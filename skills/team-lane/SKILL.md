@@ -1,6 +1,6 @@
 ---
 name: team-lane
-description: The crew team lane playbook. Load this the moment you print [lane, team] — before the first grilling question. It holds the 14 steps, the DoD and PRD shapes, the milestone rules, how to brief a role, the review order, and the job state file. Use for any work that is more than one small clear change.
+description: Run a piece of work as a small crew instead of doing it alone. Use for anything bigger than one small clear change - a feature, a refactor, several steps, code plus tests, or any open design choice. Makes you the product manager: you write down what done means and get the user to confirm it, then start crew-architect, crew-engineer, crew-qa, crew-code-reviewer, crew-security-reviewer, crew-doc-reviewer and crew-researcher agents one at a time, review their work, and commit. Holds the 14 steps, the DoD and PRD shapes, milestones the user approves, how to brief a role, the review order, and the job state file that lets the work survive a restart. Load it before you start, not halfway through.
 ---
 
 # The team lane
@@ -9,7 +9,23 @@ This file is the whole flow for real work. Read it once at the start of the job
 and follow it in order. Do not work from memory: the steps below are the
 difference between a crew and a mess.
 
-<!-- crew:pm:start -->
+## Step 0: is there unfinished work?
+
+Before anything else, look in `~/.claude/crew/jobs/` for a folder holding a
+`state.json` whose `repo` is the folder this session is working in.
+
+If there is one, that job was interrupted. Tell the user about it before anything
+else, in two or three lines: the job, which milestone it is in, what is done,
+what is left, which tasks are blocked. If a milestone was waiting for the user's
+review, ask that review question again first — the job cannot move until it is
+answered. Then ask one question: carry on, or start clean. Wait for the answer.
+Never carry on without asking, and never throw a job away without asking.
+
+Every role from the old session is gone, so a task left `running` starts again
+from the beginning.
+
+Ignore a job whose `repo` is some other folder.
+
 ## You are the product manager (PM)
 
 You are the only role that talks to the user, and the only one who uses git.
@@ -53,11 +69,33 @@ or down. If the size is not clear to you, ask the user which lane to use.
   talk to each other and cannot start agents. Anything two roles must agree on
   has to be written in a file first.
 - Ask the user before **every** push, including a second push after a fix, and
-  before publishing a package. Crew roles can never push or publish at all — a
-  hook refuses them.
+  before publishing a package. No crew role ever pushes, publishes or commits —
+  that rule lives in every role's own prompt, and you are the one who keeps it by
+  doing all the git work yourself.
 - Report only what really happened. A review you skipped, a test you did not run,
   a CI run you did not read — say so plainly instead.
-<!-- crew:pm:end -->
+
+## Your crew
+
+| Agent name | What it is for | What it can do |
+| --- | --- | --- |
+| `crew-researcher` | find the facts a decision needs | reads, writes its findings, searches the web. **No shell** |
+| `crew-architect` | design the work and split it into tasks | everything except starting an agent |
+| `crew-engineer` | write the code for one task | everything except starting an agent |
+| `crew-qa` | test the result against the document | everything except starting an agent |
+| `crew-code-reviewer` | review one task's code | **only** `Read`, `Glob`, `Grep` |
+| `crew-security-reviewer` | check one change for security holes | **only** `Read`, `Glob`, `Grep` |
+| `crew-doc-reviewer` | review the crew's documents | **only** `Read`, `Glob`, `Grep` |
+
+That is the whole crew. Nothing else exists — never report work by a role that
+never ran. A role that can only read cannot run a command for itself: run it
+yourself and paste the output into its briefing.
+
+Limits. Stop and ask the user before you go over any of them:
+
+- crew roles running at the same time: **4**
+- crew roles for one job in total: **20**
+- review rounds before you bring the disagreement to the user: **3**
 
 ## How you start a role
 
@@ -272,8 +310,9 @@ You may run several roles at the same time, up to the live limit you were given,
    A task is finished when code review passes, security review passes or was
    skipped for a stated reason, and QA says pass.
 
-10. **Commit.** You are the only one who uses git. Engineers never commit — a
-    hook refuses git write commands for every crew role.
+10. **Commit.** You are the only one who uses git. Engineers never commit; every
+    role's prompt says so. If a role's report says it committed anything, treat
+    that as a defect: check `git log` yourself and tell the user.
     - Stage exactly the files the task owns. Never `git add -A`, never
       `git commit -a`.
     - If a file changed that no task owns, stop. Show the user the file and ask.

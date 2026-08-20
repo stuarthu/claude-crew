@@ -21,10 +21,10 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-import { PLUGIN_ROOT } from "../lib/roles.mjs";
-
+const PLUGIN_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const MANIFEST = join(PLUGIN_ROOT, "upstream.json");
 
 const args = process.argv.slice(2);

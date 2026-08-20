@@ -18,7 +18,7 @@
       "portedTo": [
         "skills/team-lane/SKILL.md"
       ],
-      "note": "The PM rules go between the crew:pm markers at the top of the skill; the 14 steps follow. lib/invitation.md is not a port of anything."
+      "note": "Step 0, the PM rules, the roster and limits, then the 14 steps \u2014 all in the skill."
     },
     "roles/researcher.md": {
       "sha256": "c3518600b5dc3f691e1c87c26925be6cf103781eea13ebdf5b20a1a7d762dc47",
@@ -65,31 +65,32 @@
     "host/roles.js": {
       "sha256": "58aeb654868446e6188fa1cbce9e30b3edd81497b6f7aa1f0308593d4c41940b",
       "portedTo": [
-        "lib/roles.mjs",
         "agents/"
       ],
-      "note": "The role table. A change to allow/deny here must change both lib/roles.mjs AND the agent file frontmatter; verify-plugin.mjs catches a half-done edit."
+      "note": "The tool filters live in each agent file's frontmatter. tools/check.mjs enforces the design rules the table used to guarantee."
     },
     "host/jobs.js": {
       "sha256": "b8497fe1d112e1c50324a66c419eca669840b63c1d68df444a0b644460920743",
       "portedTo": [
-        "lib/jobs.mjs"
-      ]
+        "skills/team-lane/SKILL.md"
+      ],
+      "note": "Not code here: step 0 of the skill tells the PM to look in ~/.claude/crew/jobs itself."
     },
     "host/git-guard.js": {
       "sha256": "1a7f014b409ad6e070bf8fad9bda53d7f425ccd863bd53aba333ff9bfefe5fb2",
       "portedTo": [
-        "lib/guard.mjs",
-        "scripts/guard.mjs"
+        "agents/crew-engineer.md",
+        "agents/crew-qa.md",
+        "README.md"
       ],
-      "note": "Roles here can never push at all, so the approval file and the CI-publish scan were dropped on purpose."
+      "note": "NOT ported as code. The plugin ships no hooks; the rule is stated in every role with a shell, and the README offers a hook the user can add to their own settings. See principles 15."
     },
     "host/crew.js": {
       "sha256": "4d82ebb6b2e3a400c07e47250c525aee99267ad07e3e89b07dc21b7c21a49c13",
       "portedTo": [
-        "scripts/session-start.mjs"
+        "skills/team-lane/SKILL.md"
       ],
-      "note": "The preset installer has no equivalent and was dropped. Only the prompt section and the job notice ported."
+      "note": "Nothing loads at session start. The skill description is the entry point."
     },
     "host/roles-preset.js": {
       "sha256": "93a5c698399be81a026129873204fe243c3733e5d5a1bb3667741725a4f235e8",

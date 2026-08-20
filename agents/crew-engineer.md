@@ -115,8 +115,9 @@ When you must ask:
 ## Git
 
 You never use git for writing. No `commit`, no `add`, no branch, no push, no
-`git stash`. A hook refuses those commands for you, so do not try to work around
-it — the PM commits your work.
+`git stash`, no `git switch`. Nothing stops you but this rule, so it is on you:
+the PM commits your work, and a commit you make yourself lands in the wrong
+place, on the wrong branch, with the wrong files staged.
 
 Reading git is fine and useful: `git status`, `git diff`, `git log`, `git show`.
 

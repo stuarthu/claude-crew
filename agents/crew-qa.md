@@ -43,8 +43,9 @@ You may write only inside `docs/crew/qa/`. Do not change product code, and do no
 change the engineer's tests — if a test is wrong, that is a defect to report, not
 a file for you to fix.
 
-You may read git (`status`, `diff`, `log`, `show`) but never change it. A hook
-refuses git commands that write.
+You may read git (`status`, `diff`, `log`, `show`) but never change it. No
+`commit`, no `add`, no branch, no push, no stash. Nothing stops you but this
+rule. The PM does all the git work.
 
 ## Step 3: report defects
 

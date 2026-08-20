@@ -7,33 +7,35 @@ Newest first. Each entry says what a user would notice.
 First release. A port of [dsh-crew](https://github.com/stuarthu/dsh-crew) 0.6.0
 (commit `690e291`) to Claude Code.
 
-- By default the plugin only says, at the start of a session, that the crew is
-  available and that real work should load the `crew:team-lane` skill. It does
-  not change how Claude answers you.
-- That skill makes the session the crew **product manager (PM)**. The PM picks a
-  lane every time: `ask`, `quick` or `team`. Only `team` runs the crew.
-- `CLAUDE_CREW_ALWAYS=1` loads the PM rules in every session, which is how
-  dsh-crew behaves. The rules have one home — inside the skill — so the two ways
-  of getting them cannot drift apart.
+**It is markdown and nothing else.** No hooks, no scripts, no code — seven agent
+files and one skill file. It runs wherever Claude Code runs, and adds nothing to
+a session until it is used.
+
+- Ask for work that is bigger than one small change and Claude loads the
+  `crew:team-lane` skill. That makes the session the crew **product manager**:
+  it picks a lane (`ask`, `quick`, `team`), writes down what "done" means, gets
+  you to confirm it, and runs the work.
 - Seven role agents: `crew-researcher`, `crew-architect`, `crew-engineer`,
   `crew-qa`, `crew-code-reviewer`, `crew-security-reviewer`, `crew-doc-reviewer`.
   Reviewers can only read. The engineer and QA keep the shell.
 - A role runs once and reports back. A second review round is a fresh role,
   briefed with the earlier round's blocking findings.
-- A `PreToolUse` hook refuses crew roles the tools that start an agent, and every
-  git command that writes, plus publishing and releasing. Your own session and
-  other plugins' subagents are untouched.
-- Unfinished jobs are reported at the start of the next session, and the PM asks
-  you whether to carry on or start clean.
-- `node tools/check.mjs` runs four checks; `node tools/check-upstream.mjs
+- Big work is cut into milestones you approve one at a time. Nothing moves to the
+  next milestone until you say so.
+- Job state lives in `~/.claude/crew/jobs/`, outside your repository, so an
+  interrupted job can be picked up later and your `git status` stays clean.
+- `node tools/check.mjs` checks the design rules; `node tools/check-upstream.mjs
   ../dsh-crew` says what changed in dsh-crew since this port was last brought up
-  to date. There is no `package.json` — nothing here is an npm package.
+  to date. Both are contributor tools and never run on a user's machine.
 
 Ported with changes, each one written up in `docs/principles.md`:
 
-- The full PM prompt does not load in every session unless you ask for it
-  (principle 14).
+- Nothing loads into a session by itself; the skill's description is the entry
+  point (principle 14).
 - Roles do not stay alive; there is no `send_message` or `interrupt_agent`
   (principle 13).
-- Roles can never push, so dsh-crew's one-shot push approval file is gone.
-- The unfinished-job notice is printed once per session, not per turn.
+- The git guard is not shipped as code. A role must never commit, push or
+  publish, that rule is in every role prompt that owns a shell, and the README
+  says plainly that nothing stops it — plus offers a hook you can add to your own
+  settings (principle 15).
+- The unfinished-job notice became step 0 of the playbook.

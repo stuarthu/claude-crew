@@ -31,9 +31,9 @@ it. Our builders cannot communicate at all. So anything two of them must agree o
 has to be written down first, or it will not be agreed at all. This is why the
 architect writes so much, and why "ask the other engineer" is never an option.
 
-**Lives in** `lib/roles.mjs` (the deny lists), `lib/guard.mjs` (the hook that
-refuses delegation whatever a file says), every `agents/*.md` frontmatter,
-`skills/team-lane/SKILL.md`, `agents/crew-architect.md`.
+**Lives in** every `agents/*.md` frontmatter (Claude Code applies the lists
+itself, so a role does not have the tool at all), `skills/team-lane/SKILL.md`,
+`agents/crew-architect.md`, and the design rules in `tools/check.mjs`.
 
 **Source.** [Conway's Law](https://lawsofsoftwareengineering.com/laws/conways-law/) ·
 [Team Topologies and Conway's Law alignment](https://archman.dev/docs/domain-driven-design/strategic-design/team-topologies-and-conways-law-alignment)
@@ -198,8 +198,7 @@ document the job touched, including the README.
 **Why.** A specification nobody re-reads becomes decoration, and the next role
 builds from a document that stopped being true.
 
-**Lives in** `skills/team-lane/SKILL.md`, `agents/crew-doc-reviewer.md`,
-`lib/jobs.mjs`.
+**Lives in** `skills/team-lane/SKILL.md`, `agents/crew-doc-reviewer.md`.
 
 **Source.** [The Spec Growth Engine, arXiv 2606.27045](https://arxiv.org/abs/2606.27045)
 
@@ -216,8 +215,8 @@ With the shell denied too, its tool list still held workflow tools and
 desktop-control MCP tools. A deny list cannot name what a deployment has not
 installed yet; an allow list does not have to.
 
-**Lives in** `lib/roles.mjs`, the reviewer files in `agents/`, and the design
-rules in `tools/verify-plugin.mjs`.
+**Lives in** the reviewer files in `agents/`, and the design rules in
+`tools/check.mjs`.
 
 **Source.** (ours)
 
@@ -245,85 +244,93 @@ What it costs, honestly: the PM cannot interrupt an engineer that is running whe
 a document changes. It has to let the work finish and then re-run it. That is
 written into the team-lane skill rather than hidden.
 
-**Lives in** `skills/team-lane/SKILL.md` ("How you start a role"),
-`scripts/session-start.mjs`, every `agents/*.md` ("You run once").
+**Lives in** `skills/team-lane/SKILL.md` ("How you start a role"), and every
+`agents/*.md` ("You run once").
 
 **Source.** (ours)
 
 ---
 
-## 14. The default announces the crew; it does not take the session over
+## 14. Nothing loads until the work needs it
 
-**Rule.** By default the session-start hook prints one short note: the crew is
-available, and work bigger than a small change should load the `crew:team-lane`
-skill. It says nothing about how to behave. The PM rules and the 14 steps both
-live in that skill. `CLAUDE_CREW_ALWAYS=1` prints the PM rules in every session
-instead.
+**Rule.** The plugin adds nothing to a session by itself. Claude reaches for the
+`crew:team-lane` skill because its description says what the skill is for, and
+everything — the PM rules, the 14 steps, the roster, the limits — arrives with
+that one file.
 
 **Why.** In dsh you choose the crew preset, so a crew session is crew work by
 definition. A Claude Code plugin is loaded in every project, next to five other
-plugins the person also installed. A plugin that quietly rewrites how Claude
-talks — lanes, one question per turn, "you are the PM" — in a session where
-somebody only wanted to know what a function does is bad manners, and the blame
-lands on Claude Code rather than on the plugin.
+plugins the person also installed. A plugin that rewrites how Claude talks in a
+session where somebody only wanted to know what a function does is bad manners,
+and the blame lands on Claude Code rather than on the plugin.
 
-So the loud version is a setting, not the default. Whoever wants dsh-crew's
-behaviour turns it on once and gets exactly that.
+So the skill description is the entry point, exactly as it is for most plugins in
+the official directory. That makes the description load-bearing: it is the only
+thing that decides whether the crew is ever used. Write it as "use this when…",
+never as "this file contains…".
 
-The risk this creates is real: the crew flow only starts if the skill is loaded.
-Three things hold it. The note names the skill exactly, so loading it is one call
-and not a search. It says to load it **before** starting, not halfway through.
-And the unfinished-job notice, which appears in both modes, says to load the
-skill before touching the job.
+The risk this creates is real: if the description is weak, the crew never runs
+and nothing says why. `tools/check.mjs` fails when it is short.
 
-**The rules have one home.** They sit inside the skill between `crew:pm` markers,
-and the always-on mode reads them out of that one copy. A second copy in a second
-file would drift, and nobody would notice which one was stale.
-
-**Lives in** `lib/invitation.md`, `lib/pm.mjs`, `skills/team-lane/SKILL.md`,
-`scripts/session-start.mjs`, and the two-mode checks in
-`tools/verify-plugin.mjs` and `tools/verify-hooks.mjs`.
+**Lives in** the `description` in `skills/team-lane/SKILL.md`, and the length
+check in `tools/check.mjs`.
 
 **Source.** (ours)
 
 ---
 
-## 15. The guard refuses this plugin's roles, and nobody else
+## 15. The plugin is markdown, and states plainly what it cannot enforce
 
-**Rule.** The `PreToolUse` hook blocks git writes, publishing and delegation
-**only** when `agent_type` names a crew role. Your own session passes straight
-through. Another plugin's subagent passes straight through too.
+**Rule.** No hooks, no scripts, no code. Seven agent files and one skill file.
+The one rule that cannot be enforced — a role must never commit, push or publish
+— is written in the prompt of every role that owns a shell, and the README says
+plainly that nothing stops it.
 
-**Why.** dsh-crew guards every child, because it only runs when you chose the
-crew preset. This plugin is always on, in every project. A hook that refused
-`git commit` to any subagent would quietly break other people's work, and the
-blame would land on Claude Code, not on this plugin.
+**Why.** Three reasons, in order of weight.
 
-The trade-off is stated plainly: if the PM ever delegated to a non-crew agent,
-that agent would not be guarded. The team-lane skill never tells it to.
+*It is the only honest shape.* An earlier version shipped a `PreToolUse` hook
+that refused git writes from a crew role. Of everything that hook did, only that
+one rule needed it: every other guarantee — reviewers cannot write, roles cannot
+start agents — is already enforced by Claude Code from the agent files. One rule
+is not worth becoming the only plugin in the directory that needs an interpreter.
 
-**Lives in** `lib/guard.mjs` (`isCrewRole`), `tools/verify-guard.mjs` (the scope
-cases), `README.md`.
+*A hook needs a runtime the user may not have.* Claude Code ships as a single
+binary, so node may be absent. Of Anthropic's own forty plugins, thirty-four have
+no hooks at all; the six that do use `bash` or `python3`, and none uses node. A
+hook that silently does nothing is worse than no hook, because the README
+promises it.
+
+*A rule you cannot enforce should be said out loud.* Claude Code already asks the
+user before each `Bash` call unless permissions are skipped. For the case where
+they are, the README carries a small hook the **user** can add to their own
+settings. It stays theirs, so it cannot break anyone who did not choose it.
+
+**Lives in** `agents/crew-engineer.md` and `agents/crew-qa.md` ("Git"),
+`skills/team-lane/SKILL.md` (step 10), the "What is not enforced" section of both
+READMEs, and the check in `tools/check.mjs` that fails if `hooks/`, `scripts/`,
+`lib/` or `package.json` comes back.
 
 **Source.** (ours)
 
 ---
 
-## 16. The role table is checked, not generated
+## 16. The design rules are checked, not trusted
 
-**Rule.** `lib/roles.mjs` is the single source of truth for the role table. The
-agent files repeat it in their frontmatter. `tools/verify-plugin.mjs` fails the
-test run when the two disagree.
+**Rule.** `tools/check.mjs` reads every agent file and fails the run when a
+design rule is broken: a reviewer that can write, an allow-list role holding a
+shell, a role that can start an agent, a frontmatter name that no longer matches
+its file, a tool name that does not exist.
 
-**Why.** dsh-crew builds the PM's role list and every tool filter from the table
-at run time, so they cannot drift. Claude Code reads static agent files, so
-generation is not available. A check gives the same guarantee at the same moment
-that matters: before anything ships.
+**Why.** An agent file's frontmatter is one line of text that decides what a role
+may do. A wrong word there is invisible in a diff and total in effect — it hands
+a reviewer a shell, or leaves a maker able to start its own agents. dsh-crew
+avoided this by building the filters at run time from one table; a markdown-only
+plugin has no run time, so the check is what remains.
 
-The rule this protects is dsh-crew's "derive, do not retype". Here it becomes
-"retype, and let the check catch you".
+It is a contributor tool. It never runs on a user's machine, which is why node is
+acceptable there and nowhere else.
 
-**Lives in** `lib/roles.mjs`, `tools/verify-plugin.mjs`, `docs/porting.md`.
+**Lives in** `tools/check.mjs`, `CLAUDE.md`.
 
 **Source.** (ours)
 
@@ -344,6 +351,7 @@ The check skips out loud when no dsh-crew checkout is present, so it never fails
 a run on a machine that only has this repository.
 
 **Lives in** `upstream.json`, `tools/check-upstream.mjs`, `docs/porting.md`.
+`tools/check.mjs` does not run it: dsh-crew moving is news, not a defect here.
 
 **Source.** (ours)
 
@@ -354,8 +362,12 @@ a run on a machine that only has this repository.
 | Idea | Why not |
 | --- | --- |
 | Long-lived role agents, messaged with `SendMessage` | Claude Code can do it, and dsh-crew works that way. Rejected: a live child dies with the session, so every rule built on "message every live child" would fail silently after a restart. See principle 13. |
-| The full PM prompt in every session, by default | Faithful to dsh-crew, and it is still available as `CLAUDE_CREW_ALWAYS=1`. Rejected as the default: it changes how Claude behaves in every project, including sessions that only ask a question. See principle 14. |
-| A second copy of the PM rules in `lib/`, kept in step by a check | Was the first shape of this port. Replaced: the rules now live only inside the skill, and the hook reads them from there. A check that two files match still lets them be edited apart between test runs; one file cannot. |
+| A `PreToolUse` hook that refuses git writes from a crew role | Shipped, then removed. It enforced exactly one rule that the agent files cannot express, and cost a runtime dependency the user may not have. The rule is now stated in the prompts, and the README offers the same hook for the user's own settings. See principle 15. |
+| Writing the hooks in node | Removed with the hooks. Claude Code ships as a binary, so node can be absent, and no plugin in the official directory uses it. |
+| Writing the hooks in Python 3, with a shim that finds a working interpreter | What `hookify` and `security-guidance` do, and it would have worked. Rejected together with the hook itself: one rule did not justify any interpreter. |
+| Anything that loads into every session, by default | Faithful to dsh-crew, and it is still available as `CLAUDE_CREW_ALWAYS=1`. Rejected as the default: it changes how Claude behaves in every project, including sessions that only ask a question. See principle 14. |
+| A second copy of the PM rules outside the skill | Was the first shape of this port, kept in step by a check. Replaced: the rules live only inside the skill now. A check that two files match still lets them be edited apart between runs; one file cannot. |
+| A role table in code, generating or checking the agent files | dsh-crew builds every tool filter from one table at run time. A markdown-only plugin has no run time, so the table would exist only for the check. `tools/check.mjs` reads the agent files directly instead. See principle 16. |
 | A one-shot push approval file for roles | Ported from dsh-crew and then dropped. The PM is the only one who uses git in every step of the playbook, so the child-push path was close to dead code, and it was one more thing to explain and to get wrong. |
 | Blocking `git push` with `permissions.deny` in settings | Simpler, but it cannot tell a subagent from your own session, so it would block your pushes too. |
 | Re-printing the unfinished-job notice on every turn | Claude Code adds hook text to the context instead of replacing it, so this would repeat the same paragraph on every turn. It is printed once at session start. |

@@ -19,103 +19,86 @@ There is no build step and no bundler. Plain ES modules, no dependencies.
 ## Commands
 
 ```sh
-node tools/check.mjs              # all four checks; run this before every commit
-node tools/verify-guard.mjs       # guard rules, replayed against fake hook payloads
-node tools/verify-jobs.mjs        # the unfinished-job notice, using throwaway job folders
-node tools/verify-plugin.mjs      # manifests, agent files, design rules, table drift
-node tools/verify-hooks.mjs       # the hook command lines, run the way Claude Code runs them
+node tools/check.mjs                        # the whole check; run this before every commit
 node tools/check-upstream.mjs ../dsh-crew   # what changed in dsh-crew since the last port pass
 ```
 
-Every check runs against temporary folders. None of them may read or write the real `~/.claude` —
-keep it that way when adding cases.
+Both are **contributor** tools. Nothing in this repository runs on a user's machine: the plugin is
+seven agent files and one skill file, and that is all. Node is acceptable in `tools/` and nowhere
+else, because the checks compare lists across files.
 
-Run one check on its own by calling its file directly — that is the "single test" here.
+There is no `package.json`, no npm, and no dependencies. Do not add one to get `npm test` back.
 
-There is no `package.json` and no npm. The repository has no dependencies, and the plugin ships
-as a git repository through a marketplace, never as a package. Do not add one to get `npm test`
-back — `node tools/check.mjs` is the command.
+`check-upstream.mjs` is deliberately not part of `check.mjs`: dsh-crew moving is news, not a defect
+here, and it needs a checkout this machine may not have. It skips out loud when there is none.
 
-`check-upstream.mjs` is deliberately **not** part of `node tools/check.mjs`: dsh-crew moving is news, not a
-defect here. It skips out loud when no dsh-crew checkout is present.
+## What the plugin is made of
 
-## The two halves (the main thing to understand)
+| Piece | Lives in | Why there |
+| --- | --- | --- |
+| The PM rules **and** the 14-step playbook | `skills/team-lane/SKILL.md` | One file. Its `description` is the only thing that makes Claude reach for the crew, so the description is load-bearing |
+| Role prompts and tool filters | `agents/*.md` | A subagent's tool list is read from its own file; nothing else can set it |
+| The design rules | `tools/check.mjs` | A wrong word in frontmatter is invisible in a diff and total in effect |
 
-Claude Code gives a plugin no way to add to the system prompt directly, and no way to build agents
-at run time. So the plugin is split, and the split is load-bearing:
-
-| Piece | Lives in | Loaded by | Why it must be there |
-| --- | --- | --- | --- |
-| The default note: "the crew is here, load the skill" | `lib/invitation.md`, `scripts/session-start.mjs` | the `SessionStart` hook | It must announce the crew without changing how Claude behaves |
-| The PM rules **and** the 14-step playbook | `skills/team-lane/SKILL.md` | the PM, with the Skill tool; and by the hook when `CLAUDE_CREW_ALWAYS=1` | One home for the rules. `lib/pm.mjs` reads them out from between the `crew:pm` markers |
-| Role prompts and tool filters | `agents/*.md` | Claude Code, as subagents | A subagent's tool list is read from its own file; nothing else can set it |
-| The guard | `lib/guard.mjs`, `scripts/guard.mjs` | the `PreToolUse` hook | A rule in prose is advice; a hook is where a call is actually stopped |
-| The role table | `lib/roles.mjs` | the session-start hook and the checks | Single source of truth, checked against the agent files |
+Nothing else. No hooks, no scripts, no library code — see `docs/principles.md` 15.
 
 ## Design rules a change must not break
 
-These are not style preferences. Each one is checked by `tools/verify-plugin.mjs` or
-`tools/verify-guard.mjs`, and most exist because a live test showed the weaker version failing.
+Each one is checked by `tools/check.mjs`, and most exist because a live test showed the weaker
+version failing.
 
-1. **The crew is flat.** Only the PM starts agents. Three independent guards keep it: every
-   deny-list role denies `Agent`, `Task`, `Workflow`, `SendMessage` and `ListAgents`; every
-   allow-list role names none of them; and the `PreToolUse` hook refuses them to any crew role
-   whatever its file says. That third guard names no tool list, so a hand edit cannot weaken it.
+1. **The crew is flat.** Only the PM starts agents. Every deny-list role denies `Agent`, `Task`,
+   `Workflow`, `SendMessage` and `ListAgents`; every allow-list role names none of them. Claude
+   Code applies both itself.
 2. **Reviewers use an allow list, never a deny list.** With `Write` and `Edit` denied, a reviewer
    still created a file with `echo hello > file` — a shell is a file-writing tool. A deny list
    cannot name what a deployment has not installed yet; an allow list does not have to. So: no
-   allow-list role may name `Bash`, `BashOutput` or `KillShell`, and no role whose key contains
-   `review` may name `Write`, `Edit` or `NotebookEdit`.
-3. **Every tool name in an allow or deny list must be real.** `verify-plugin.mjs` keeps a
-   `KNOWN_TOOLS` set — extend it only after checking Claude Code really calls the tool that.
+   allow-list role may name `Bash`, `BashOutput` or `KillShell`, and no reviewer may name `Write`,
+   `Edit` or `NotebookEdit`.
+3. **Every tool name must be real.** `KNOWN_TOOLS` in `tools/check.mjs` is the list. Extend it only
+   after checking Claude Code really calls the tool that.
 4. **The engineer and QA keep `Bash`.** They have to run the code and the tests.
-5. **`lib/roles.mjs` and the agent frontmatter must agree.** The table cannot generate the files,
-   so the check enforces it. A change to a role's tools is always two edits.
-6. **Both hooks must exit 0 when they cannot run.** They fire in every session in every project. A
-   hook that fails loudly would break work that has nothing to do with this plugin.
-7. **The guard touches crew roles only.** Not your session, and not another plugin's subagent.
-8. **The PM rules have exactly one copy**, inside `skills/team-lane/SKILL.md` between the
-   `crew:pm` markers. Never add a second copy in `lib/`, not even one a check keeps in step —
-   two files can be edited apart between test runs.
-9. **The default session-start output must not change how Claude behaves.** `verify-plugin.mjs`
-   fails if `lib/invitation.md` starts telling Claude it is the PM. The loud version is
-   `CLAUDE_CREW_ALWAYS=1`.
-10. **`.claude-plugin/plugin.json` must not set `agents`, `skills` or `hooks`.** Default discovery
-   of `./agents/`, `./skills/` and `./hooks/hooks.json` works. An explicit `"agents"` string is
-   rejected at install time, and an explicit array of file paths installs cleanly and then loads
-   **zero** agents — a silent, total outage. Confirmed with `claude plugin details`.
+5. **Every role that owns a shell is told, in its own prompt, that the PM does all the git work.**
+   Nothing enforces it. That is stated plainly in both READMEs, and must stay stated.
+6. **The plugin stays markdown.** No `hooks/`, `scripts/`, `lib/` or `package.json`. The check
+   fails if any of them comes back.
+7. **`.claude-plugin/plugin.json` must not set `agents`, `skills` or `hooks`.** Default discovery
+   of `./agents/` and `./skills/` works. An explicit `"agents"` string is rejected at install time,
+   and an explicit array of file paths installs cleanly and then loads **zero** agents — a silent,
+   total outage. Confirmed with `claude plugin details`.
+8. **The skill description must say when to use the crew, not what the file contains.** It is the
+   only entry point. The check fails if it gets short.
 
 ## Adding or changing a role
 
-1. Add the entry to `ROLES` in `lib/roles.mjs` with exactly **one** of `allow` or `deny`.
-2. Write `agents/crew-<name>.md`. The frontmatter must match the table; the description must start
-   with `Crew role.`; the body must be real instructions (the check rejects anything under 500
-   characters), must say the role talks only to the PM, and must say it runs once.
-3. Name the role in `skills/team-lane/SKILL.md` — the PM only uses what its playbook describes.
+1. Write `agents/crew-<name>.md` with exactly **one** of `tools` or `disallowedTools`. The
+   description must start with `Crew role.`; the body must be real instructions (the check rejects
+   anything under 500 characters), must say the role talks only to the PM, and must say it runs
+   once. A role with a shell must also say the PM does the git work.
+2. Add it to the `ROLES` list in `tools/check.mjs`, naming which filter it uses.
+3. Name the role in the roster table and the steps of `skills/team-lane/SKILL.md` — the PM only
+   uses what its playbook describes, and the check fails if the skill never names it.
 4. If the allow list names a tool not in `KNOWN_TOOLS`, add it there.
 5. Run `node tools/check.mjs`.
 
-`scripts/session-start.mjs` builds the PM's role list **from the `ROLES` table**, so the PM can
-never promise a role that does not exist. Keep it that way: derive, do not retype.
-
 ## Users override, the plugin does not change
 
-There is no configuration file. Limits, the jobs folder and the resume notice are environment
-variables, listed in `README.md`. To change a role, a user edits the agent file. When you add a
-setting, add it as an environment variable and document it in **both** READMEs.
+There is no configuration, because there is no code to read it. Every setting is a file: a role's
+tools are its frontmatter, the limits and the whole flow are in the skill. Never add a setting that
+needs code to read it.
 
-## The guard
+## The rule nothing enforces
 
-`lib/guard.mjs` is the rules; `scripts/guard.mjs` is the wrapper that reads the hook payload. It
-refuses, for crew roles only: any tool that starts an agent, any git subcommand that writes,
-`npm|pnpm|yarn|bun publish`, `npm dist-tag` and `gh release create`. Reading git stays open.
+A crew role must never commit, push or publish. The engineer and QA need `Bash`, and `Bash` is one
+tool, so this cannot be expressed in frontmatter. It lives in their prompts, and both READMEs say
+plainly that nothing stops it, plus offer a `PreToolUse` hook the **user** can add to their own
+settings.
 
-It reads command text, so it is a seat belt, not a locked door — a push hidden in a script file
-gets through. Say so plainly in docs; do not describe it as airtight.
+That snippet matches on `"agent_type":"crew-` in the hook payload. `agent_type` is absent for the
+root session and set to the agent's name for a subagent — confirmed against a live session, not
+read from documentation. It reads command text, so it is a seat belt, not a locked door.
 
-The hook payload carries `agent_id` and `agent_type`; `agent_type` is absent for the root session
-and set to the agent's name for a subagent. That is how the guard tells them apart. It was
-confirmed against a live session, not read from documentation.
+Do not ship it as a hook in this repository. `docs/principles.md` 15 says why.
 
 ## State and documents
 
@@ -124,8 +107,9 @@ Job state lives **outside** the repository, in `~/.claude/crew/jobs/<job>/state.
 per pair of modules that talk, in `docs/crew/api/<caller>-<callee>.md`) live **inside** it, in
 `docs/crew/`.
 
-`lib/jobs.mjs` turns unfinished jobs into the notice the session-start hook prints — it must
-return `""` when there is nothing to say, and must never throw.
+Nothing announces an unfinished job. Step 0 of the skill tells the PM to look in
+`~/.claude/crew/jobs/` for a `state.json` whose `repo` is this folder, and to ask the user one
+question before anything moves.
 
 ## Documentation
 
@@ -146,4 +130,4 @@ README in step with `.claude-plugin/plugin.json`.
 
 Releases: add the new version's section to `CHANGELOG.md`, bump `version` in
 `.claude-plugin/plugin.json` and `metadata.version` in `.claude-plugin/marketplace.json` —
-`verify-plugin.mjs` fails if the two disagree — then commit and tag.
+`tools/check.mjs` fails if the two disagree — then commit and tag.

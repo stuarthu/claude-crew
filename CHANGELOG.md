@@ -25,8 +25,9 @@ First release. A port of [dsh-crew](https://github.com/stuarthu/dsh-crew) 0.6.0
   other plugins' subagents are untouched.
 - Unfinished jobs are reported at the start of the next session, and the PM asks
   you whether to carry on or start clean.
-- `npm test` runs four checks; `npm run upstream ../dsh-crew` says what changed
-  in dsh-crew since this port was last brought up to date.
+- `node tools/check.mjs` runs four checks; `node tools/check-upstream.mjs
+  ../dsh-crew` says what changed in dsh-crew since this port was last brought up
+  to date. There is no `package.json` — nothing here is an npm package.
 
 Ported with changes, each one written up in `docs/principles.md`:
 

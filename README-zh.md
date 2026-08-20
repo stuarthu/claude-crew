@@ -176,12 +176,15 @@ crew 角色**拒绝两类事：
 ## 跑检查
 
 ```sh
-npm test                        # 全部四项检查
+node tools/check.mjs            # 全部四项检查
 node tools/verify-guard.mjs     # 用假的钩子数据回放守卫规则
 node tools/verify-jobs.mjs      # 未完成任务提示，用临时文件夹
 node tools/verify-plugin.mjs    # 清单文件、agent 文件、设计规则、有没有走样
 node tools/verify-hooks.mjs     # 按 Claude Code 的方式真的跑一遍钩子命令行
 ```
+
+这里没有 npm。本仓库没有任何依赖，插件也是通过 marketplace 以 git 仓库的形式交付的，
+从来不是一个包——放一个 `package.json` 只会让人误以为它发到了某个registry。
 
 每项检查都只用临时文件夹。没有一项会读写真正的 `~/.claude`。
 
@@ -208,14 +211,14 @@ dsh-crew 会继续变，而 Claude Code 不会察觉。所以 `upstream.json` �
 的每个 dsh-crew 文件的 SHA-256，以及每个文件对应本仓库的哪些文件。运行：
 
 ```sh
-npm run upstream ../dsh-crew
+node tools/check-upstream.mjs ../dsh-crew
 ```
 
 它会打印哪些上游文件变了、本仓库要回头看哪些文件，以及查看这次改动的确切 git 命令。
 如果那个检出目录里有未提交的改动，它也会警告你，免得把没写完的编辑搬过来。搬完之后用
 `--update` 重新盖章。
 
-它**不在** `npm test` 里，这是故意的：dsh-crew 有变化是消息，不是本仓库的缺陷。没有
+它**不在** `node tools/check.mjs` 里，这是故意的：dsh-crew 有变化是消息，不是本仓库的缺陷。没有
 dsh-crew 检出目录时，这条命令会明确说自己跳过了。
 
 `docs/porting.md` 里有逐文件对照表和一次移植的完整步骤。

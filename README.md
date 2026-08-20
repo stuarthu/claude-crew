@@ -198,12 +198,16 @@ To turn the plugin off for good: `/plugin uninstall crew@claude-crew`.
 ## Running the checks
 
 ```sh
-npm test                        # all four checks
+node tools/check.mjs            # all four checks
 node tools/verify-guard.mjs     # the guard rules, replayed against fake payloads
 node tools/verify-jobs.mjs      # the unfinished-job notice, using throwaway folders
 node tools/verify-plugin.mjs    # manifests, agent files, design rules, no drift
 node tools/verify-hooks.mjs     # the hook command lines, run the way Claude Code runs them
 ```
+
+There is no npm here. This repository has no dependencies, and the plugin is
+delivered as a git repository through a marketplace, never as a package — a
+`package.json` would only be a task runner dressed as a registry entry.
 
 Every check runs against temporary folders. None of them reads or writes the real
 `~/.claude`.
@@ -235,7 +239,7 @@ records the SHA-256 of every dsh-crew file this port was made from, and which
 claude-crew files each one feeds. Run:
 
 ```sh
-npm run upstream ../dsh-crew
+node tools/check-upstream.mjs ../dsh-crew
 ```
 
 It prints the upstream files that changed, the claude-crew files to revisit, and
@@ -243,8 +247,8 @@ the exact git command to read the change. It also warns when that checkout has
 uncommitted work, so a port pass does not carry across a half-finished edit. When
 you have carried a change over, re-stamp with `--update`.
 
-This is not part of `npm test` on purpose: dsh-crew moving is news, not a defect
-in this repository. With no dsh-crew checkout the command skips out loud.
+This is not part of `node tools/check.mjs` on purpose: dsh-crew moving is news,
+not a defect in this repository. With no dsh-crew checkout the command skips out loud.
 
 `docs/porting.md` holds the file-by-file map and the steps of a port pass.
 

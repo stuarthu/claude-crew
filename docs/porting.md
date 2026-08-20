@@ -54,7 +54,7 @@ Do not "fix" these by adding them back. Each one is a decision, and
 4. If a role's tool filter changed, edit **both** `lib/roles.mjs` and the agent
    file frontmatter.
 5. If a rule changed, update the matching principle in `docs/principles.md`.
-6. `npm test`.
+6. `node tools/check.mjs`.
 7. `node tools/check-upstream.mjs --update ../dsh-crew` to re-stamp.
 8. Add a line to `CHANGELOG.md` saying which dsh-crew version was carried across.
 
@@ -71,4 +71,4 @@ seen. To add it:
 4. If the allow list names a tool that is not in `KNOWN_TOOLS` in
    `tools/verify-plugin.mjs`, add it there — but only after checking Claude Code
    really calls it that.
-5. `npm test`, then `--update` the manifest.
+5. `node tools/check.mjs`, then `--update` the manifest.

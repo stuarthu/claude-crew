@@ -19,12 +19,12 @@ There is no build step and no bundler. Plain ES modules, no dependencies.
 ## Commands
 
 ```sh
-npm test                          # all four checks; run this before every commit
+node tools/check.mjs              # all four checks; run this before every commit
 node tools/verify-guard.mjs       # guard rules, replayed against fake hook payloads
 node tools/verify-jobs.mjs        # the unfinished-job notice, using throwaway job folders
 node tools/verify-plugin.mjs      # manifests, agent files, design rules, table drift
 node tools/verify-hooks.mjs       # the hook command lines, run the way Claude Code runs them
-npm run upstream ../dsh-crew      # what changed in dsh-crew since the last port pass
+node tools/check-upstream.mjs ../dsh-crew   # what changed in dsh-crew since the last port pass
 ```
 
 Every check runs against temporary folders. None of them may read or write the real `~/.claude` —
@@ -32,7 +32,11 @@ keep it that way when adding cases.
 
 Run one check on its own by calling its file directly — that is the "single test" here.
 
-`check-upstream.mjs` is deliberately **not** part of `npm test`: dsh-crew moving is news, not a
+There is no `package.json` and no npm. The repository has no dependencies, and the plugin ships
+as a git repository through a marketplace, never as a package. Do not add one to get `npm test`
+back — `node tools/check.mjs` is the command.
+
+`check-upstream.mjs` is deliberately **not** part of `node tools/check.mjs`: dsh-crew moving is news, not a
 defect here. It skips out loud when no dsh-crew checkout is present.
 
 ## The two halves (the main thing to understand)
@@ -89,7 +93,7 @@ These are not style preferences. Each one is checked by `tools/verify-plugin.mjs
    characters), must say the role talks only to the PM, and must say it runs once.
 3. Name the role in `skills/team-lane/SKILL.md` — the PM only uses what its playbook describes.
 4. If the allow list names a tool not in `KNOWN_TOOLS`, add it there.
-5. Run `npm test`.
+5. Run `node tools/check.mjs`.
 
 `scripts/session-start.mjs` builds the PM's role list **from the `ROLES` table**, so the PM can
 never promise a role that does not exist. Keep it that way: derive, do not retype.
@@ -141,5 +145,5 @@ plain, short-sentence style already in both files, and keep the version line nea
 README in step with `.claude-plugin/plugin.json`.
 
 Releases: add the new version's section to `CHANGELOG.md`, bump `version` in
-`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` (`metadata.version`) and
-`package.json` — `verify-plugin.mjs` fails if the first two disagree — then commit and tag.
+`.claude-plugin/plugin.json` and `metadata.version` in `.claude-plugin/marketplace.json` —
+`verify-plugin.mjs` fails if the two disagree — then commit and tag.

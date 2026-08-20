@@ -70,6 +70,12 @@ for (const key of ["agents", "skills", "hooks"]) {
 
 check(market.metadata?.version === plugin.version, `marketplace.json metadata.version (${market.metadata?.version}) must match plugin.json version (${plugin.version})`);
 
+// No package.json. This repository has no dependencies, and the plugin is
+// delivered as a git repository through a marketplace, never as a package. A
+// manifest here would only be a task runner implying a registry that is not
+// involved. `node tools/check.mjs` is the test command.
+check(!existsSync(join(PLUGIN_ROOT, "package.json")), "package.json is back. This is not an npm package — use node tools/check.mjs.");
+
 // ── the agent files ─────────────────────────────────────────────────────────
 
 const onDisk = listAgentFiles();

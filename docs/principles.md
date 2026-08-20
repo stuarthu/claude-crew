@@ -341,7 +341,7 @@ say which improvements were skipped on purpose and which were simply missed. The
 carried across, so the next pass does not re-open a settled question.
 
 The check skips out loud when no dsh-crew checkout is present, so it never fails
-a test run on a machine that only has this repository.
+a run on a machine that only has this repository.
 
 **Lives in** `upstream.json`, `tools/check-upstream.mjs`, `docs/porting.md`.
 

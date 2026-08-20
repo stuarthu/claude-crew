@@ -1,0 +1,19 @@
+{
+  "name": "claude-crew",
+  "owner": {
+    "name": "Stuart Hu",
+    "url": "https://github.com/stuarthu"
+  },
+  "metadata": {
+    "description": "The crew plugin for Claude Code: run work as a small team of role agents with a product manager in front.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "crew",
+      "source": "./",
+      "description": "Your session becomes a product manager that runs the work as a small crew of role agents.",
+      "category": "workflow"
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "source": {
+    "name": "dsh-crew",
+    "repository": "https://github.com/stuarthu/dsh-crew",
+    "version": "0.6.0",
+    "commit": "690e291f8444889dbb8b4ed56761d6e3bf28e372",
+    "note": "The sha256 values are of the files AS COMMITTED at source.commit, not of a working tree."
+  },
+  "watch": [
+    "roles/*.md",
+    "host/*.js",
+    "docs/principles.md",
+    "README.md"
+  ],
+  "files": {
+    "roles/pm.md": {
+      "sha256": "2f575a58d0285a052dbbf9c490473de7a82cb9aea50c11a0b2802334e202ff9a",
+      "portedTo": [
+        "lib/pm-core.md",
+        "skills/team-lane/SKILL.md"
+      ],
+      "note": "Split in two: the always-on part is pm-core.md, the team lane is the skill."
+    },
+    "roles/researcher.md": {
+      "sha256": "c3518600b5dc3f691e1c87c26925be6cf103781eea13ebdf5b20a1a7d762dc47",
+      "portedTo": [
+        "agents/crew-researcher.md"
+      ]
+    },
+    "roles/architect.md": {
+      "sha256": "de332079da2cbbd49a179fd9c8807d0a0901909c9a74f4ddadaed4c841d004fa",
+      "portedTo": [
+        "agents/crew-architect.md"
+      ]
+    },
+    "roles/engineer.md": {
+      "sha256": "f89864a0bdaf58be1e3757831f9821846927128d70e81f63e38d4afcf8c32a73",
+      "portedTo": [
+        "agents/crew-engineer.md"
+      ]
+    },
+    "roles/qa.md": {
+      "sha256": "b998d79064d2b7390e7e39d283486d220c563f714948f38bb1c5a58e815396f2",
+      "portedTo": [
+        "agents/crew-qa.md"
+      ]
+    },
+    "roles/code-reviewer.md": {
+      "sha256": "e02302ac7cbf8f13074a0a75b98f12610f0d2696d5181548eca911d257c81f90",
+      "portedTo": [
+        "agents/crew-code-reviewer.md"
+      ]
+    },
+    "roles/security-reviewer.md": {
+      "sha256": "7cb86b2eb0dedd60ffe2406f4e45591368bf2c11a12ca45ede809ca95f25ca37",
+      "portedTo": [
+        "agents/crew-security-reviewer.md"
+      ]
+    },
+    "roles/doc-reviewer.md": {
+      "sha256": "75c46b35c51f982afb8f8440251eb9b0e115336ed11c254242b4ad21270e523a",
+      "portedTo": [
+        "agents/crew-doc-reviewer.md"
+      ]
+    },
+    "host/roles.js": {
+      "sha256": "58aeb654868446e6188fa1cbce9e30b3edd81497b6f7aa1f0308593d4c41940b",
+      "portedTo": [
+        "lib/roles.mjs",
+        "agents/"
+      ],
+      "note": "The role table. A change to allow/deny here must change both lib/roles.mjs AND the agent file frontmatter; verify-plugin.mjs catches a half-done edit."
+    },
+    "host/jobs.js": {
+      "sha256": "b8497fe1d112e1c50324a66c419eca669840b63c1d68df444a0b644460920743",
+      "portedTo": [
+        "lib/jobs.mjs"
+      ]
+    },
+    "host/git-guard.js": {
+      "sha256": "1a7f014b409ad6e070bf8fad9bda53d7f425ccd863bd53aba333ff9bfefe5fb2",
+      "portedTo": [
+        "lib/guard.mjs",
+        "scripts/guard.mjs"
+      ],
+      "note": "Roles here can never push at all, so the approval file and the CI-publish scan were dropped on purpose."
+    },
+    "host/crew.js": {
+      "sha256": "4d82ebb6b2e3a400c07e47250c525aee99267ad07e3e89b07dc21b7c21a49c13",
+      "portedTo": [
+        "scripts/session-start.mjs"
+      ],
+      "note": "The preset installer has no equivalent and was dropped. Only the prompt section and the job notice ported."
+    },
+    "host/roles-preset.js": {
+      "sha256": "93a5c698399be81a026129873204fe243c3733e5d5a1bb3667741725a4f235e8",
+      "portedTo": [
+        "agents/"
+      ],
+      "note": "Claude Code has no presets: the tool filters live in each agent file's frontmatter instead."
+    },
+    "docs/principles.md": {
+      "sha256": "31e4a1c039ea4f1bd70cb2bbd9efec25575a8c6f7384eb7f0f167c8d9984ef71",
+      "portedTo": [
+        "docs/principles.md"
+      ]
+    },
+    "README.md": {
+      "sha256": "8a03501f49c534bfd460b89b51a0dddc2c2d695ef3c826d09ff3cb878b82dd21",
+      "portedTo": [
+        "README.md",
+        "README-zh.md"
+      ]
+    }
+  }
+}

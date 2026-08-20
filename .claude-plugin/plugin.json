@@ -1,0 +1,23 @@
+{
+  "name": "crew",
+  "version": "0.1.0",
+  "description": "Your session becomes a product manager that runs the work as a small crew: researcher, architect, engineer, QA, code reviewer, security reviewer and doc reviewer, started one at a time, talking only through files on disk. The PM is the only voice to the user and the only one who uses git.",
+  "author": {
+    "name": "Stuart Hu"
+  },
+  "homepage": "https://github.com/stuarthu/claude-crew#readme",
+  "repository": "https://github.com/stuarthu/claude-crew",
+  "license": "MIT",
+  "keywords": [
+    "agents",
+    "multi-agent",
+    "agent-team",
+    "subagent",
+    "orchestration",
+    "product-manager",
+    "prd",
+    "code-review",
+    "qa",
+    "software-team"
+  ]
+}

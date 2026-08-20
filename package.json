@@ -1,0 +1,20 @@
+{
+  "name": "claude-crew",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Claude Code plugin: run work as a small crew of role agents (product manager, researcher, architect, engineer, QA, code reviewer, security reviewer, doc reviewer) that talk through files on disk, with the PM as the only voice to the user.",
+  "license": "MIT",
+  "author": "Stuart Hu",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stuarthu/claude-crew.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node tools/verify-guard.mjs && node tools/verify-jobs.mjs && node tools/verify-plugin.mjs && node tools/verify-hooks.mjs",
+    "upstream": "node tools/check-upstream.mjs"
+  }
+}

@@ -48,16 +48,34 @@ const preToolUse = hooks.hooks.PreToolUse[0].hooks[0].command;
 
 // ── SessionStart ────────────────────────────────────────────────────────────
 
-const started = runHook(sessionStart, "", { CLAUDE_PLUGIN_ROOT: PLUGIN_ROOT, CLAUDE_CREW_JOBS_DIR: join(PLUGIN_ROOT, "no-such-jobs-folder") });
-let context = "";
-try {
-  context = JSON.parse(started).hookSpecificOutput.additionalContext;
-} catch {
-  failures += 1;
-  console.error(`FAIL the SessionStart hook did not print valid hook JSON, got: ${started.slice(0, 200)}`);
+/** Run the SessionStart hook and return the context it adds. */
+function startContext(env = {}) {
+  const printed = runHook(sessionStart, "", {
+    CLAUDE_PLUGIN_ROOT: PLUGIN_ROOT,
+    CLAUDE_CREW_JOBS_DIR: join(PLUGIN_ROOT, "no-such-jobs-folder"),
+    ...env,
+  });
+  if (printed.length === 0) return "";
+  try {
+    return JSON.parse(printed).hookSpecificOutput.additionalContext;
+  } catch {
+    failures += 1;
+    console.error(`FAIL the SessionStart hook did not print valid hook JSON, got: ${printed.slice(0, 200)}`);
+    return "";
+  }
 }
-check(context.includes("product manager"), "the SessionStart hook must tell the session it is the PM");
-check(context.includes("crew-engineer"), "the SessionStart hook must list the crew roles");
+
+// The quiet default: say the crew is here, change nothing about how Claude behaves.
+const quiet = startContext();
+check(quiet.includes("crew:team-lane"), "the default SessionStart output must point at the team-lane skill");
+check(!quiet.includes("One question per turn"), "the default SessionStart output must not take the session over");
+
+// Always mode: the PM rules and the role list.
+const always = startContext({ CLAUDE_CREW_ALWAYS: "1" });
+check(always.includes("product manager"), "always mode must tell the session it is the PM");
+check(always.includes("crew-engineer"), "always mode must list the crew roles");
+
+check(startContext({ CLAUDE_CREW_DISABLED: "1" }) === "", "CLAUDE_CREW_DISABLED=1 must print nothing");
 
 // With no plugin root, the hook must do nothing and still succeed.
 check(runHook(sessionStart, "", { CLAUDE_PLUGIN_ROOT: "" }) === "", "the SessionStart hook must print nothing when CLAUDE_PLUGIN_ROOT is unset");

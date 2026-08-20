@@ -16,10 +16,9 @@
     "roles/pm.md": {
       "sha256": "2f575a58d0285a052dbbf9c490473de7a82cb9aea50c11a0b2802334e202ff9a",
       "portedTo": [
-        "lib/pm-core.md",
         "skills/team-lane/SKILL.md"
       ],
-      "note": "Split in two: the always-on part is pm-core.md, the team lane is the skill."
+      "note": "The PM rules go between the crew:pm markers at the top of the skill; the 14 steps follow. lib/invitation.md is not a port of anything."
     },
     "roles/researcher.md": {
       "sha256": "c3518600b5dc3f691e1c87c26925be6cf103781eea13ebdf5b20a1a7d762dc47",

@@ -12,6 +12,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
+import { INVITATION_PATH, pmRulesFrom } from "../lib/pm.mjs";
 import {
   AGENTS_DIR, DELEGATION_TOOLS, PLUGIN_ROOT, ROLES, ROLE_AGENT_NAMES,
   listAgentFiles, readAgentFile, splitFrontmatter,
@@ -180,19 +181,54 @@ if (existsSync(skillPath)) {
   }
 }
 
-const core = readFileSync(join(PLUGIN_ROOT, "lib", "pm-core.md"), "utf8");
-check(core.includes("crew:team-lane"), "pm-core.md must tell the PM to load the crew:team-lane skill before team work");
-check(core.split("\n").length < 90, "pm-core.md is growing; it loads in every session, so keep it short");
+// The PM rules live in ONE place — inside the skill, between the markers — and
+// the session-start hook reads them from there. Two copies would drift.
+if (existsSync(skillPath)) {
+  const skillText = readFileSync(skillPath, "utf8");
+  check(skillText.includes("<!-- crew:pm:start -->"), "the team-lane skill must hold the PM rules between crew:pm markers");
+  check(skillText.includes("<!-- crew:pm:end -->"), "the team-lane skill is missing the crew:pm:end marker");
+  const rules = pmRulesFrom(skillText);
+  check(rules.length > 800, "the PM rules block in the skill is too short to be the real rules");
+  for (const phrase of ["One question per turn", "only one who uses git", "[lane: team]"]) {
+    check(rules.includes(phrase), `the PM rules block must still say "${phrase}"`);
+  }
+}
 
-// ── what the session-start hook really prints ───────────────────────────────
+const invitation = readFileSync(INVITATION_PATH, "utf8");
+check(invitation.includes("crew:team-lane"), "invitation.md must name the skill to load, or nobody ever loads it");
+check(invitation.split("\n").length < 30, "invitation.md is growing; it loads in every session, so keep it short");
+// The quiet default must not tell Claude how to behave — that is the whole point
+// of principle 14. It says the crew exists; the skill changes the manner.
+for (const phrase of ["You are the product manager", "One question per turn"]) {
+  check(!invitation.includes(phrase), `invitation.md must not say "${phrase}": the default mode announces the crew, it does not take the session over`);
+}
+
+// ── what the session-start hook really prints, in both modes ────────────────
 
 const { execFileSync } = await import("node:child_process");
-const printed = execFileSync(process.execPath, [join(PLUGIN_ROOT, "scripts", "session-start.mjs")], { encoding: "utf8" });
-const context = JSON.parse(printed).hookSpecificOutput.additionalContext;
-for (const role of ROLES) {
-  check(context.includes(role.agentName), `the session-start hook never names ${role.agentName}`);
+
+/** Run the hook and return the context it would add. */
+function contextFrom(env) {
+  const printed = execFileSync(process.execPath, [join(PLUGIN_ROOT, "scripts", "session-start.mjs")], {
+    encoding: "utf8",
+    env: { ...process.env, CLAUDE_CREW_JOBS_DIR: join(PLUGIN_ROOT, "no-such-jobs-folder"), ...env },
+  });
+  return printed.length === 0 ? "" : JSON.parse(printed).hookSpecificOutput.additionalContext;
 }
-check(context.includes("crew:team-lane"), "the session-start hook must point the PM at the team-lane skill");
+
+const quiet = contextFrom({});
+check(quiet.includes("crew:team-lane"), "the default session-start output must point at the team-lane skill");
+check(!quiet.includes("One question per turn"), "the default session-start output must not change how Claude behaves");
+check(quiet.length < 1200, "the default session-start output is growing; it is paid in every session");
+
+const always = contextFrom({ CLAUDE_CREW_ALWAYS: "1" });
+for (const role of ROLES) {
+  check(always.includes(role.agentName), `always mode never names ${role.agentName}`);
+}
+check(always.includes("One question per turn"), "always mode must carry the PM rules");
+check(always.includes("crew:team-lane"), "always mode must still send the PM to the skill for team work");
+
+check(contextFrom({ CLAUDE_CREW_DISABLED: "1" }) === "", "CLAUDE_CREW_DISABLED=1 must print nothing at all");
 
 if (failures > 0) {
   console.error(`\nverify-plugin: ${failures} check(s) failed`);

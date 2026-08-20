@@ -1,24 +1,30 @@
 #!/usr/bin/env node
-// SessionStart hook: make your session the crew PM.
+// SessionStart hook: tell the session that the crew exists.
 //
-// Prints three things as session context:
-//   1. the thin PM core (lib/pm-core.md) — always on, deliberately short;
-//   2. the role list and the limits, BUILT FROM `lib/roles.mjs`, so the PM can
-//      never promise a role that does not exist;
-//   3. the unfinished-job notice, when there is one.
+// Two modes, and the default is the quiet one:
 //
-// The full team playbook is NOT here. It lives in the `crew:team-lane` skill and
-// is loaded when the PM picks the team lane. That is the whole point of the
-// split: an `ask` or `quick` session pays about fifty lines, not four hundred.
+//   default            — print `lib/invitation.md`: the crew is here, and real
+//                        work should load the `crew:team-lane` skill. It changes
+//                        nothing about how Claude behaves in this session.
 //
-// This hook must never fail loudly. A hook that errors would print noise at the
-// top of every session in every project, so every failure path exits 0 quietly.
+//   CLAUDE_CREW_ALWAYS=1 — print the PM rules themselves, so every session in
+//                        every project behaves like the crew product manager.
+//
+// The PM rules are NOT stored here. They live inside the team-lane skill, between
+// the `crew:pm` markers, and this file reads them out of that one copy. That way
+// a session that loads the skill and a session running in always mode are reading
+// the same words, and neither can drift from the other.
+//
+// The unfinished-job notice is printed in BOTH modes: a job someone left half
+// done is news whatever mode this is.
+//
+// This hook must never fail loudly. It runs at the start of every session in
+// every project, so every failure path exits 0 quietly.
 
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
 import { DEFAULT_JOBS_DIR, jobsNotice } from "../lib/jobs.mjs";
-import { PLUGIN_ROOT, ROLES } from "../lib/roles.mjs";
+import { INVITATION_PATH, SKILL_PATH, pmRulesFrom } from "../lib/pm.mjs";
+import { ROLES } from "../lib/roles.mjs";
 
 /** Defaults the PM must respect. Each one can be raised with an environment variable. */
 const DEFAULT_LIMITS = { liveAgents: 4, agentsPerJob: 20, reviewRounds: 3 };
@@ -33,7 +39,7 @@ function limitOf(name, fallback) {
 
 /**
  * The facts the PM must know that live in code, not in prose: the exact agent
- * names, what each is for, and the limits. Kept out of `pm-core.md` so the list
+ * names, what each is for, and the limits. Built from the role table so the list
  * cannot drift from the agent files that really ship.
  */
 function crewSection(limits) {
@@ -58,22 +64,28 @@ function crewSection(limits) {
     "",
     `The crew is: a PM (you) plus ${ROLES.map(role => role.key.replace(/_/g, " ")).join(", ")}. Nothing else exists. Do not report work by a role that never ran.`,
     "Pushing the work branch and watching CI are your own steps, not a role's. Run them yourself, and ask the user before every push.",
+    "",
+    "**Before any `team` lane work, load the `crew:team-lane` skill.** These rules are",
+    "the short version; the skill holds the fourteen steps, the document shapes and",
+    "the milestone rules. Do not run team work from memory.",
   ].join("\n");
 }
 
 function main() {
   if (process.env.CLAUDE_CREW_DISABLED === "1") return;
 
-  const limits = {
-    liveAgents: limitOf("CLAUDE_CREW_LIVE_AGENTS", DEFAULT_LIMITS.liveAgents),
-    agentsPerJob: limitOf("CLAUDE_CREW_AGENTS_PER_JOB", DEFAULT_LIMITS.agentsPerJob),
-    reviewRounds: limitOf("CLAUDE_CREW_REVIEW_ROUNDS", DEFAULT_LIMITS.reviewRounds),
-  };
+  const parts = [];
 
-  const parts = [
-    readFileSync(join(PLUGIN_ROOT, "lib", "pm-core.md"), "utf8").trim(),
-    crewSection(limits),
-  ];
+  if (process.env.CLAUDE_CREW_ALWAYS === "1") {
+    const limits = {
+      liveAgents: limitOf("CLAUDE_CREW_LIVE_AGENTS", DEFAULT_LIMITS.liveAgents),
+      agentsPerJob: limitOf("CLAUDE_CREW_AGENTS_PER_JOB", DEFAULT_LIMITS.agentsPerJob),
+      reviewRounds: limitOf("CLAUDE_CREW_REVIEW_ROUNDS", DEFAULT_LIMITS.reviewRounds),
+    };
+    parts.push(pmRulesFrom(readFileSync(SKILL_PATH, "utf8")), crewSection(limits));
+  } else {
+    parts.push(readFileSync(INVITATION_PATH, "utf8").trim());
+  }
 
   if (process.env.CLAUDE_CREW_RESUME_NOTICE !== "0") {
     const notice = jobsNotice(process.env.CLAUDE_CREW_JOBS_DIR ?? DEFAULT_JOBS_DIR);

@@ -13,7 +13,11 @@
       "name": "crew",
       "source": "./",
       "description": "Your session becomes a product manager that runs the work as a small crew of role agents.",
-      "category": "workflow"
+      "category": "development",
+      "author": {
+        "name": "Stuart Hu"
+      },
+      "homepage": "https://github.com/stuarthu/claude-crew"
     }
   ]
 }

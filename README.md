@@ -35,9 +35,13 @@ To try it from a local clone instead:
 
 ## What you will notice
 
-The plugin is **always on**. In every session, in every project, the PM rules
-load at the start. They are short on purpose — about fifty lines. The PM's first
-move is to pick a lane:
+By default, almost nothing. At the start of a session the plugin adds a short
+note: the crew is available here, and work that is more than one small change
+should load the `crew:team-lane` skill. It does not change how Claude answers
+you.
+
+The crew starts when that skill loads. The skill makes the session the **product
+manager**, and the PM's first move is to pick a lane:
 
 | Lane | When | What happens |
 | --- | --- | --- |
@@ -48,9 +52,28 @@ move is to pick a lane:
 The lane is printed in one line, like `[lane: team]`, so you can move it up or
 down with one word.
 
-Only the `team` lane loads the full playbook — a skill called `crew:team-lane`,
-about four hundred lines, holding the fourteen steps, the document shapes, the
-milestone rules and the state file format. An `ask` session never pays for it.
+Only the `team` lane runs the crew. The skill holds the fourteen steps, the
+document shapes, the milestone rules and the state file format — about four
+hundred lines, paid only when they are used.
+
+### If you want the PM in every session
+
+```sh
+export CLAUDE_CREW_ALWAYS=1
+```
+
+Then the PM rules load at the start of every session in every project, and Claude
+behaves like the PM whatever you ask it. This is how
+[dsh-crew](https://github.com/stuarthu/dsh-crew) works, and it is a good setting
+if the crew is how you work.
+
+It is **not** the default. A plugin that rewrites how Claude talks in every
+project is fair enough when you chose it on purpose, and bad manners when it
+arrives with five other plugins.
+
+The PM rules have exactly one home — inside the skill, between the
+`<!-- crew:pm:start -->` markers. The always-on mode reads them from there, so
+the two ways of getting them can never drift apart.
 
 ## The crew
 
@@ -158,6 +181,7 @@ things people really change:
 
 | Variable | Default | What it does |
 | --- | --- | --- |
+| `CLAUDE_CREW_ALWAYS` | unset | set to `1` to load the PM rules in every session |
 | `CLAUDE_CREW_DISABLED` | unset | set to `1` to load nothing at all in this session |
 | `CLAUDE_CREW_JOBS_DIR` | `~/.claude/crew/jobs` | where job state lives |
 | `CLAUDE_CREW_RESUME_NOTICE` | unset | set to `0` to stop the unfinished-job notice |
@@ -196,7 +220,7 @@ dsh.
 
 | | dsh-crew | claude-crew |
 | --- | --- | --- |
-| PM rules | a prompt section, always in full | a thin core always on, the full playbook in a skill loaded for team work |
+| PM rules | a prompt section, always in full | off by default: a short note points at the skill, and the skill carries the rules. `CLAUDE_CREW_ALWAYS=1` brings the dsh-crew behaviour back |
 | Roles | stay alive; the PM messages and interrupts them | run once and report; a second round is a fresh role |
 | Job notice | re-read every turn | printed once at the start of the session |
 | Role pushes | possible with a one-shot approval file you create | never possible at all |

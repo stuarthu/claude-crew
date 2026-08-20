@@ -7,10 +7,14 @@ Newest first. Each entry says what a user would notice.
 First release. A port of [dsh-crew](https://github.com/stuarthu/dsh-crew) 0.6.0
 (commit `690e291`) to Claude Code.
 
-- Your session becomes the crew **product manager (PM)** in every project. The
-  rules load at session start and are short on purpose — about fifty lines.
-- The PM picks a lane every time: `ask`, `quick` or `team`. Only `team` loads the
-  full playbook, the `crew:team-lane` skill.
+- By default the plugin only says, at the start of a session, that the crew is
+  available and that real work should load the `crew:team-lane` skill. It does
+  not change how Claude answers you.
+- That skill makes the session the crew **product manager (PM)**. The PM picks a
+  lane every time: `ask`, `quick` or `team`. Only `team` runs the crew.
+- `CLAUDE_CREW_ALWAYS=1` loads the PM rules in every session, which is how
+  dsh-crew behaves. The rules have one home — inside the skill — so the two ways
+  of getting them cannot drift apart.
 - Seven role agents: `crew-researcher`, `crew-architect`, `crew-engineer`,
   `crew-qa`, `crew-code-reviewer`, `crew-security-reviewer`, `crew-doc-reviewer`.
   Reviewers can only read. The engineer and QA keep the shell.
@@ -26,7 +30,8 @@ First release. A port of [dsh-crew](https://github.com/stuarthu/dsh-crew) 0.6.0
 
 Ported with changes, each one written up in `docs/principles.md`:
 
-- The full PM prompt does not load in every session (principle 14).
+- The full PM prompt does not load in every session unless you ask for it
+  (principle 14).
 - Roles do not stay alive; there is no `send_message` or `interrupt_agent`
   (principle 13).
 - Roles can never push, so dsh-crew's one-shot push approval file is gone.

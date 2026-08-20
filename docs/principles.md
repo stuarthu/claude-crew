@@ -252,24 +252,37 @@ written into the team-lane skill rather than hidden.
 
 ---
 
-## 14. Always on, but only the thin part
+## 14. The default announces the crew; it does not take the session over
 
-**Rule.** The session-start hook loads about fifty lines: how to write, never
-guess, pick a lane, the hard rules, the role list. The 400-line team playbook
-lives in the `crew:team-lane` skill and is loaded only when the lane is `team`.
+**Rule.** By default the session-start hook prints one short note: the crew is
+available, and work bigger than a small change should load the `crew:team-lane`
+skill. It says nothing about how to behave. The PM rules and the 14 steps both
+live in that skill. `CLAUDE_CREW_ALWAYS=1` prints the PM rules in every session
+instead.
 
 **Why.** In dsh you choose the crew preset, so a crew session is crew work by
-definition. A Claude Code plugin is always on in every project, including the
-session where you only want to know what a function does. Loading the whole
-playbook there would spend thousands of tokens on rules that will not be used.
+definition. A Claude Code plugin is loaded in every project, next to five other
+plugins the person also installed. A plugin that quietly rewrites how Claude
+talks — lanes, one question per turn, "you are the PM" — in a session where
+somebody only wanted to know what a function does is bad manners, and the blame
+lands on Claude Code rather than on the plugin.
 
-The risk this creates is real: the PM has to remember to load the skill. Two
-things hold it. The thin core says the team lane **may not start** before the
-skill is loaded, and it names the skill exactly, so loading it is one call and
-not a search.
+So the loud version is a setting, not the default. Whoever wants dsh-crew's
+behaviour turns it on once and gets exactly that.
 
-**Lives in** `lib/pm-core.md`, `skills/team-lane/SKILL.md`,
-`scripts/session-start.mjs`, and the length check in `tools/verify-plugin.mjs`.
+The risk this creates is real: the crew flow only starts if the skill is loaded.
+Three things hold it. The note names the skill exactly, so loading it is one call
+and not a search. It says to load it **before** starting, not halfway through.
+And the unfinished-job notice, which appears in both modes, says to load the
+skill before touching the job.
+
+**The rules have one home.** They sit inside the skill between `crew:pm` markers,
+and the always-on mode reads them out of that one copy. A second copy in a second
+file would drift, and nobody would notice which one was stale.
+
+**Lives in** `lib/invitation.md`, `lib/pm.mjs`, `skills/team-lane/SKILL.md`,
+`scripts/session-start.mjs`, and the two-mode checks in
+`tools/verify-plugin.mjs` and `tools/verify-hooks.mjs`.
 
 **Source.** (ours)
 
@@ -341,7 +354,8 @@ a test run on a machine that only has this repository.
 | Idea | Why not |
 | --- | --- |
 | Long-lived role agents, messaged with `SendMessage` | Claude Code can do it, and dsh-crew works that way. Rejected: a live child dies with the session, so every rule built on "message every live child" would fail silently after a restart. See principle 13. |
-| The full PM prompt in every session | Faithful to dsh-crew, but this plugin is always on in every project. About 6,000 tokens spent on sessions that only ask a question. See principle 14. |
+| The full PM prompt in every session, by default | Faithful to dsh-crew, and it is still available as `CLAUDE_CREW_ALWAYS=1`. Rejected as the default: it changes how Claude behaves in every project, including sessions that only ask a question. See principle 14. |
+| A second copy of the PM rules in `lib/`, kept in step by a check | Was the first shape of this port. Replaced: the rules now live only inside the skill, and the hook reads them from there. A check that two files match still lets them be edited apart between test runs; one file cannot. |
 | A one-shot push approval file for roles | Ported from dsh-crew and then dropped. The PM is the only one who uses git in every step of the playbook, so the child-push path was close to dead code, and it was one more thing to explain and to get wrong. |
 | Blocking `git push` with `permissions.deny` in settings | Simpler, but it cannot tell a subagent from your own session, so it would block your pushes too. |
 | Re-printing the unfinished-job notice on every turn | Claude Code adds hook text to the context instead of replacing it, so this would repeat the same paragraph on every turn. It is printed once at session start. |

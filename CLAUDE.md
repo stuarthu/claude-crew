@@ -42,8 +42,8 @@ at run time. So the plugin is split, and the split is load-bearing:
 
 | Piece | Lives in | Loaded by | Why it must be there |
 | --- | --- | --- | --- |
-| Thin PM rules + role list + job notice | `lib/pm-core.md`, `scripts/session-start.mjs` | the `SessionStart` hook | It is the only way to make every session a PM |
-| The 14-step playbook | `skills/team-lane/SKILL.md` | the PM, with the Skill tool | Too long to load in a session that only asks a question |
+| The default note: "the crew is here, load the skill" | `lib/invitation.md`, `scripts/session-start.mjs` | the `SessionStart` hook | It must announce the crew without changing how Claude behaves |
+| The PM rules **and** the 14-step playbook | `skills/team-lane/SKILL.md` | the PM, with the Skill tool; and by the hook when `CLAUDE_CREW_ALWAYS=1` | One home for the rules. `lib/pm.mjs` reads them out from between the `crew:pm` markers |
 | Role prompts and tool filters | `agents/*.md` | Claude Code, as subagents | A subagent's tool list is read from its own file; nothing else can set it |
 | The guard | `lib/guard.mjs`, `scripts/guard.mjs` | the `PreToolUse` hook | A rule in prose is advice; a hook is where a call is actually stopped |
 | The role table | `lib/roles.mjs` | the session-start hook and the checks | Single source of truth, checked against the agent files |
@@ -70,7 +70,13 @@ These are not style preferences. Each one is checked by `tools/verify-plugin.mjs
 6. **Both hooks must exit 0 when they cannot run.** They fire in every session in every project. A
    hook that fails loudly would break work that has nothing to do with this plugin.
 7. **The guard touches crew roles only.** Not your session, and not another plugin's subagent.
-8. **`.claude-plugin/plugin.json` must not set `agents`, `skills` or `hooks`.** Default discovery
+8. **The PM rules have exactly one copy**, inside `skills/team-lane/SKILL.md` between the
+   `crew:pm` markers. Never add a second copy in `lib/`, not even one a check keeps in step —
+   two files can be edited apart between test runs.
+9. **The default session-start output must not change how Claude behaves.** `verify-plugin.mjs`
+   fails if `lib/invitation.md` starts telling Claude it is the PM. The loud version is
+   `CLAUDE_CREW_ALWAYS=1`.
+10. **`.claude-plugin/plugin.json` must not set `agents`, `skills` or `hooks`.** Default discovery
    of `./agents/`, `./skills/` and `./hooks/hooks.json` works. An explicit `"agents"` string is
    rejected at install time, and an explicit array of file paths installs cleanly and then loads
    **zero** agents — a silent, total outage. Confirmed with `claude plugin details`.

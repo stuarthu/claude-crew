@@ -9,7 +9,7 @@ This file says how to keep the two in step.
 
 | dsh-crew file | claude-crew file(s) | What changes on the way |
 | --- | --- | --- |
-| `roles/pm.md` | `lib/pm-core.md` + `skills/team-lane/SKILL.md` | Split in two. The always-on part (how to write, never guess, pick a lane, hard rules) goes in `pm-core.md`. The 14 steps go in the skill. |
+| `roles/pm.md` | `skills/team-lane/SKILL.md` | All of it goes in the skill: the PM rules between the `crew:pm` markers, then the 14 steps. `lib/invitation.md` is the short note that sends Claude to the skill, and is not a port of anything. |
 | `roles/researcher.md` | `agents/crew-researcher.md` | Add frontmatter. Rename tools. Add "you run once". |
 | `roles/architect.md` | `agents/crew-architect.md` | Same. |
 | `roles/engineer.md` | `agents/crew-engineer.md` | Same. |

@@ -18,19 +18,16 @@ There is no build step and no bundler. Plain ES modules, no dependencies.
 
 ## Commands
 
+There is nothing to build, nothing to install and nothing to run. The repository is markdown, two
+JSON manifests and one checksum file. No node, no npm, no python, no scripts — do not add any.
+
+The only command here is the upstream check, and it uses a standard tool:
+
 ```sh
-node tools/check.mjs                        # the whole check; run this before every commit
-node tools/check-upstream.mjs ../dsh-crew   # what changed in dsh-crew since the last port pass
+cd ../dsh-crew && sha256sum -c ~/workspace/claude-crew/upstream.sums
 ```
 
-Both are **contributor** tools. Nothing in this repository runs on a user's machine: the plugin is
-seven agent files and one skill file, and that is all. Node is acceptable in `tools/` and nowhere
-else, because the checks compare lists across files.
-
-There is no `package.json`, no npm, and no dependencies. Do not add one to get `npm test` back.
-
-`check-upstream.mjs` is deliberately not part of `check.mjs`: dsh-crew moving is news, not a defect
-here, and it needs a checkout this machine may not have. It skips out loud when there is none.
+Every `FAILED` line is a dsh-crew file that changed since this port was made. See `docs/porting.md`.
 
 ## What the plugin is made of
 
@@ -38,14 +35,14 @@ here, and it needs a checkout this machine may not have. It skips out loud when 
 | --- | --- | --- |
 | The PM rules **and** the 14-step playbook | `skills/team-lane/SKILL.md` | One file. Its `description` is the only thing that makes Claude reach for the crew, so the description is load-bearing |
 | Role prompts and tool filters | `agents/*.md` | A subagent's tool list is read from its own file; nothing else can set it |
-| The design rules | `tools/check.mjs` | A wrong word in frontmatter is invisible in a diff and total in effect |
+| The design rules | this file, and the "Editing a role" section of `README.md` | Nothing checks them, so they have to be where the person editing will look |
 
 Nothing else. No hooks, no scripts, no library code — see `docs/principles.md` 15.
 
 ## Design rules a change must not break
 
-Each one is checked by `tools/check.mjs`, and most exist because a live test showed the weaker
-version failing.
+**Nothing enforces these.** There is no check to run. Read them before you touch an agent file;
+most exist because a live test showed the weaker version failing.
 
 1. **The crew is flat.** Only the PM starts agents. Every deny-list role denies `Agent`, `Task`,
    `Workflow`, `SendMessage` and `ListAgents`; every allow-list role names none of them. Claude
@@ -55,19 +52,19 @@ version failing.
    cannot name what a deployment has not installed yet; an allow list does not have to. So: no
    allow-list role may name `Bash`, `BashOutput` or `KillShell`, and no reviewer may name `Write`,
    `Edit` or `NotebookEdit`.
-3. **Every tool name must be real.** `KNOWN_TOOLS` in `tools/check.mjs` is the list. Extend it only
-   after checking Claude Code really calls the tool that.
+3. **Every tool name must be real.** A name Claude Code does not have is a silent hole: the deny
+   list stops covering the tool it meant to stop. Check the name before you write it.
 4. **The engineer and QA keep `Bash`.** They have to run the code and the tests.
 5. **Every role that owns a shell is told, in its own prompt, that the PM does all the git work.**
    Nothing enforces it. That is stated plainly in both READMEs, and must stay stated.
-6. **The plugin stays markdown.** No `hooks/`, `scripts/`, `lib/` or `package.json`. The check
-   fails if any of them comes back.
+6. **The plugin stays markdown.** No `hooks/`, `scripts/`, `lib/`, `tools/` or `package.json`.
+   Every one of those was here at some point and was removed for a reason in `docs/principles.md`.
 7. **`.claude-plugin/plugin.json` must not set `agents`, `skills` or `hooks`.** Default discovery
    of `./agents/` and `./skills/` works. An explicit `"agents"` string is rejected at install time,
    and an explicit array of file paths installs cleanly and then loads **zero** agents — a silent,
    total outage. Confirmed with `claude plugin details`.
 8. **The skill description must say when to use the crew, not what the file contains.** It is the
-   only entry point. The check fails if it gets short.
+   only entry point. If it gets vague or short, the crew simply never runs and nothing says why.
 
 ## Adding or changing a role
 
@@ -75,11 +72,10 @@ version failing.
    description must start with `Crew role.`; the body must be real instructions (the check rejects
    anything under 500 characters), must say the role talks only to the PM, and must say it runs
    once. A role with a shell must also say the PM does the git work.
-2. Add it to the `ROLES` list in `tools/check.mjs`, naming which filter it uses.
-3. Name the role in the roster table and the steps of `skills/team-lane/SKILL.md` — the PM only
-   uses what its playbook describes, and the check fails if the skill never names it.
-4. If the allow list names a tool not in `KNOWN_TOOLS`, add it there.
-5. Run `node tools/check.mjs`.
+2. Name the role in the roster table and in the steps of `skills/team-lane/SKILL.md` — the PM only
+   uses what its playbook describes.
+3. Add it to the role table in both READMEs.
+4. Re-read the design rules above against the new frontmatter, line by line. Nothing else will.
 
 ## Users override, the plugin does not change
 
@@ -120,8 +116,9 @@ rule in `agents/*.md` or in the skill, update the principle that carries it; whe
 idea, add it to the table so the next person does not re-run the same search.
 
 `docs/porting.md` holds the file-by-file map to dsh-crew and the steps of a port pass.
-`upstream.json` records what each ported file looked like at port time — update it with
-`node tools/check-upstream.mjs --update ../dsh-crew`, never by hand.
+`upstream.sums` records what each ported file looked like at port time, in `sha256sum` format, with
+the map in comments above each line. After carrying a change across, replace that one line with
+`sha256sum <file>` run in the dsh-crew checkout.
 
 `README.md` (English) and `README-zh.md` (Chinese) say the same thing and must be updated together
 whenever user-visible behaviour changes; write the English first, then match the Chinese. Keep the
@@ -129,5 +126,5 @@ plain, short-sentence style already in both files, and keep the version line nea
 README in step with `.claude-plugin/plugin.json`.
 
 Releases: add the new version's section to `CHANGELOG.md`, bump `version` in
-`.claude-plugin/plugin.json` and `metadata.version` in `.claude-plugin/marketplace.json` —
-`tools/check.mjs` fails if the two disagree — then commit and tag.
+`.claude-plugin/plugin.json` and `metadata.version` in `.claude-plugin/marketplace.json` — keep
+those two in step by hand — then commit and tag.

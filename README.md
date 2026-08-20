@@ -183,20 +183,29 @@ file you can edit:
 
 To turn it off: `/plugin uninstall crew@claude-crew`.
 
-## Running the checks
+## Editing a role
 
-```sh
-node tools/check.mjs                        # the whole check
-node tools/check-upstream.mjs ../dsh-crew   # what moved in dsh-crew
-```
+There is nothing to build and nothing to run — but there is also **no check**, so
+these rules are on you. Each one exists because the weaker version failed a live
+test:
 
-These are contributor tools and never run on a user's machine. Node is used only
-because the checks compare lists across files, which is unpleasant in shell.
+1. A role uses **exactly one** of `tools` (an allow list) or `disallowedTools`
+   (a deny list). Never both, never neither.
+2. A **reviewer** always uses an allow list, and never names `Write`, `Edit` or
+   `NotebookEdit`. A reviewer that can change what it judges is not a reviewer.
+3. An **allow-list role never gets a shell** — no `Bash`, no `BashOutput`. A
+   shell writes files, runs code, and reaches past anything a deny list closed.
+4. A **deny-list role denies all five**: `Agent`, `Task`, `Workflow`,
+   `SendMessage`, `ListAgents`. That is what keeps the crew flat.
+5. The **engineer and QA keep `Bash`** — they have to run the code and the tests.
+6. The frontmatter `name` matches the file name, and the description starts with
+   `Crew role.` so the role is never picked for ordinary work.
+7. Every tool name must be one Claude Code really has. A name that does not exist
+   is a silent hole: the deny list stops covering the tool it meant to stop.
 
-The check is worth reading before you edit a role. It catches the mistakes a diff
-does not show: a reviewer quietly handed `Write`, an agent whose frontmatter name
-no longer matches its file, a version that disagrees between the two manifests, a
-`hooks/` folder creeping back in.
+After adding a role, name it in `skills/team-lane/SKILL.md` as well — the PM only
+uses what its playbook describes. `CLAUDE.md` repeats these rules for whoever
+edits next.
 
 ## What changed from dsh-crew
 
@@ -215,18 +224,22 @@ looked at and rejected.
 
 ### Keeping up with dsh-crew
 
-dsh-crew keeps moving, and nothing in Claude Code notices. So `upstream.json`
-records the SHA-256 of every dsh-crew file this port was made from, and which
-claude-crew files each one feeds:
+dsh-crew keeps moving, and nothing in Claude Code notices. So `upstream.sums`
+holds the SHA-256 of every dsh-crew file this port was made from, in the format
+`sha256sum` reads, with a comment above each line saying which claude-crew file
+it feeds:
 
 ```sh
-node tools/check-upstream.mjs ../dsh-crew
+cd ../dsh-crew && sha256sum -c ~/workspace/claude-crew/upstream.sums
+cd ../dsh-crew && shasum -a 256 -c ~/workspace/claude-crew/upstream.sums   # macOS
 ```
 
-It prints the upstream files that changed, the files to revisit, and the exact
-git command to read the change. It also warns when that checkout has uncommitted
-work, so a port pass does not carry across a half-finished edit. When you have
-carried a change over, re-stamp with `--update`.
+Every `FAILED` line is a dsh-crew file that changed since this port was made.
+Read it with `git -C ../dsh-crew log -p <file>`, decide what it means here, then
+replace that line with the new sum.
+
+Run `git -C ../dsh-crew status` first: an uncommitted change there is work in
+progress, not something to carry across.
 
 `docs/porting.md` holds the file-by-file map and the steps of a port pass.
 

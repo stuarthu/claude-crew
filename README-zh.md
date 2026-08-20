@@ -162,19 +162,27 @@ Claude Code 执行，所以角色根本就没有那个工具。
 
 想关掉：`/plugin uninstall crew@claude-crew`。
 
-## 跑检查
+## 改一个角色
 
-```sh
-node tools/check.mjs                        # 全部检查
-node tools/check-upstream.mjs ../dsh-crew   # dsh-crew 有什么变了
-```
+没有东西要构建，也没有东西要运行——但也**没有任何检查**，所以下面这些规则要靠你自己守。
+每一条都是因为更弱的版本在实测中失败过：
 
-这些是给贡献者用的工具，永远不会在用户的机器上运行。这里用 node，只是因为这些检查要跨
-文件比对清单，用 shell 写很难受。
+1. 一个角色**只能有一个**：`tools`（白名单）或 `disallowedTools`（黑名单）。不能两个都
+   有，也不能一个都没有。
+2. **评审**必须用白名单，而且绝不能出现 `Write`、`Edit`、`NotebookEdit`。能改动自己所
+   评判的东西的评审，不是评审。
+3. **用白名单的角色永远没有 shell**——没有 `Bash`，没有 `BashOutput`。shell 会写文件、
+   会运行代码，能绕过黑名单关掉的一切。
+4. **用黑名单的角色必须禁掉这五个**：`Agent`、`Task`、`Workflow`、`SendMessage`、
+   `ListAgents`。这就是团队保持扁平的原因。
+5. **工程师和 QA 保留 `Bash`**——他们必须能运行代码和测试。
+6. frontmatter 里的 `name` 要和文件名一致，description 要以 `Crew role.` 开头，这样它
+   永远不会被拿去做普通工作。
+7. 每个工具名都必须是 Claude Code 真的有的。一个不存在的名字是个隐蔽的漏洞：黑名单会
+   悄悄地不再覆盖它本来要挡住的工具。
 
-改一个角色之前值得先读一遍这个检查。它能抓住 diff 看不出来的错误：评审被悄悄给了
-`Write`、某个 agent 的 frontmatter 名字和文件名对不上、两个清单文件里的版本号不一致、
-或者 `hooks/` 目录又偷偷回来了。
+加了新角色之后，还要在 `skills/team-lane/SKILL.md` 里写上它——PM 只会用它的手册里描述过
+的东西。`CLAUDE.md` 里也重复了这些规则，给下一个改动的人看。
 
 ## 和 dsh-crew 的区别
 
@@ -192,16 +200,20 @@ node tools/check-upstream.mjs ../dsh-crew   # dsh-crew 有什么变了
 
 ### 跟上 dsh-crew
 
-dsh-crew 会继续变，而 Claude Code 不会察觉。所以 `upstream.json` 记下了本移植版所依据
-的每个 dsh-crew 文件的 SHA-256，以及每个文件对应本仓库的哪些文件：
+dsh-crew 会继续变，而 Claude Code 不会察觉。所以 `upstream.sums` 用 `sha256sum` 能读的
+格式，记下了本移植版所依据的每个 dsh-crew 文件的 SHA-256，每一行上面还有一条注释说明它
+对应本仓库的哪个文件：
 
 ```sh
-node tools/check-upstream.mjs ../dsh-crew
+cd ../dsh-crew && sha256sum -c ~/workspace/claude-crew/upstream.sums
+cd ../dsh-crew && shasum -a 256 -c ~/workspace/claude-crew/upstream.sums   # macOS
 ```
 
-它会打印哪些上游文件变了、要回头看哪些文件，以及查看这次改动的确切 git 命令。如果那个
-检出目录里有未提交的改动，它也会警告你，免得把没写完的编辑搬过来。搬完之后用
-`--update` 重新盖章。
+每一个 `FAILED` 就是一个自本次移植以来变过的 dsh-crew 文件。用
+`git -C ../dsh-crew log -p <文件>` 读那次改动，决定它在这里意味着什么，然后把那一行换成
+新的 sum。
+
+先跑 `git -C ../dsh-crew status`：那边未提交的改动是还没写完的东西，不该搬过来。
 
 `docs/porting.md` 里有逐文件对照表和一次移植的完整步骤。
 

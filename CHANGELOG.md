@@ -24,9 +24,9 @@ a session until it is used.
   next milestone until you say so.
 - Job state lives in `~/.claude/crew/jobs/`, outside your repository, so an
   interrupted job can be picked up later and your `git status` stays clean.
-- `node tools/check.mjs` checks the design rules; `node tools/check-upstream.mjs
-  ../dsh-crew` says what changed in dsh-crew since this port was last brought up
-  to date. Both are contributor tools and never run on a user's machine.
+- There is nothing to build, install or run. `upstream.sums` holds the SHA-256
+  of every dsh-crew file this port was made from, so
+  `sha256sum -c upstream.sums` in a dsh-crew checkout says what has moved since.
 
 Ported with changes, each one written up in `docs/principles.md`:
 
@@ -39,3 +39,6 @@ Ported with changes, each one written up in `docs/principles.md`:
   says plainly that nothing stops it — plus offers a hook you can add to your own
   settings (principle 15).
 - The unfinished-job notice became step 0 of the playbook.
+- Nothing checks the design rules. They are written out in `CLAUDE.md` and in the
+  "Editing a role" section of both READMEs, where whoever edits a role will see
+  them.

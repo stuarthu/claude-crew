@@ -33,7 +33,7 @@ architect writes so much, and why "ask the other engineer" is never an option.
 
 **Lives in** every `agents/*.md` frontmatter (Claude Code applies the lists
 itself, so a role does not have the tool at all), `skills/team-lane/SKILL.md`,
-`agents/crew-architect.md`, and the design rules in `tools/check.mjs`.
+`agents/crew-architect.md`, and the design rules in `CLAUDE.md`.
 
 **Source.** [Conway's Law](https://lawsofsoftwareengineering.com/laws/conways-law/) ·
 [Team Topologies and Conway's Law alignment](https://archman.dev/docs/domain-driven-design/strategic-design/team-topologies-and-conways-law-alignment)
@@ -215,8 +215,8 @@ With the shell denied too, its tool list still held workflow tools and
 desktop-control MCP tools. A deny list cannot name what a deployment has not
 installed yet; an allow list does not have to.
 
-**Lives in** the reviewer files in `agents/`, and the design rules in
-`tools/check.mjs`.
+**Lives in** the reviewer files in `agents/`, the design rules in `CLAUDE.md`,
+and the "Editing a role" section of both READMEs.
 
 **Source.** (ours)
 
@@ -270,10 +270,10 @@ thing that decides whether the crew is ever used. Write it as "use this when…"
 never as "this file contains…".
 
 The risk this creates is real: if the description is weak, the crew never runs
-and nothing says why. `tools/check.mjs` fails when it is short.
+and nothing says why — so treat that description as the most important line in
+the plugin.
 
-**Lives in** the `description` in `skills/team-lane/SKILL.md`, and the length
-check in `tools/check.mjs`.
+**Lives in** the `description` in `skills/team-lane/SKILL.md`.
 
 **Source.** (ours)
 
@@ -307,30 +307,37 @@ settings. It stays theirs, so it cannot break anyone who did not choose it.
 
 **Lives in** `agents/crew-engineer.md` and `agents/crew-qa.md` ("Git"),
 `skills/team-lane/SKILL.md` (step 10), the "What is not enforced" section of both
-READMEs, and the check in `tools/check.mjs` that fails if `hooks/`, `scripts/`,
-`lib/` or `package.json` comes back.
+READMEs, and design rule 6 in `CLAUDE.md`.
 
 **Source.** (ours)
 
 ---
 
-## 16. The design rules are checked, not trusted
+## 16. Nothing is checked, so the rules are written where the editor will look
 
-**Rule.** `tools/check.mjs` reads every agent file and fails the run when a
-design rule is broken: a reviewer that can write, an allow-list role holding a
-shell, a role that can start an agent, a frontmatter name that no longer matches
-its file, a tool name that does not exist.
+**Rule.** There is no check to run. The design rules — exactly one filter per
+role, a reviewer never writes, an allow-list role never gets a shell, a deny-list
+role denies all five delegation tools, the engineer and QA keep `Bash` — are
+written out in `CLAUDE.md` and in the "Editing a role" section of both READMEs.
 
-**Why.** An agent file's frontmatter is one line of text that decides what a role
-may do. A wrong word there is invisible in a diff and total in effect — it hands
-a reviewer a shell, or leaves a maker able to start its own agents. dsh-crew
-avoided this by building the filters at run time from one table; a markdown-only
-plugin has no run time, so the check is what remains.
+**Why.** This started as four verify scripts, then one. Each version was useful,
+and each one made node a requirement for anyone touching a repository whose whole
+content is markdown. They were dropped so the repository depends on nothing at
+all, for users **and** contributors.
 
-It is a contributor tool. It never runs on a user's machine, which is why node is
-acceptable there and nowhere else.
+**Say the cost plainly, because it is real.** An agent file's frontmatter is one
+line of text that decides what a role may do. A wrong word there is invisible in
+a diff and total in effect: it hands a reviewer a shell, or leaves a maker able
+to start its own agents. dsh-crew avoids this by building every filter at run
+time from one table. A markdown-only plugin has no run time, and now no check
+either, so the only thing between that mistake and a release is somebody reading
+the frontmatter line carefully.
 
-**Lives in** `tools/check.mjs`, `CLAUDE.md`.
+That is why the rules are repeated in three places instead of one, and why the
+README puts them under a heading somebody editing a role will actually open.
+
+**Lives in** `CLAUDE.md` ("Design rules a change must not break"), and the
+"Editing a role" section of `README.md` and `README-zh.md`.
 
 **Source.** (ours)
 
@@ -338,20 +345,26 @@ acceptable there and nowhere else.
 
 ## 17. A port needs a way to notice the original moved
 
-**Rule.** `upstream.json` records the SHA-256 of every dsh-crew file this port
-was made from, and which claude-crew files each one feeds.
-`tools/check-upstream.mjs` reports what moved and what to revisit.
+**Rule.** `upstream.sums` records the SHA-256 of every dsh-crew file this port
+was made from, in the format `sha256sum` reads, with a comment above each line
+saying which claude-crew file it feeds. Running `sha256sum -c upstream.sums`
+inside a dsh-crew checkout reports what moved.
 
 **Why.** A port without this becomes a fork within a few months, and nobody can
 say which improvements were skipped on purpose and which were simply missed. The
-`note` field is the important half: it holds the reason a change was **not**
-carried across, so the next pass does not re-open a settled question.
+comment above each line is the important half: it holds the reason a change was
+**not** carried across, so the next pass does not re-open a settled question.
 
-The check skips out loud when no dsh-crew checkout is present, so it never fails
-a run on a machine that only has this repository.
+Using `sha256sum` instead of a script is the point. It needs nothing installed,
+it is one line to run, and the file still makes sense when nobody remembers how
+the tracking was meant to work.
 
-**Lives in** `upstream.json`, `tools/check-upstream.mjs`, `docs/porting.md`.
-`tools/check.mjs` does not run it: dsh-crew moving is news, not a defect here.
+What it cannot do is notice a file dsh-crew has **added**, because a checksum
+file only knows the names already in it. `docs/porting.md` carries the git
+command for that.
+
+**Lives in** `upstream.sums`, `docs/porting.md`, and the "Keeping up with
+dsh-crew" section of both READMEs.
 
 **Source.** (ours)
 
@@ -367,7 +380,9 @@ a run on a machine that only has this repository.
 | Writing the hooks in Python 3, with a shim that finds a working interpreter | What `hookify` and `security-guidance` do, and it would have worked. Rejected together with the hook itself: one rule did not justify any interpreter. |
 | Anything that loads into every session, by default | Faithful to dsh-crew, and it is still available as `CLAUDE_CREW_ALWAYS=1`. Rejected as the default: it changes how Claude behaves in every project, including sessions that only ask a question. See principle 14. |
 | A second copy of the PM rules outside the skill | Was the first shape of this port, kept in step by a check. Replaced: the rules live only inside the skill now. A check that two files match still lets them be edited apart between runs; one file cannot. |
-| A role table in code, generating or checking the agent files | dsh-crew builds every tool filter from one table at run time. A markdown-only plugin has no run time, so the table would exist only for the check. `tools/check.mjs` reads the agent files directly instead. See principle 16. |
+| A role table in code, generating or checking the agent files | dsh-crew builds every tool filter from one table at run time. A markdown-only plugin has no run time, so the table would exist only for a check — and the checks are gone too. See principle 16. |
+| Verify scripts that check the design rules | Shipped in four forms, then one, then none. Every version made node a requirement for anyone touching a repository whose whole content is markdown. Dropped so it depends on nothing at all; principle 16 states what that costs. |
+| A GitHub Actions workflow | There is nothing left for it to run. With no code and no checks, CI would only prove that markdown is still markdown. |
 | A one-shot push approval file for roles | Ported from dsh-crew and then dropped. The PM is the only one who uses git in every step of the playbook, so the child-push path was close to dead code, and it was one more thing to explain and to get wrong. |
 | Blocking `git push` with `permissions.deny` in settings | Simpler, but it cannot tell a subagent from your own session, so it would block your pushes too. |
 | Re-printing the unfinished-job notice on every turn | Claude Code adds hook text to the context instead of replacing it, so this would repeat the same paragraph on every turn. It is printed once at session start. |
@@ -385,6 +400,6 @@ When you change a rule in `agents/*.md` or in `skills/team-lane/SKILL.md`, updat
 the principle that carries it. When you reject an idea, add it to the table above
 so the next person does not re-run the same search.
 
-When a principle numbered 1 to 12 changes upstream, `tools/check-upstream.mjs`
-will point at `docs/principles.md`. Keep the numbers in step; if a shared
+When a principle numbered 1 to 12 changes upstream, `sha256sum -c upstream.sums`
+reports `docs/principles.md` as FAILED. Keep the numbers in step; if a shared
 principle stops being true here, say so in its entry rather than renumbering.

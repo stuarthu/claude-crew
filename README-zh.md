@@ -22,6 +22,13 @@
 /plugin install crew@claude-crew
 ```
 
+或者，从脚本或 agent 里安装：
+
+```sh
+claude plugin marketplace add stuarthu/claude-crew && \
+  claude plugin install crew@claude-crew -y
+```
+
 然后开一个新会话。没有任何需要配置的东西。
 
 想从本地克隆试用：

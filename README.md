@@ -25,6 +25,13 @@ see [What changed from dsh-crew](#what-changed-from-dsh-crew).
 /plugin install crew@claude-crew
 ```
 
+Or, from a script or an agent:
+
+```sh
+claude plugin marketplace add stuarthu/claude-crew && \
+  claude plugin install crew@claude-crew -y
+```
+
 Then start a new session. There is nothing to configure.
 
 To try it from a local clone instead:

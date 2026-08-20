@@ -19,7 +19,7 @@ This file says how to keep the two in step.
 | `roles/doc-reviewer.md` | `agents/crew-doc-reviewer.md` | Same. |
 | `host/roles.js` | every `agents/*.md` frontmatter | dsh builds the tool filters at run time; Claude Code reads them from the agent file. Nothing checks them here — the design rules are written out in `CLAUDE.md` and in both READMEs instead. |
 | `host/jobs.js` | `skills/team-lane/SKILL.md`, step 0 | Not code here. The PM looks in `~/.claude/crew/jobs/` itself when the skill loads. |
-| `host/git-guard.js` | `agents/crew-engineer.md`, `agents/crew-qa.md`, and the "What is not enforced" section of both READMEs | **Not ported as code.** The plugin ships no hooks. The rule is stated in every role that owns a shell, and the README offers a hook the user can add to their own settings. See principle 15. |
+| `host/git-guard.js` | `agents/crew-engineer.md`, `agents/crew-qa.md`, and the "What is not enforced" section of both READMEs | **Not ported as code.** The plugin ships no hooks. The rule is stated in every role that owns a shell, and the README offers a hook the user can add to their own settings. See principle P3. |
 | `host/crew.js` | `skills/team-lane/SKILL.md` | Nothing loads at session start. The skill's description is what makes Claude reach for the crew. |
 | `host/roles-preset.js` | `agents/*.md` frontmatter | Claude Code has no presets. |
 | `docs/principles.md` | `docs/principles.md` | Keep the numbering the same, so a principle can be quoted across both repositories. |
@@ -34,7 +34,7 @@ Do not "fix" these by adding them back. Each one is a decision, and
 | --- | --- |
 | The preset installer and the `.bak` rescue | Claude Code plugins install themselves. There is no folder to overwrite. |
 | `maxDepth: 1` | No equivalent setting, and none needed: Claude Code applies each agent's tool list itself, so a role does not have a delegation tool to use. |
-| The git guard, as running code | The plugin is markdown only. See principle 15. |
+| The git guard, as running code | The plugin is markdown only. See principle P3. |
 | `send_message`, `interrupt_agent`, `list_agents` | A role runs once. A second round is a fresh role. |
 | The one-shot push approval file | A crew role can never push, so there is nothing to approve. |
 | The per-turn job notice | Claude Code adds hook text to context instead of replacing it, so it is printed once at session start. |

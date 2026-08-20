@@ -37,7 +37,7 @@ Every `FAILED` line is a dsh-crew file that changed since this port was made. Se
 | Role prompts and tool filters | `agents/*.md` | A subagent's tool list is read from its own file; nothing else can set it |
 | The design rules | this file, and the "Editing a role" section of `README.md` | Nothing checks them, so they have to be where the person editing will look |
 
-Nothing else. No hooks, no scripts, no library code — see `docs/principles.md` 15.
+Nothing else. No hooks, no scripts, no library code — see `docs/principles.md` P3.
 
 ## Design rules a change must not break
 
@@ -94,14 +94,27 @@ That snippet matches on `"agent_type":"crew-` in the hook payload. `agent_type` 
 root session and set to the agent's name for a subagent — confirmed against a live session, not
 read from documentation. It reads command text, so it is a seat belt, not a locked door.
 
-Do not ship it as a hook in this repository. `docs/principles.md` 15 says why.
+Do not ship it as a hook in this repository. `docs/principles.md` P3 says why.
 
 ## State and documents
 
 Job state lives **outside** the repository, in `~/.claude/crew/jobs/<job>/state.json`, so a user's
-`git status` stays clean. Crew documents (DoD, PRD, design, ADRs, and one module boundary contract
-per pair of modules that talk, in `docs/crew/api/<caller>-<callee>.md`) live **inside** it, in
-`docs/crew/`.
+`git status` stays clean. Crew documents live **inside** it, in `docs/crew/`: the DoD or PRD with
+its **Language and stack** section, the design, ADRs, one boundary contract per pair of modules
+that talk (`docs/crew/api/<caller>-<callee>.md`), one change request per scope-or-contract change
+(`docs/crew/crd/NNNN-<short-name>.md`), and QA's plan plus its **runnable** cases
+(`docs/crew/qa/<task-id>-plan.md`, `docs/crew/qa/<task-id>/case-*`, a `run.sh` per task and one
+`docs/crew/qa/run-all.sh` that finds them all).
+
+Two rules there are load-bearing, and `docs/principles.md` 13 and 14 carry the reasons:
+
+- **QA writes only under `docs/crew/qa/`**, in the project's own test framework, never into the
+  product's test folder and never into project config. If a runner cannot see that folder, QA asks
+  the PM and the PM edits the config — that keeps "one task owns its files" true.
+- **A CRD is written by the PM for scope or contract changes only**, whoever asked. Scope needs the
+  user's yes; a contract fix the user cannot see is the PM's call, reported at the milestone review.
+  Questions, review findings and internal design changes are deliberately *not* CRDs — widening
+  that scope turns the PM into a clerk.
 
 Nothing announces an unfinished job. Step 0 of the skill tells the PM to look in
 `~/.claude/crew/jobs/` for a `state.json` whose `repo` is this folder, and to ask the user one
@@ -110,7 +123,8 @@ question before anything moves.
 ## Documentation
 
 `docs/principles.md` holds the **reasons** behind the crew's rules. Principles 1 to 12 are shared
-with dsh-crew and **the numbers match on purpose**; 13 to 17 belong to this port. Role prompts are
+with dsh-crew and **the numbers match on purpose**; `P1` to `P5` belong to this port, and carry
+the `P` so dsh-crew can add more numbered principles without colliding. Role prompts are
 written short and bossy on purpose, so the reasoning has to live somewhere else. When you change a
 rule in `agents/*.md` or in the skill, update the principle that carries it; when you reject an
 idea, add it to the table so the next person does not re-run the same search.

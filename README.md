@@ -9,9 +9,10 @@ then starts an **architect** to design the work, **engineers** to write the code
 and **reviewers** to judge both. The roles never talk to each other — they share
 work through files on disk, and the PM passes everything between them.
 
-> **Version 0.1.0.** PM, researcher, architect, engineer, QA, code reviewer,
-> security reviewer, doc reviewer — plus milestones you approve, pushing with
-> your permission, and picking a job up after a restart.
+> **Version 0.2.0.** PM, researcher, architect, engineer, QA, code reviewer,
+> security reviewer, doc reviewer — plus a stack you confirm before any design,
+> milestones you approve one at a time, QA cases that stay in your repository,
+> written change requests, and picking a job up after a restart.
 
 This is a port of [dsh-crew](https://github.com/stuarthu/dsh-crew), the same idea
 built for DeepSeek Harness. The rules are the same. The machinery is different —
@@ -39,7 +40,7 @@ There are no hooks, no scripts, and no code of any kind in this plugin. It is
 seven agent files and one skill file. It runs on any machine that runs Claude
 Code, and it adds nothing to your session until it is used.
 
-That is on purpose, and `docs/principles.md` 15 says why.
+That is on purpose, and `docs/principles.md` P3 says why.
 
 ## What you will notice
 
@@ -60,6 +61,30 @@ Once the skill loads, the session is the PM, and the PM picks a lane:
 
 The lane is printed in one line, like `[lane: team]`, so you can move it up or
 down with one word.
+
+## What the team lane guarantees
+
+- **The stack is settled before anything is designed, and you confirm it.** If
+  the repository already has one, the PM states what it found and you agree in a
+  line. If the choice is real, a researcher lists the candidates with a source per
+  claim and is not allowed to recommend one; the PM recommends, you decide. It
+  goes into the document as a **Language and stack** section, and after that it
+  moves only through a written change request.
+- **Every test is a file that stays.** The engineer's test lives in your project's
+  test suite. QA's cases live in `docs/crew/qa/<task-id>/` with a `run.sh`, and
+  `docs/crew/qa/run-all.sh` runs every task's cases ever written. A case from an
+  earlier task that now fails is a blocking regression, and nobody may edit it
+  green.
+- **Changes are written down.** Anything that changes what you get — the scope, an
+  acceptance check, the milestone list, the stack — or how two modules talk gets a
+  change request document in `docs/crew/crd/`, before anything moves. Scope needs
+  your yes. A contract fix you cannot see is the PM's call, and it is reported at
+  the next milestone review.
+- **Nothing is decided in a message.** A role reports by naming the file it wrote;
+  the PM answers by changing a document. Here that is not discipline, it is the
+  only option — a role runs once and cannot be messaged at all.
+- **A new dependency is the PM's call.** An engineer picks freely among the
+  libraries the project already has, but a brand-new package comes back to the PM.
 
 ## The crew
 
@@ -164,7 +189,7 @@ belt, not a locked door — a push hidden in a script file gets through.
 
 | What | Where | Why |
 | --- | --- | --- |
-| Crew documents (DoD, PRD, design, ADRs, boundary contracts, QA plans, research) | `docs/crew/` **inside your repository** | they are part of the work, and they get committed |
+| Crew documents — `dod.md` or `prd.md`, `hld.md`, `adr/`, `api/`, `tasks.md`, `research/`, `crd/`, and QA's plans and cases in `qa/` | `docs/crew/` **inside your repository** | they are part of the work, and they get committed with the task |
 | Job state (`state.json`) | `~/.claude/crew/jobs/<job>/` **outside your repository** | so your `git status` stays clean |
 
 If a job is left unfinished, the PM finds it at step 0 of the playbook and asks

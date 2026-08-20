@@ -10,14 +10,15 @@ remove a rule without seeing the cost it was paying for.
 Who "the user" means in this file: whoever installed the plugin and is running
 the session. Not the person who wrote the plugin.
 
-**Principles 1 to 12 are shared with [dsh-crew](https://github.com/stuarthu/dsh-crew),
+**Numbered principles are shared with [dsh-crew](https://github.com/stuarthu/dsh-crew),
 and the numbers match on purpose**, so a principle can be quoted across both
 repositories. They are kept short here: the rule, a short why, the files that
 carry it here, and the outside source. The long version, with the live tests
 behind each one, is in that project's `docs/principles.md` under the same number.
 
-**Principles 13 to 17 are new**, and belong to this port alone. They are written
-in full, because nothing else records them.
+**Principles P1 to P5 belong to this port alone.** They carry a `P` so dsh-crew
+can keep adding numbered principles without ever colliding with them, and they are
+written in full, because nothing else records them.
 
 ---
 
@@ -123,7 +124,8 @@ passing output after.
 after the code tends to test what the code does rather than what was asked for.
 
 **Lives in** `agents/crew-engineer.md`, `agents/crew-code-reviewer.md`,
-`skills/team-lane/SKILL.md`.
+`skills/team-lane/SKILL.md`. Where that test file lives, and how it is run again
+later, is principle 13.
 
 **Source.** [The 2020 Scrum Guide](https://scrumguides.org/scrum-guide.html)
 
@@ -144,16 +146,38 @@ A module that is tidy inside but easy to misuse costs more than it saves.
 
 ---
 
-## 8. The architect picks the shape, the engineer picks the library
+## 8. The stack is settled once and confirmed, then shape and library split
 
-**Rule.** A contract says "HTTP/REST, JSON", never "FastAPI". Which framework or
-client writes it is the engineer's call, and the engineer uses what the
-repository already uses.
+**Rule.** Before anything is designed, the **PM** settles the language and stack
+and the **user confirms it**, as a *Language and stack* section in the PRD or DoD:
+language and version, package manager, framework, database, and the test framework
+with its exact test command. If the repository already has a stack, that is the
+stack — no options, no research, just state it and confirm. Only when the choice is
+real does the PM start a `crew-researcher` for the options and their costs, then
+decide and recommend one.
 
-**Why.** The shape is what both sides must agree on. The library is a local
-choice, and forcing one from outside fights the repository.
+After that, the old line holds: the architect says "HTTP/REST, JSON", never
+"FastAPI" or "grpc-go". Which of the libraries the project already has an engineer
+uses is the engineer's call. Adding a package the project does not depend on yet
+is the PM's call, and gets written into the stack section. Changing the stack
+itself needs a CRD, like scope.
 
-**Lives in** `agents/crew-architect.md`, `agents/crew-doc-reviewer.md`.
+**Why the up-front part.** The old rule said the engineer uses "what the
+repository already uses", which quietly assumed a repository that already exists.
+On an empty one there is nothing to use, and roles cannot talk to each other, so
+several engineers would each pick a language and a test framework and none of them
+would find out. The choice reaches further than code: QA writes its cases in the
+same framework, so a disagreement splits the tests too.
+
+**Why the PM and not the architect.** Small DoD work has no architect at all, and
+the design itself depends on the stack, so it must be settled before the architect
+starts. Facts still come from a researcher — it lists candidates with costs and
+sources and is forbidden to recommend one — so "the PM decides" does not mean the
+PM guesses.
+
+**Lives in** `skills/team-lane/SKILL.md` (step 3), `agents/crew-researcher.md`,
+`agents/crew-architect.md`, `agents/crew-engineer.md`, `agents/crew-qa.md`,
+`agents/crew-doc-reviewer.md` (a named library in a contract is a finding).
 
 **Source.** [Software architect job description](https://interviewkickstart.com/job-description/software-architect)
 
@@ -222,7 +246,79 @@ and the "Editing a role" section of both READMEs.
 
 ---
 
-## 13. A role runs once, so the briefing is the design
+## 13. Every test lands on disk and runs again
+
+**Rule.** An engineer's unit test is a file in the project's own test suite, named
+in its task row and committed with the code. QA's cases are files too, in the
+project's test framework, under `docs/crew/qa/<task-id>/`, with a `run.sh` per
+task and one `docs/crew/qa/run-all.sh` that finds and runs them all. QA runs all
+of them — including cases written for tasks that finished long ago — on every task
+it checks, and an old case that now fails is a blocking regression.
+
+**Why.** A crew job ends; the project does not. A case that only ever ran inside
+an agent's shell proves something for ten minutes and then protects nothing, so
+the next change breaks a promise nobody is watching. Written down, the same cases
+become the project's regression suite, and each job leaves the next one better
+guarded.
+
+**How the split is drawn.** QA writes only inside `docs/crew/qa/`, never into the
+product's own test folder. That keeps the file-ownership rule intact — one task
+owns its files — and keeps "who wrote this test?" answerable by the path alone.
+The cost is real and known: a runner that only looks inside configured folders
+will not see `docs/crew/qa/`, so QA reports that to the PM and the PM either adds
+the one config line or records the cases as not runnable. QA never edits project
+config, and never moves its files to dodge the problem.
+
+**Lives in** `agents/crew-qa.md`, `agents/crew-engineer.md` ("Your test is a file
+that stays"), `skills/team-lane/SKILL.md` (steps 4, 10c, 11, 12, 16).
+
+**Source.** [The 2020 Scrum Guide](https://scrumguides.org/scrum-guide.html)
+
+---
+
+## 14. Documents are the only channel, and a change gets a CRD
+
+**Rule.** Nothing that matters lives only in a message. A role's report points at
+the file it wrote; the PM's answer is a change to a document and that document's
+new version. And any request that would change **what the user gets** (scope, an
+acceptance check, the milestone list, the stack) or **how two modules talk** (a
+boundary contract) becomes a change request document —
+`docs/crew/crd/NNNN-<short-name>.md` — written by the PM before anything moves,
+whoever asked: the user, a role, or the PM itself. A CRD is never deleted, and a
+rejected one stays.
+
+Who decides: a contract fix that changes nothing the user sees is the PM's call,
+reported at the next milestone review. Anything touching scope, an acceptance
+check, the stack or the milestone list needs the user's yes first.
+
+**Why.** The crew is flat, so anything said to one role dies there (principle 1).
+Two engineers building two sides of a boundary cannot compare notes; if one of
+them was told something in a briefing, the other is building against a different
+truth and nobody finds out until the halves are joined. A document is the only
+thing every role, and every role started tomorrow, reads the same way. The CRD
+adds the missing half: the record of *why* a confirmed document changed, and who
+agreed to it.
+
+**Here it is not a habit but the only option.** A role in this port runs once and
+cannot be messaged at all (principle P1), so there is no private channel to be
+disciplined about — only files.
+
+**Why the scope is narrow.** A CRD for every question or review finding would bury
+the ones that matter and put the PM in a writing job instead of a deciding one. So
+an internal change that keeps the same behaviour and the same contract — an ADR,
+an HLD detail, splitting one task in two — is only a version bump on the document
+that owns it. A question the files can answer stays an inbox `Q-` file.
+
+**Lives in** `skills/team-lane/SKILL.md` ("Documents are the only channel",
+"Change requests"), `agents/crew-architect.md` ("When the PM sends you a CRD"),
+`agents/crew-engineer.md`, `agents/crew-qa.md`.
+
+**Source.** [The 2020 Scrum Guide](https://scrumguides.org/scrum-guide.html) ·
+[Change control](https://en.wikipedia.org/wiki/Change_control)
+
+---
+
+## P1. A role runs once, so the briefing is the design
 
 **Rule.** The PM starts a role with the Agent tool. The role works, writes its
 files, reports in its last message, and is gone. There is no second message.
@@ -251,7 +347,7 @@ written into the team-lane skill rather than hidden.
 
 ---
 
-## 14. Nothing loads until the work needs it
+## P2. Nothing loads until the work needs it
 
 **Rule.** The plugin adds nothing to a session by itself. Claude reaches for the
 `crew:team-lane` skill because its description says what the skill is for, and
@@ -279,7 +375,7 @@ the plugin.
 
 ---
 
-## 15. The plugin is markdown, and states plainly what it cannot enforce
+## P3. The plugin is markdown, and states plainly what it cannot enforce
 
 **Rule.** No hooks, no scripts, no code. Seven agent files and one skill file.
 The one rule that cannot be enforced — a role must never commit, push or publish
@@ -313,7 +409,7 @@ READMEs, and design rule 6 in `CLAUDE.md`.
 
 ---
 
-## 16. Nothing is checked, so the rules are written where the editor will look
+## P4. Nothing is checked, so the rules are written where the editor will look
 
 **Rule.** There is no check to run. The design rules — exactly one filter per
 role, a reviewer never writes, an allow-list role never gets a shell, a deny-list
@@ -343,7 +439,7 @@ README puts them under a heading somebody editing a role will actually open.
 
 ---
 
-## 17. A port needs a way to notice the original moved
+## P5. A port needs a way to notice the original moved
 
 **Rule.** `upstream.sums` records the SHA-256 of every dsh-crew file this port
 was made from, in the format `sha256sum` reads, with a comment above each line
@@ -374,20 +470,27 @@ dsh-crew" section of both READMEs.
 
 | Idea | Why not |
 | --- | --- |
-| Long-lived role agents, messaged with `SendMessage` | Claude Code can do it, and dsh-crew works that way. Rejected: a live child dies with the session, so every rule built on "message every live child" would fail silently after a restart. See principle 13. |
-| A `PreToolUse` hook that refuses git writes from a crew role | Shipped, then removed. It enforced exactly one rule that the agent files cannot express, and cost a runtime dependency the user may not have. The rule is now stated in the prompts, and the README offers the same hook for the user's own settings. See principle 15. |
+| Long-lived role agents, messaged with `SendMessage` | Claude Code can do it, and dsh-crew works that way. Rejected: a live child dies with the session, so every rule built on "message every live child" would fail silently after a restart. See principle P1. |
+| A `PreToolUse` hook that refuses git writes from a crew role | Shipped, then removed. It enforced exactly one rule that the agent files cannot express, and cost a runtime dependency the user may not have. The rule is now stated in the prompts, and the README offers the same hook for the user's own settings. See principle P3. |
 | Writing the hooks in node | Removed with the hooks. Claude Code ships as a binary, so node can be absent, and no plugin in the official directory uses it. |
 | Writing the hooks in Python 3, with a shim that finds a working interpreter | What `hookify` and `security-guidance` do, and it would have worked. Rejected together with the hook itself: one rule did not justify any interpreter. |
-| Anything that loads into every session, by default | Faithful to dsh-crew, and it is still available as `CLAUDE_CREW_ALWAYS=1`. Rejected as the default: it changes how Claude behaves in every project, including sessions that only ask a question. See principle 14. |
+| Anything that loads into every session, by default | Faithful to dsh-crew, and it is still available as `CLAUDE_CREW_ALWAYS=1`. Rejected as the default: it changes how Claude behaves in every project, including sessions that only ask a question. See principle P2. |
 | A second copy of the PM rules outside the skill | Was the first shape of this port, kept in step by a check. Replaced: the rules live only inside the skill now. A check that two files match still lets them be edited apart between runs; one file cannot. |
-| A role table in code, generating or checking the agent files | dsh-crew builds every tool filter from one table at run time. A markdown-only plugin has no run time, so the table would exist only for a check — and the checks are gone too. See principle 16. |
-| Verify scripts that check the design rules | Shipped in four forms, then one, then none. Every version made node a requirement for anyone touching a repository whose whole content is markdown. Dropped so it depends on nothing at all; principle 16 states what that costs. |
+| A role table in code, generating or checking the agent files | dsh-crew builds every tool filter from one table at run time. A markdown-only plugin has no run time, so the table would exist only for a check — and the checks are gone too. See principle P4. |
+| Verify scripts that check the design rules | Shipped in four forms, then one, then none. Every version made node a requirement for anyone touching a repository whose whole content is markdown. Dropped so it depends on nothing at all; principle P4 states what that costs. |
 | A GitHub Actions workflow | There is nothing left for it to run. With no code and no checks, CI would only prove that markdown is still markdown. |
 | A one-shot push approval file for roles | Ported from dsh-crew and then dropped. The PM is the only one who uses git in every step of the playbook, so the child-push path was close to dead code, and it was one more thing to explain and to get wrong. |
 | Blocking `git push` with `permissions.deny` in settings | Simpler, but it cannot tell a subagent from your own session, so it would block your pushes too. |
 | Re-printing the unfinished-job notice on every turn | Claude Code adds hook text to the context instead of replacing it, so this would repeat the same paragraph on every turn. It is printed once at session start. |
 | Using Claude Code's built-in `/code-review` and `security-review` skills | They run as the main agent with the full tool set. A reviewer that can change the code it judges is not a reviewer — principle 12. |
-| Generating `agents/*.md` from the role table at build time | Would keep "derive, do not retype", but it puts a build step between an edit and the file that ships, and a stale generated file would look hand-written. A check does the same job. See principle 16. |
+| Generating `agents/*.md` from the role table at build time | Would keep "derive, do not retype", but it puts a build step between an edit and the file that ships, and a stale generated file would look hand-written. A check does the same job. See principle P4. |
+| QA writing its cases straight into the project's test folder | One test command for everything, and CI would run the QA cases too. Rejected: QA would then own files inside the product, which breaks the rule that one task owns its files, and makes an engineer's and a reviewer's job harder to tell apart. `docs/crew/qa/` plus `run-all.sh` buys the same protection without moving that line. |
+| QA cases as plain shell scripts, one exit code each | Portable and needs no framework. Rejected: a shell can only test what a shell can reach, so a library's return value or a browser app has to be squeezed through a command, and the assertions end up weaker than the ones the project already has. |
+| A CRD for every request, question and review finding | A complete audit trail. Rejected: most of those are answered from the files in one turn, and the PM would spend the job writing records instead of deciding. |
+| The PM deciding scope changes on its own, and telling the user later | Faster, and the CRD folder would still hold the history. Rejected: it defeats the milestone stop (principle 5), whose whole point is that the user judges direction while changing it is cheap. |
+| The architect chooses the stack | It is the most technical decision in the job. Rejected: small DoD work has no architect, the design already depends on the stack, and the user has to approve it — and only the PM talks to the user. |
+| Each engineer picks its own libraries in a new repository | What the old principle 8 implied. Rejected once the crew met an empty repository: roles cannot talk, so two engineers pick two languages and two test frameworks and nobody notices until the halves are joined. |
+| The researcher recommends a stack | It has the sources in front of it. Rejected: a researcher that recommends is deciding, and its findings are then read as a verdict nobody approved. |
 | Standups, sprint planning, retrospectives | Every ceremony is peers talking to peers. Crew roles cannot talk to each other at all, so these become the PM talking to itself. |
 | A throwaway proof of concept, deleted after review | Considered for `M1`. Rejected: it makes the crew build the same thing twice. `M1` is the walking skeleton instead, and its code is kept and grown. |
 | Consumer-driven contracts, where the calling side owns the contract | Assumes two teams that negotiate. One architect writes both sides here, so the caller/callee split is only about who builds what. |
@@ -400,6 +503,8 @@ When you change a rule in `agents/*.md` or in `skills/team-lane/SKILL.md`, updat
 the principle that carries it. When you reject an idea, add it to the table above
 so the next person does not re-run the same search.
 
-When a principle numbered 1 to 12 changes upstream, `sha256sum -c upstream.sums`
-reports `docs/principles.md` as FAILED. Keep the numbers in step; if a shared
-principle stops being true here, say so in its entry rather than renumbering.
+When a numbered principle changes upstream, `sha256sum -c upstream.sums` reports
+`docs/principles.md` as FAILED. Keep the numbers in step; if a shared principle
+stops being true here, say so in its entry rather than renumbering. Port-specific
+principles keep the `P` prefix, so dsh-crew can add 15, 16 and beyond without ever
+colliding.

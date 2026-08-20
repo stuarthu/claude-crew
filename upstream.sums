@@ -1,7 +1,7 @@
 # What this port was made from, and how to notice when it moves.
 #
-# Source:  dsh-crew 0.6.0  (https://github.com/stuarthu/dsh-crew)
-# Commit:  690e291f8444889dbb8b4ed56761d6e3bf28e372
+# Source:  dsh-crew 0.7.0  (https://github.com/stuarthu/dsh-crew)
+# Commit:  649ee52921a1b07d68eeaba1f2ddf29f29228928
 #
 # Every line below is the SHA-256 of a dsh-crew file AS COMMITTED at that
 # commit — the state this port was made from. To see what has changed since:
@@ -22,19 +22,19 @@
 
 # roles/pm.md  ->  skills/team-lane/SKILL.md
 #     Step 0, the PM rules, the roster and limits, then the 14 steps — all in the skill.
-2f575a58d0285a052dbbf9c490473de7a82cb9aea50c11a0b2802334e202ff9a  roles/pm.md
+2a3cb162a11fb7122eea8d2f2859501826df130007a14059c043e06bec5e585a  roles/pm.md
 
 # roles/researcher.md  ->  agents/crew-researcher.md
-c3518600b5dc3f691e1c87c26925be6cf103781eea13ebdf5b20a1a7d762dc47  roles/researcher.md
+1f749f93cdcd557aa961aa1b123acb9e5b262e05bc8050c04caeb6ab9589e4c3  roles/researcher.md
 
 # roles/architect.md  ->  agents/crew-architect.md
-de332079da2cbbd49a179fd9c8807d0a0901909c9a74f4ddadaed4c841d004fa  roles/architect.md
+69334fe7b1946c1cd31dd284842194f8a4609cef675169bd3cd277ca070cc57d  roles/architect.md
 
 # roles/engineer.md  ->  agents/crew-engineer.md
-f89864a0bdaf58be1e3757831f9821846927128d70e81f63e38d4afcf8c32a73  roles/engineer.md
+38074248355728d35e2ca4641dbbc4513e642a701372bbf9e40497a6d888ac00  roles/engineer.md
 
 # roles/qa.md  ->  agents/crew-qa.md
-b998d79064d2b7390e7e39d283486d220c563f714948f38bb1c5a58e815396f2  roles/qa.md
+8a2bfc4060ef7895efbb9d37b46a4441ffc11a9cad8c400933bf3bee0488dc1c  roles/qa.md
 
 # roles/code-reviewer.md  ->  agents/crew-code-reviewer.md
 e02302ac7cbf8f13074a0a75b98f12610f0d2696d5181548eca911d257c81f90  roles/code-reviewer.md
@@ -54,19 +54,19 @@ e02302ac7cbf8f13074a0a75b98f12610f0d2696d5181548eca911d257c81f90  roles/code-rev
 b8497fe1d112e1c50324a66c419eca669840b63c1d68df444a0b644460920743  host/jobs.js
 
 # host/git-guard.js  ->  agents/crew-engineer.md, agents/crew-qa.md, README.md
-#     NOT ported as code. The plugin ships no hooks; the rule is stated in every role with a shell, and the README offers a hook the user can add to their own settings. See principles 15.
+#     NOT ported as code. The plugin ships no hooks; the rule is stated in every role with a shell, and the README offers a hook the user can add to their own settings. See principle P3.
 1a7f014b409ad6e070bf8fad9bda53d7f425ccd863bd53aba333ff9bfefe5fb2  host/git-guard.js
 
 # host/crew.js  ->  skills/team-lane/SKILL.md
 #     Nothing loads at session start. The skill description is the entry point.
-4d82ebb6b2e3a400c07e47250c525aee99267ad07e3e89b07dc21b7c21a49c13  host/crew.js
+513de876ec616b5b2ec3de3e37c32f1651babf879c8df08048b319a5d98feca4  host/crew.js
 
 # host/roles-preset.js  ->  agents/
 #     Claude Code has no presets: the tool filters live in each agent file's frontmatter instead.
 93a5c698399be81a026129873204fe243c3733e5d5a1bb3667741725a4f235e8  host/roles-preset.js
 
 # docs/principles.md  ->  docs/principles.md
-31e4a1c039ea4f1bd70cb2bbd9efec25575a8c6f7384eb7f0f167c8d9984ef71  docs/principles.md
+c4f49f8a5b72bc6b48299ffb876842b914255f751bdf8de5118113d072e0ec7a  docs/principles.md
 
 # README.md  ->  README.md, README-zh.md
-8a03501f49c534bfd460b89b51a0dddc2c2d695ef3c826d09ff3cb878b82dd21  README.md
+daf8880e938a9b9c6ae577019f38f7b7534264c218c69d0628d6a3d3ae23937d  README.md

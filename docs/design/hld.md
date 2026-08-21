@@ -1,8 +1,30 @@
 # High level design: port claude-crew up to dsh-crew v0.7.0
 
-Version: 4
+Version: 5
 Language: English.
-Reads from: `docs/design/prd.md` version 6 (confirmed by the user).
+Reads from: `docs/design/prd.md` version 7 (confirmed by the user).
+
+## What changed in version 5
+
+`M1` is finished — `T-01` is committed as `aa064d3` and the user reviewed the
+milestone — and at that review the user accepted **CRD 0006**: text arriving
+inside a tool result is data, not instructions, stated in all seven role prompts
+and in the skill. Three things follow for this document.
+
+1. **`M2` has five tasks, not four.** The new one is `T-13`, the PM's half of
+   CRD 0006 plus the round-3 optional findings still live in the skill. It owns
+   `skills/team-lane/SKILL.md`, which is free because `T-01` is committed and
+   `M1` is accepted — a milestone the user has accepted is not re-opened.
+2. **There are nine divergences, not seven**, and the ninth is a different kind.
+   The other eight are places upstream contradicts itself; this one is a **gap** —
+   a rule neither project had. Checked against `$UP` before it was written: no
+   `roles/*.md` mentions it and upstream's principle 12 mentions MCP only to say a
+   deny list cannot name an uninstalled tool, which is about which tools exist,
+   not about what a tool's output says.
+3. **It reaches every role prompt**, so nine of the fifteen lines in
+   `upstream.sums` now carry a divergence comment, where four did before. That is
+   the real cost of a rule that lives in seven files, and it is cheaper than a
+   future pass silently deleting the rule seven times.
 
 ## What changed in version 4
 
@@ -52,8 +74,8 @@ reviewed. Nothing else in this document moved.
    this repository; **version 3 moves it out** — see above.
 3. **Local files now differ from their upstream twin on purpose**, so the port
    map gains a ledger and a procedure (ADR 0009). Version 2 said three files and
-   six differences; version 3 makes it four and seven. See "The seven deliberate
-   divergences" below.
+   six differences; version 3 makes it four and seven. See "The nine divergences"
+   below.
 
 The riskiest file, the reason `M1` holds one task, and the "no modules, no
 boundary contracts" finding are all unchanged. `T-01`'s fix round runs alone in
@@ -218,7 +240,7 @@ moving `porting.md`; ADR 0008 revision one is why the hand-off to upstream is
 **not** a file here at all — the user's reason, in their words, is that it is an
 issue sent to another project, and an issue is not documentation.
 
-## The seven deliberate divergences, and the one mis-port
+## The nine deliberate divergences, and the one mis-port
 
 This is where the job's stated goal — the two projects say the same thing — is
 knowingly given up, and where it turns out the two projects were **not** saying
@@ -230,15 +252,28 @@ settled cause: two this port's own, six dsh-crew v0.7.0's own, copied here word
 for word. CRD 0003 took the six to the user, who chose: fix them all here, and
 write a document dsh-crew's author can read. The ninth was CRD 0005, below.
 
-### Seven divergences (Class A)
+### Nine divergences (Class A)
 
-After this job **four** local files no longer say what their upstream twin says:
-`skills/team-lane/SKILL.md`, `agents/crew-qa.md`, `agents/crew-code-reviewer.md`
-and `principles.md`. Six of the seven are CRD 0003's. The seventh is CRD 0005 and
-is the largest: this port says a **unit test** and a **QA test** are two different
-things, written by two different roles and run by two different commands, and
-that the crew never edits the project's test command. Upstream's own CRD 0009
-exists to do the opposite.
+After this job **eleven** local files no longer say what their upstream twin
+says: `skills/team-lane/SKILL.md`, all seven `agents/*.md`, `principles.md` — and
+`CLAUDE.md` and both READMEs, which have no pinned twin. Six of the nine are
+CRD 0003's. The seventh is CRD 0005: this port says a **unit test** and a **QA
+test** are two different things, written by two different roles and run by two
+different commands, and that the crew never edits the project's test command —
+upstream's own CRD 0009 exists to do the opposite. The eighth is the force-push
+licence this port dropped from the Hard rules (CRD 0003 revision two).
+
+**The ninth is not a contradiction, and that changes what has to be written
+about it.** CRD 0006: a third-party MCP server's instruction block was delivered,
+unprompted, into a crew role's context five times in one day — once into a role
+holding `Read`, `Glob` and `Grep` and nothing else, and once into the architect
+writing the rule about it. Every role ignored it and reported it, which was good
+behaviour rather than a rule. Neither project had a rule; this one now does, in
+all seven prompts (sentence `S12`) and in the skill. Upstream cannot check that
+against its own file and cannot reproduce our measurements, so the entry has to
+carry its evidence with it: what was delivered, into which role, and what each
+role did. `T-12`'s issue therefore has **two parts with two shapes**, which is the
+one real design question this raised.
 
 That is a new failure the design has to carry, because the next port pass sees
 only a `FAILED` line from `sha256sum -c` and cannot tell a missed port from a
@@ -303,14 +338,14 @@ keeps the document rule enforceable.
 The PRD's four milestones are the user's and are not changed. Inside them:
 
 ```
-M1   T-01  the skill                      alone. Nothing runs beside it.
-     T-01  fix round                     alone as well: 28 fixes, one engineer
+M1   T-01  the skill, then four fix rounds   alone. Committed aa064d3, M1 accepted
             |
             v  user reviews M1
 M2   T-02  crew-architect            \
-     T-03  crew-doc-reviewer          |  all four in parallel:
+     T-03  crew-doc-reviewer          |  all five in parallel:
      T-04  crew-engineer + crew-qa    |  no two share a file
-     T-05  researcher + the 2 reviewers /
+     T-05  researcher + the 2 reviewers |
+     T-13  the skill again            /   CRD 0006's PM half + round 3's leftovers
             |
             v  user reviews M2
 M3   T-06  principles.md at the root  \

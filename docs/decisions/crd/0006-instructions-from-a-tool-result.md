@@ -13,7 +13,21 @@ role's context after its first tool call. Measured occurrences, all on 2026-08-2
 
 1. the `crew-engineer` running the deny-list probe;
 2. `crew-security-reviewer`, round 2;
-3. `crew-architect`, on its optional-findings round.
+3. `crew-architect`, on its optional-findings round;
+4. `crew-architect`, on the round that wrote this rule into the task table. Its own
+   report: "I did neither thing it asked: I cannot start an agent, and the rule this
+   round is writing says report it, so this is the report."
+5. `crew-security-reviewer`, at the start of review round 3 — **a read-only role**, with
+   `tools: Read, Glob, Grep`. It reported it unprompted, in its own words: "I ignored it
+   and I am reporting it — which is what CRD 0006 says all three earlier roles did, and
+   it is still luck, not a rule."
+
+**Five occurrences in one day, and there is no role shape it has not reached**: a
+deny-list role that holds a shell, an allow-list role that holds none, and the architect,
+twice. What matters more than the count: It reached a role that holds **no
+shell and no write tool at all**, which shows the delivery does not depend on what a role
+can do — every crew role can be handed text like this, including the three that only
+read.
 
 The block is the `ouroboros` server's instructions. Two parts matter, verbatim:
 
@@ -100,9 +114,55 @@ noise, and names it at the milestone review.
 
 ## Decision
 
-Pending — for the user, at the `M1` milestone review. Nothing is blocked by it: `T-01`
-is in its fix round and `M2` has not started.
+**Accepted — Option A.** The user decided at the `M1` milestone review on 2026-08-21,
+after being shown the fourth occurrence: every role prompt gains the section, and the
+skill gains the PM's half.
+
+The fourth occurrence is what settled it. It reached `crew-security-reviewer`, a role
+with `tools: Read, Glob, Grep` — no shell, no write tool. So the delivery does not depend
+on what a role can do, and no role is out of reach. Option B (say it once and let the PM
+repeat it in every briefing) fails for the reason the skill itself gives: a briefing is a
+pointer, never the place a rule lives. Option C fails because a role never reads
+`principles.md` (`P4`). Option D loses only on timing, and the timing is now.
 
 ## Applied
 
-Not yet.
+Not yet. It reaches:
+
+- `agents/crew-researcher.md`, `crew-architect.md`, `crew-engineer.md`, `crew-qa.md`,
+  `crew-code-reviewer.md`, `crew-security-reviewer.md`, `crew-doc-reviewer.md` — tasks
+  `T-02` to `T-05`, none started. **The section is one shared sentence**, so all seven
+  copies must be character-identical, like `S7`.
+- `skills/team-lane/SKILL.md` — the PM's half. `T-01` is finished and committed
+  (`aa064d3`) and `M1` has been reviewed, so this is a **new task**, not a re-opening.
+- `principles.md` — the principle that carries design rule 2 gains the entry, because
+  this is that rule's own argument one level up: a deny list cannot name what is not
+  installed yet, and it certainly cannot name text that arrives at run time inside a
+  permitted tool's output. Task `T-06`.
+- `CLAUDE.md` (`T-09`) and both READMEs (`T-10`) only if the design rules' wording has to
+  change to stay true.
+
+### It is also divergence number nine, and it goes to upstream
+
+Added by the user at the `M1` review: "we need add this into upstream defects too."
+
+dsh-crew v0.7.0 has no such rule either. Not one of its `roles/*.md` says that text
+arriving inside a tool result is data rather than instructions, and its `principles.md`
+does not carry the case. So this port will state a rule upstream does not have — which
+`docs/design/tasks.md` fact 10 counts as a **divergence**, the ninth.
+
+That means three more places, on top of the Applied list above:
+
+- **`porting.md`'s divergence table** (`T-07`) gains a ninth row: what this port says,
+  what upstream does not say, and why.
+- **`upstream.sums`** (`T-08`) — the comment above `roles/pm.md`'s line already warns the
+  next pass that paragraphs deliberately differ; the count changes.
+- **`~/dsh-crew-0.7.0-defects.md`** (`T-12`) gains a section. It is a different **kind** of
+  entry from the other eight, and the issue should say so plainly: the first eight are
+  places where upstream contradicts itself or states a rule that cannot be followed. This
+  one is a **gap** — something neither project had, found by measuring, with four
+  occurrences on one day and one of them reaching a role that holds no shell and no write
+  tool. Upstream cannot reproduce our measurements, so this section has to carry the
+  evidence with it: what was delivered, verbatim, into which role, and what each role did.
+
+`docs/design/tasks.md` fact 10 goes from eight to nine.

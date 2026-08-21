@@ -1,6 +1,6 @@
 # ADR 0014: when the PM messages a live role, and when it starts a fresh one
 
-Version: 2
+Version: 3
 
 ## The choice
 
@@ -142,3 +142,25 @@ reason* for the revised test rather than a footnote.
 
 **What follows.** `S11`'s copies in `skills/team-lane/SKILL.md` are the fix
 engineer's work (`F-45`), and `F-32`'s check anchors on the new first words.
+
+## Revision two — this ADR's own opening still quoted the old `S6`
+
+Found by the document review of `T-01` round 3, as an optional finding, and it is
+a document fix rather than a skill fix, so it is made here.
+
+The opening of this ADR says CRD 0004 "settles the rule that protects the
+documents (a message carries a path and a version and nothing else)". That was
+`S6` version 3. `S6` has said something different since `tasks.md` version 4, and
+`T-01` round 2 blocked on the old wording precisely because it forbade ten things
+the same file orders.
+
+**Read that clause as:** CRD 0004 settles the rule that protects the documents —
+*never decide anything in a message; a message may carry a pointer, evidence, or a
+request, and anything else is a decision.* The rule this ADR reasons from is
+unchanged: a message reaches one role and dies there. Nothing in the
+recommendation moves.
+
+The `request` clause is newer than revision one and comes from code review round 3
+(`T-13` item 5): a request — "send me your test-first proof" — is neither a
+pointer nor evidence, so `S6`'s residue clause swept it in and forbade what step
+10a orders. Fixed in `S6` itself, which is where it belongs.

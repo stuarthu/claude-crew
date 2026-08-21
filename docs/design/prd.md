@@ -1,6 +1,6 @@
 # PRD: port claude-crew up to dsh-crew v0.7.0
 
-Version: 7
+Version: 8
 Language: documents and briefings in English; the PM talks to the user in Chinese.
 
 ## The problem, and who has it
@@ -170,7 +170,12 @@ the user reviews it before anything else runs.
    upgrade plans for a milestone that ships. Step 17 is merge and clean up, on
    three separate yeses (merge / push `main` / delete the branch). Step 18 is
    Finish.
-2. Step 10 says the three checks run in parallel by default, and gives the reason.
+2. Step 10 says the three checks — code review, security review and QA — run in parallel
+   by default, and gives the reason. **The title stays "the three checks" even though
+   step 10 now has four labelled sub-steps**: `10d`, the doc review, runs on every
+   landing rather than being one of the three that decide a task, and three reviewers
+   asked in round 3 that the title not be changed. What must be true is that `10a` to
+   `10d` are all present and each says when it starts.
 3. The limits section says: no cap on crew agents for one job, 20 crew roles awake
    at the same time, 3 review rounds.
 4. The skill holds a section on decisions about how: every one gets an ADR, the ADR
@@ -244,9 +249,10 @@ landed, so they are checked here.
     is shared sentence `S9`, and every role prompt must carry it.
     `skills/team-lane/SKILL.md` says the PM may message a role, live or finished; it
     carries the rule that a message may hold a **pointer** (a document path with its
-    version) or **evidence** (something copied out of the world that could be copied
-    again — a diff, a command's output, a CI log, the text of a file) and that anything
-    which is neither is a decision, and decisions go in a document first; it carries the
+    version), **evidence** (something copied out of the world that could be copied
+    again — a diff, a command's output, a CI log, the text of a file), or a **request**
+    for something the sender needs, and that anything which is none of the three is a
+    decision, and decisions go in a document first; it carries the
     "user said stop" rule; and its `state.json` shape holds an agent id and a list of the
     commits the PM made. No `agents/*.md` frontmatter changed.
 

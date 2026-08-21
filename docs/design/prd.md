@@ -1,6 +1,6 @@
 # PRD: port claude-crew up to dsh-crew v0.7.0
 
-Version: 12
+Version: 13
 Language: documents and briefings in English; the PM talks to the user in Chinese.
 
 ## The problem, and who has it
@@ -129,6 +129,28 @@ would put shell scripts back into a markdown-only plugin. Instead:
 - the PM re-runs the upstream checksum command and shows the real result.
 
 This is recorded here so nobody later reports a QA verdict that never happened.
+
+### From `M3` onward: one document review, at the end
+
+The user decided this on 2026-08-21, after `M3`'s tasks landed: **move every document
+review to the last milestone.** So `M3` is not reviewed as it lands, and `M4` carries one
+review over everything this job produced.
+
+Read against the skill, this is a choice between its two doc-review points: step **10d**
+reviews each landing, step **15** reviews every document at the end. The user is keeping
+step 15 and dropping step 10d.
+
+**What it costs.** `M3` landed three files nobody but the PM has read — `principles.md`
+(1,223 lines), `porting.md` (280) and `upstream.sums` (154). They are the files the *next*
+port pass depends on, and `principles.md` is what `CLAUDE.md` and both READMEs point at. So
+a finding in `principles.md` at `M4` is not a one-file fix: it reaches every file that
+quotes or references it. The earlier a document review runs, the cheaper its findings are,
+and this makes them as late as they can be.
+
+**What reduces it.** Every one of those three files has runnable checks that the engineer
+and the PM both ran, and `upstream.sums` has the only binary check in the job — 15 lines,
+all `OK`, exit 0. What a document review adds is the judgement those greps cannot give:
+whether a person can act on the file.
 
 ### From `M2` onward: `crew-doc-reviewer` only
 

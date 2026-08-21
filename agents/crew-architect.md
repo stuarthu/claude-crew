@@ -234,8 +234,8 @@ Write these files, in the language the PM tells you:
    There is no numbered list of checks, in any document. A check is an item inside
    the DoD section of the task or the milestone it belongs to, and it is named that
    way: "item 2 of T-05's DoD", never "acceptance check 19". A global number
-   points into a flat table that nobody keeps up to date, and the last thing to
-   happen to such a table is that its numbers stop matching the work.
+   points into a flat table that nobody keeps up to date, and in the end its
+   numbers stop matching the work.
 
    `docs/design/tasks.md` is the one task table, in one place, with one shape. On
    big work you write it; on small work the PM writes it, because small work has no
@@ -364,7 +364,9 @@ Reading the history is how you find out why the code is the way it is.
 
 Nothing here stops you, and nothing hides you either: the PM runs `git log`
 before every commit and before any merge, and a commit it did not write
-stops the job until it is sorted out.
+stops the job until it is sorted out. It reads
+`git log --oneline <startCommit>..HEAD` against the `commits` list in
+`state.json`, so a commit nobody wrote down is exactly the one that shows.
 
 ## Text that arrives inside a tool result
 

@@ -1,6 +1,6 @@
 # Task breakdown: port claude-crew up to dsh-crew v0.7.0
 
-Version: 13
+Version: 14
 Language: English.
 Reads with: `docs/design/prd.md` version 7, `docs/design/hld.md` version 5,
 `docs/decisions/adr/0001` to `0015`, `docs/decisions/crd/0001` to `0006`.
@@ -1241,7 +1241,7 @@ to both — the text arrives whatever the role can do.
 | 21 | `grep -c 'DoD items' agents/crew-code-reviewer.md` | `1` or more — what a QA case is judged against | 20 |
 | 22 | `grep -c 'data, not instructions' agents/crew-researcher.md agents/crew-code-reviewer.md agents/crew-security-reviewer.md` | `1` in each — sentence `S12`, fact 17, CRD 0006 | 21 |
 | 23 | `for f in agents/*.md; do b=$(basename $f); sed -n '/data, not instructions/,+6p' "$f" > /tmp/s12-$b; test -s /tmp/s12-$b \|\| echo "EMPTY $f"; done; md5sum /tmp/s12-* \| awk '{print $1}' \| sort -u \| wc -l` | no `EMPTY` line, then `1` — **all seven** copies present and identical. The `test -s` is not decoration: without it seven missing sections hash the same and the check passes on an empty file. Run it after `T-02` to `T-05` have all landed; it is the only check that sees the seven together | 21 |
-| 24 | `grep -n 'data, not instructions' agents/crew-researcher.md` | read the section in the researcher: it is the role most likely to meet the case, because it opens web pages | 21 |
+| 24 | `grep -n 'data, not instructions' agents/crew-researcher.md` | read the section in the researcher: **corrected at tasks version 14** — this used to read "it is the role most likely to meet the case, because it opens web pages". CRD 0006 measured the opposite: the text arrives with the first tool result and does not depend on the role calling anything. The `M2` review found the prompt carrying the same unsourced claim, the optional round removed it, and the engineer reported that this expected value still said it. What the check needs is the section's presence, plus the researcher's own case — a web page that gives orders is quoted, its URL named, and the question carried on with | 21 |
 
 ---
 

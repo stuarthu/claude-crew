@@ -1,6 +1,6 @@
 # PRD: port claude-crew up to dsh-crew v0.7.0
 
-Version: 14
+Version: 15
 Language: documents and briefings in English; the PM talks to the user in Chinese.
 
 ## The problem, and who has it
@@ -214,6 +214,16 @@ one of the things this job is fixing.
 riskiest single file here. It is the only task in `M1`, one engineer builds it, and
 the user reviews it before anything else runs.
 
+> **Who may edit this document.** The PM, and nobody else. The user confirmed it, and
+> its acceptance checks are the standard every task is judged against — so a role that
+> edits them is the party being judged rewriting the test. **This was broken in this very
+> job:** the PM handed an engineer two edits to these checks (versions 14 and 15's
+> corrections), the engineer made them exactly as specified, and the user caught it. The
+> content was right and the hand was wrong; the file was reverted and the PM made both
+> edits itself. The skill had no rule to break here — it says "Only the architect edits a
+> boundary file" and said nothing about this document, which is why the mistake was
+> available to make. CRD 0008 fixes that.
+
 ## Acceptance checks
 
 > **Why this is a flat numbered list, when the rules this job ships say it should not be.**
@@ -255,8 +265,11 @@ the user reviews it before anything else runs.
    lists **every** option with its cost and why it lost, marks the recommendation,
    and the user may overturn it at the milestone review.
 5. The skill says a bug becomes a task row and its DoD section is written first.
-6. The skill says the opening document is `docs/design/prd.md` in both lanes, and
-   that the DoD is a section inside it, never a file of its own.
+6. The skill says the opening document is `docs/design/prd.md` for small work and
+   big work alike, and that the DoD is a section inside it, never a file of its
+   own. *(Reworded at PRD version 15. It said "in both lanes" — the exact phrase
+   divergence entry 5 exists to delete, so the check asked the skill to keep the
+   defect it was fixed to remove, and stopped matching the file it checks.)*
 7. Every crew document path in the skill is a new-layout path. The full v0.7.0 set
    is `docs/design/`, `docs/design/api/` (boundary contracts), `docs/decisions/adr/`,
    `docs/decisions/crd/`, `docs/qa/`, `docs/release/` (the release and upgrade plans
@@ -291,8 +304,11 @@ the user reviews it before anything else runs.
 13. `porting.md` — moved to the repository root by CRD 0002, so that `docs/` holds
     only crew job output — maps every upstream v0.7.0 path, and its "did not port"
     table names each skipped item from the "Not in scope" list above with its
-    reason. `porting.md` no longer exists, and every reference to the old path
-    points at the new one.
+    reason. `docs/porting.md` no longer exists, and every reference to that path
+    in the repository points at the new one — **except** inside this job's own
+    documents under `docs/design/` and `docs/decisions/`, which quote the old path
+    as history. *(Corrected at PRD version 15: this named `porting.md`, the file it
+    requires to exist, and it lacked the exception check 12 has.)*
 14. `upstream.sums` records v0.7.0 (`87a4332`) in its header, one line per ported
     file, and `sha256sum -c` reports `OK` for every line when run in a `v0.7.0`
     checkout.

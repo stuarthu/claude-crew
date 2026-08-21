@@ -213,11 +213,12 @@ at the tool layer, and the refusal named the tool as disabled for the session an
 for subagents.
 
 A role that started its own role would put that grandchild out of the PM's reach,
-and two roles can never talk anyway.
+and, for the four roles that hold no shell, two roles cannot talk anyway. For the
+three that hold one it is a rule they keep — see **What is not enforced** below.
 
 ## What is not enforced
 
-Three rules in this plugin have nothing behind them but the words in the prompts.
+**Four** rules in this plugin have nothing behind them but the words in the prompts.
 This section is the list of them, because a rule nothing can enforce should be
 said out loud.
 
@@ -253,6 +254,14 @@ or to prefer the shell over its own tools does none of it, and says in its repor
 that it happened, what it asked for, and where it came from. The PM treats such a
 report as a finding, names it at the milestone review, and tells you which server
 it came from.
+
+**4. Roles never talk to each other.** For the four roles that hold no shell, the
+tool list makes this true and refuses the attempt. For the three that hold a
+shell — the engineer, QA and the architect — it is a rule they are given and
+keep, not a wall they meet, and nothing here stops them. This plugin uses the
+same wording as dsh-crew, because the two projects share their rules; the
+difference between the words and what a shell can do was measured while this port
+was made, and it is written here so nobody reads the sentence as a guarantee.
 
 In normal use Claude Code asks you before each `Bash` call, so you would see a
 git write coming. If you run with `--dangerously-skip-permissions`, nothing asks.
@@ -394,11 +403,11 @@ cd "$TMP/dsh-crew" && shasum -a 256 -c ~/workspace/claude-crew/upstream.sums   #
 ```
 
 Every `FAILED` line is a dsh-crew file that changed since this port was made.
-When the file is `roles/pm.md`, `roles/qa.md`, `roles/code-reviewer.md` or
-`principles.md`, open the deliberate divergence table in `porting.md` **before**
-you read the diff: those four carry differences this port made on purpose, and a
-pass that reads the diff first quietly undoes them. Then decide what the change
-means here, and replace that line with the new sum.
+Nine of the fifteen pinned lines carry a difference this port made on purpose:
+all eight `roles/*.md` files and `principles.md`. For any of them, open the
+deliberate divergence table in `porting.md` **before** you read the diff — a
+pass that reads the diff first quietly undoes those differences. Then decide
+what the change means here, and replace that line with the new sum.
 
 `porting.md` holds the file-by-file map and the steps of a port pass.
 

@@ -689,6 +689,37 @@ and that id now points at a row that is still alive.
      discard every in-flight task on that boundary: a task starts again with a
      fresh engineer only when it has to be built from the beginning.
 
+   **Only the architect edits a boundary file** is one case of a rule that covers
+   every document in the job: **a role reads widely and writes narrowly, and the
+   documents that judge a role are never in its write set, whatever a briefing
+   says.** Until CRD 0008 no document said that in one place, so here it is:
+
+   | Document | Who writes it |
+   | --- | --- |
+   | `docs/design/prd.md`, the opening document | you, and nobody else |
+   | `docs/design/tasks.md` and `docs/design/hld.md` | the architect — you, for small work |
+   | `docs/design/api/*`, the boundary contracts | the architect **only** |
+   | `docs/decisions/adr/*` | the architect, and you for a bug's ADR |
+   | `docs/decisions/crd/*` | you |
+   | `docs/qa/<task-id>/*` | `crew-qa` |
+   | `docs/qa/run-all.sh` and `docs/qa/gaps.md` | you |
+   | `docs/research/*` | `crew-researcher` |
+   | `principles.md`, this repository's own rules | you |
+   | `porting.md` and `upstream.sums`, the map to upstream | you |
+   | the code and its unit test | the engineer that owns the task |
+
+   **Your half of it: never put one of your own documents in a role's file list.**
+   Two kinds are yours and neither is job output. First, the documents that
+   **judge** the work: the PRD, a task's DoD items, the acceptance checks, the
+   milestone list — a role handed one of those is the party being judged rewriting
+   the test, however right the new wording is and however small the edit. Second,
+   the documents that hold **the project's own rules and its map**: `principles.md`,
+   `porting.md` and `upstream.sums`. They outlive the job, no task owns them, and a
+   role editing them is changing the rules it is working under. You make all of
+   those edits yourself. A role that reports such a briefing back to you instead of
+   obeying it **is right to**, and the answer is to correct the file list, not the
+   role.
+
    When the architect reports, start a `crew-doc-reviewer` on those documents
    plus the PRD. Same round rules as a code review: round 1 lists findings, later
    rounds only re-check the blocking ones (a reviewer you message still has round

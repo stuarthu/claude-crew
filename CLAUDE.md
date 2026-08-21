@@ -114,9 +114,10 @@ file; most exist because a live test showed the weaker version failing.
    rest either. It must say the role talks only to the PM. It must say that a later round
    may reach it as a message, or as a fresh role, and that everything it needs is in the
    documents the briefing names — copy that sentence from any existing `agents/*.md`, where
-   all seven carry the same one. It must carry the shared `S12` section, character for
-   character as the other seven carry it. A role with a shell must also say the PM does the
-   git work.
+   all seven carry the same one. It must carry the shared `S12` and `S13` sections, character
+   for character as the other seven carry them — `S12` on text arriving inside a tool result,
+   `S13` on the documents that judge a role, which no briefing may hand it to edit. A role
+   with a shell must also say the PM does the git work.
 2. Name the role in the roster table and in the steps of `skills/team-lane/SKILL.md` — the
    PM only uses what its playbook describes.
 3. Add it to the role table in both READMEs.
@@ -131,7 +132,7 @@ setting that needs code to read it.
 
 ## The rules nothing enforces
 
-There are three, and this section exists to list exactly those. A rule nothing can check has
+There are **four**, and this section exists to list exactly those. A rule nothing can check has
 to be written where the person, or the role, will actually look (`principles.md` P3).
 
 - **A crew role must never commit, push or publish.** `crew-engineer`, `crew-qa` and
@@ -151,6 +152,12 @@ to be written where the person, or the role, will actually look (`principles.md`
   of all seven `agents/*.md`. Any MCP server the user installs can put text in front of any
   role, including the three that only read, and neither tool list closes it (design rule 2).
   Nothing but the words in the prompt does.
+- **Roles never talk to each other.** For the four roles that hold no shell the tool list
+  makes this true: a role that reaches for `Agent`, `Task`, `Workflow`, `SendMessage` or
+  `ListAgents` is refused, measured word for word. For `crew-engineer`, `crew-qa` and
+  `crew-architect` it is a rule their own prompts give them, because `Bash` is one tool. This
+  plugin keeps dsh-crew's wording on purpose (CRD 0007, option B); the measurement of the gap
+  is in this job's record, not in the plugin.
 
 Both READMEs say plainly that nothing stops these, and they offer a `PreToolUse` hook the
 **user** can add to their own settings as a seat belt for the first one. That snippet matches

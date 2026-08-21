@@ -31,17 +31,20 @@
 # it says which claude-crew file to look at, and why. porting.md holds the full
 # map and the steps of a port pass.
 #
-# BEFORE YOU READ THE DIFF. Nine paragraphs in this port say something
+# BEFORE YOU READ THE DIFF. Ten paragraphs in this port say something
 # deliberately DIFFERENT from upstream: eight places where upstream contradicts
-# itself, numbered 1 to 8, and one gap neither project had, numbered 9. Nine of
-# the fifteen lines below carry the word DIVERGENCE in their comment. For those,
-# a FAILED line may mean "we decided otherwise, on the record" rather than "we
-# are behind". Open porting.md's deliberate divergence table FIRST and work
-# through its rows for that file: upstream may have fixed the same thing its own
-# way, and then you take their wording and delete the row. Skip that step and
-# you either copy an upstream defect back in or delete a fix of ours as though
-# it were a missed port. The table is the whole record and it stands alone — no
-# document outside this repository is needed, or exists.
+# itself, numbered 1 to 8, and two gaps neither project had, numbered 9 and 10.
+# Nine of the fifteen lines below carry the word DIVERGENCE in their comment: all
+# eight roles/*.md files and principles.md. Entries 9 and 10 both reach EVERY
+# role prompt, which is why nine lines carry them and not four. For those, a
+# FAILED line may mean "we decided otherwise, on the record" rather than "we are
+# behind". Open
+# porting.md's deliberate divergence table FIRST and work through its rows for
+# that file: upstream may have fixed the same thing its own way, and then you
+# take their wording and delete the row. Skip that step and you either copy an
+# upstream defect back in or delete a fix of ours as though it were a missed
+# port. The table is the whole record and it stands alone — no document
+# outside this repository is needed, or exists.
 #
 # After carrying a change across, replace that line with the new sum:
 #   cd "$TMP/dsh-crew" && sha256sum roles/pm.md
@@ -53,50 +56,52 @@
 
 # roles/pm.md  ->  skills/team-lane/SKILL.md
 #     Step 0, the PM rules, the roster and limits, then the 18 steps — all in the skill.
-#     DIVERGENCE, entries 1 to 9: the local skill states all nine of them
+#     DIVERGENCE, entries 1 to 10: the local skill states all ten of them
 #     differently. Read porting.md's deliberate divergence table before the diff.
 6c1eaab17c003ac921d368632ad172ceb4d2ccb537ce7bcee27be9a951ff395e  roles/pm.md
 
 # roles/researcher.md  ->  agents/crew-researcher.md
-#     DIVERGENCE, entry 9: the local twin carries a section upstream has no
-#     equivalent of, so a pass that re-copies this file wholesale deletes a rule
-#     the user asked for. See porting.md's deliberate divergence table.
+#     DIVERGENCE, entries 9 and 10: the local twin carries two sections upstream
+#     has no equivalent of (S12 and S13), so a pass that re-copies this file
+#     wholesale deletes two rules the user asked for. See porting.md's table.
 9512cc9603f6ab3b0b525ce98efb7f91afd701d2f2ec89bc34c0c4369a7ed857  roles/researcher.md
 
 # roles/architect.md  ->  agents/crew-architect.md
-#     DIVERGENCE, entry 9: the local twin carries a section upstream has no
-#     equivalent of, so a pass that re-copies this file wholesale deletes a rule
-#     the user asked for. See porting.md's deliberate divergence table.
+#     DIVERGENCE, entries 9 and 10: the local twin carries two sections upstream
+#     has no equivalent of (S12 and S13), so a pass that re-copies this file
+#     wholesale deletes two rules the user asked for. See porting.md's table.
 cf977adda498bc2fc3e62bd2cdc77cc33bac4d65a6e495290f2b1464a2a7b140  roles/architect.md
 
 # roles/engineer.md  ->  agents/crew-engineer.md
-#     DIVERGENCE, entry 9: the local twin carries a section upstream has no
-#     equivalent of, so a pass that re-copies this file wholesale deletes a rule
-#     the user asked for. See porting.md's deliberate divergence table.
+#     DIVERGENCE, entries 9 and 10: the local twin carries two sections upstream
+#     has no equivalent of (S12 and S13), so a pass that re-copies this file
+#     wholesale deletes two rules the user asked for. Entry 10 is the one this
+#     file's own line 124 could not enforce. See porting.md's table.
 75d8e20bdc144ea9231aab9b1d9bc74355a3705a1ef752cb35957b9efabc1312  roles/engineer.md
 
 # roles/qa.md  ->  agents/crew-qa.md
-#     DIVERGENCE, entries 6, 7 and 9: entry 6's other half, entry 7's vocabulary
-#     and the config line this port no longer writes, and entry 9's section that
-#     upstream has no equivalent of. See porting.md's divergence table first.
+#     DIVERGENCE, entries 6, 7, 9 and 10: entry 6's other half, entry 7's
+#     vocabulary and the config line this port no longer writes, and the two
+#     sections (entries 9 and 10) upstream has no equivalent of. See
+#     porting.md's divergence table first.
 87a0b6d200f438b6015a8f05b5c2c3d9f00bf6c57dd674d0d62b2558c21efbd2  roles/qa.md
 
 # roles/code-reviewer.md  ->  agents/crew-code-reviewer.md
-#     DIVERGENCE, entries 7 and 9: entry 7 puts QA's run.sh and its case files in
-#     this reviewer's file list, and entry 9 adds a section upstream has no
-#     equivalent of. See porting.md's deliberate divergence table first.
+#     DIVERGENCE, entries 7, 9 and 10: entry 7 puts QA's run.sh and its case
+#     files in this reviewer's file list, and entries 9 and 10 add two sections
+#     upstream has no equivalent of. See porting.md's divergence table first.
 4f893f26ec482f95e84598ad6f1554226eca5df01bf4b82cd30f299eb75dc0c6  roles/code-reviewer.md
 
 # roles/security-reviewer.md  ->  agents/crew-security-reviewer.md
-#     DIVERGENCE, entry 9: the local twin carries a section upstream has no
-#     equivalent of, so a pass that re-copies this file wholesale deletes a rule
-#     the user asked for. See porting.md's deliberate divergence table.
+#     DIVERGENCE, entries 9 and 10: the local twin carries two sections upstream
+#     has no equivalent of (S12 and S13), so a pass that re-copies this file
+#     wholesale deletes two rules the user asked for. See porting.md's table.
 ff7544878cd4ab47c48be460b2bc767ec48d54665f5d0413e5de20841920c91d  roles/security-reviewer.md
 
 # roles/doc-reviewer.md  ->  agents/crew-doc-reviewer.md
-#     DIVERGENCE, entry 9: the local twin carries a section upstream has no
-#     equivalent of, so a pass that re-copies this file wholesale deletes a rule
-#     the user asked for. See porting.md's deliberate divergence table.
+#     DIVERGENCE, entries 9 and 10: the local twin carries two sections upstream
+#     has no equivalent of (S12 and S13), so a pass that re-copies this file
+#     wholesale deletes two rules the user asked for. See porting.md's table.
 55963c26b9cc06e0bd0f80c6db4196223be68b5f9b041192e0f67d8ce4effd98  roles/doc-reviewer.md
 
 # host/roles.js  ->  agents/
@@ -107,8 +112,8 @@ ff7544878cd4ab47c48be460b2bc767ec48d54665f5d0413e5de20841920c91d  roles/security
 #     Not code here: step 0 of the skill tells the PM to look in ~/.claude/crew/jobs itself.
 b8497fe1d112e1c50324a66c419eca669840b63c1d68df444a0b644460920743  host/jobs.js
 
-# host/git-guard.js  ->  agents/crew-engineer.md, agents/crew-qa.md, README.md
-#     NOT ported as code. The plugin ships no hooks; the rule is stated in every role with a shell, and the README offers a hook the user can add to their own settings. See principle P3.
+# host/git-guard.js  ->  agents/crew-architect.md, agents/crew-engineer.md, agents/crew-qa.md, README.md, README-zh.md
+#     NOT ported as code. The plugin ships no hooks; the rule is stated in every role that owns a shell — all three — and both READMEs offer a hook the user can add to their own settings. See principle P3.
 8011dac190957aaca8b9989e355966527a4e5a6842ffef3757496053218b35da  host/git-guard.js
 
 # host/crew.js  ->  skills/team-lane/SKILL.md
@@ -121,9 +126,10 @@ b8497fe1d112e1c50324a66c419eca669840b63c1d68df444a0b644460920743  host/jobs.js
 
 # principles.md  ->  principles.md at this repository's root, plus P1 to P5.
 #     Upstream moved this file out of its own docs/ folder at 0.7.0; so did this port.
-#     DIVERGENCE, entries 6, 7 and 9: principle 13 and principle 20's flow table
-#     state entries 6 and 7; principle 12 states entry 9. See porting.md's
-#     deliberate divergence table before the diff.
+#     DIVERGENCE, entries 6, 7, 9 and 10: principle 13 and principle 20's flow
+#     table state entries 6 and 7; principle 12 states entry 9, and P4 states
+#     entry 10 with the write-set table. See porting.md's deliberate divergence
+#     table before the diff.
 b2ff4aa7782788fd364cc6236d06e28bf58cb00058868e5ec7ad5ad9436fadfe  principles.md
 
 # README.md  ->  README.md, README-zh.md

@@ -11,9 +11,10 @@ Who "the user" means in this file: whoever installed the plugin and is running
 the session. Not the person who wrote the plugin.
 
 Short names used below: **PRD** (product requirements document, the file
-`docs/design/prd.md`, which opens both lanes), **DoD** (definition of done —
-always a **section** of another document, never a file of its own; see principle
-20), **HLD** (high level design, the file `docs/design/hld.md`), **ADR**
+`docs/design/prd.md`, which opens small work and big work alike), **DoD**
+(definition of done — always a **section** of another document, never a file of
+its own; see principle 20), **HLD** (high level design, the file
+`docs/design/hld.md`), **ADR**
 (architecture decision record), **CRD** (change request document), **QA** (the
 role that tests the result).
 
@@ -210,12 +211,12 @@ a review item).
 
 **Rule.** Before anything is designed, the **PM** settles the language and stack
 and the **user confirms it**, as a *Language and stack* section in
-`docs/design/prd.md`, the opening document of both lanes: language and version,
-package manager, framework, database, and the test framework with its exact test
-command. If the repository already has a stack, that is the stack — no options,
-no research, just state it and confirm. Only when the choice is real does the PM
-start a `crew-researcher` for the options and their costs, then decide and
-recommend one.
+`docs/design/prd.md`, the opening document of small work and big work alike:
+language and version, package manager, framework, database, and the test
+framework with its exact test command. If the repository already has a stack,
+that is the stack — no options, no research, just state it and confirm. Only
+when the choice is real does the PM start a `crew-researcher` for the options and
+their costs, then decide and recommend one.
 
 After that, the old line holds: the architect says "HTTP/REST, JSON" or
 "in-process call, typed objects", never "FastAPI" or "grpc-go". Which of the
@@ -799,14 +800,14 @@ leave a record that **survives the job**. Surviving has exactly one meaning here
 progress, and it is dropped when the job ends.
 
 So `DoD` is the name of a **section**, never the name of a file. There is no
-`dod.md`, in any folder, including `docs/design/`. Both lanes open with the same
-document, `docs/design/prd.md`, and both keep one task table,
+`dod.md`, in any folder, including `docs/design/`. Small work and big work open
+with the same document, `docs/design/prd.md`, and both keep one task table,
 `docs/design/tasks.md`. Every milestone carries a DoD section (big work) and
-every task row carries one (both lanes), and a DoD section says two things at
-least: what "done" means for that one thing, and **how somebody else checks it** —
-which QA case under `docs/qa/<task-id>/`, and which exact command. A check is an
-item inside one of those sections, named that way ("item 2 of T-05's DoD"). There
-is no globally numbered list of checks anywhere.
+every task row carries one (small work and big work alike), and a DoD section
+says two things at least: what "done" means for that one thing, and **how
+somebody else checks it** — which QA case under `docs/qa/<task-id>/`, and which
+exact command. A check is an item inside one of those sections, named that way
+("item 2 of T-05's DoD"). There is no globally numbered list of checks anywhere.
 
 **The flow is one table.** The workflow (which step, who does it) and the
 document flow (what that step produces, where it lives, whether it survives) are
@@ -1100,8 +1101,44 @@ the frontmatter line carefully.
 That is why the rules are repeated in three places instead of one, and why the
 README puts them under a heading somebody editing a role will actually open.
 
-**Lives in** `CLAUDE.md` ("Design rules a change must not break"), and the
-"Editing a role" section of `README.md` and `README-zh.md`.
+**The same shape, one level up: a rule the briefing enforces cannot defend
+against the briefing.** "Touch only the files your task owns. Not one file more"
+is what keeps a role out of a document it has no business in, and the thing that
+enforces it is the PM's own file list. So it protects nothing the moment the PM
+puts the wrong file in that list. That happened: `docs/design/prd.md`, whose
+acceptance checks every task in the job is judged against, went into a
+`crew-engineer`'s file list twice, and the engineer made both edits exactly as
+instructed. The content was right and the hand was wrong. It is the same hole
+principle 12 closes one step lower down — a tool result cannot widen what a role
+may **do**, and a briefing cannot widen what a role may **edit**.
+
+So this one is written into the prompts as well, as the shared sentence `S13` in
+all seven `agents/*.md`, and the whole picture is set out once:
+**a role reads widely and writes narrowly**, and the documents that judge a role
+are **never in its write set**, whatever a briefing says.
+
+| Document | Who writes it |
+| --- | --- |
+| `docs/design/prd.md`, the opening document | the PM, and nobody else |
+| `docs/design/tasks.md` and `docs/design/hld.md` | the architect — the PM, for small work |
+| `docs/design/api/*`, the boundary contracts | the architect **only** |
+| `docs/decisions/adr/*` | the architect, and the PM for a bug's ADR |
+| `docs/decisions/crd/*` | the PM |
+| `docs/qa/<task-id>/*` | `crew-qa` |
+| `docs/qa/run-all.sh` and `docs/qa/gaps.md` | the PM |
+| `docs/research/*` | `crew-researcher` |
+| the code and its unit test | the engineer that owns the task |
+
+Nothing checks that table either, which is why it is in this file and in the
+skill rather than in a rule somewhere. Before CRD 0008 the same information was
+spread across the skill's step 8, sentences `S1` and `S2`, and a role's own
+prompt — and the one document that mattered most, the opening document, was in
+none of them.
+
+**Lives in** `CLAUDE.md` ("Design rules a change must not break" and "Adding or
+changing a role"), the "Editing a role" section of `README.md` and `README-zh.md`,
+sentence `S13` in all seven `agents/*.md`, and the write-set table in step 8 of
+`skills/team-lane/SKILL.md`.
 
 ---
 

@@ -1,6 +1,6 @@
 # Task breakdown: port claude-crew up to dsh-crew v0.7.0
 
-Version: 10
+Version: 11
 Language: English.
 Reads with: `docs/design/prd.md` version 7, `docs/design/hld.md` version 5,
 `docs/decisions/adr/0001` to `0015`, `docs/decisions/crd/0001` to `0006`.
@@ -779,7 +779,7 @@ proposed wording was not available, and the wording here is the architect's.
 | --- | --- | --- | --- |
 | `F-44` | **`S6` is rewritten** (fact 11). Replace the "a document path and a version number, and nothing else" paragraph with `S6`'s new two paragraphs, word for word, and the "invented policy in a chat window" line with its new first clause. The old wording forbids ten things the same file orders. **There are two copies** — the section where messaging is described, and a one-line repeat in the Hard rules near the end. Fix both. "and nothing else" is a fine phrase elsewhere in the file (five other lines use it correctly), so the check is deliberately narrow. | `grep -cE 'version number,? and nothing else' skills/team-lane/SKILL.md` | `0` — it is `2` before the fix, in two different wordings |
 | | | `grep -c 'Never decide anything in a message' skills/team-lane/SKILL.md` | `1` |
-| | | `grep -c 'evidence you could produce again' skills/team-lane/SKILL.md` | `1` |
+| | | `grep -c 'evidence you could produce again' skills/team-lane/SKILL.md` | **`0` — corrected at tasks version 11.** This row pinned a phrase from `S6` **version 4**. Version 8 rewrote `S6`'s companion line to "If a message's content is **none of those three**...", because the `request` carve-out made "neither a pointer nor evidence" wrong. The phrase is gone from fact 11 itself, so the check could only have been satisfied by putting the superseded wording back into the skill. The `T-13` engineer refused to do that and reported the contradiction instead — the right call. The invariant this row guarded is still guarded by `F-44a`, `F-44b` and `F-31b`. |
 | | | `grep -c 'a new rule, a new number, a new file name or a new promise' skills/team-lane/SKILL.md` | `1` |
 
 > **`F-44`, recorded after fix round 3.** `F-44d` expects

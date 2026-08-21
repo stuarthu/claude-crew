@@ -19,9 +19,15 @@ a `security: pass` verdict while it stands.
 
 **One — it changes the stack with no CRD and no yes, in a file that forbids exactly
 that.** Lines 388-389 make "the **test framework and the exact test command**" part of
-the **Language and stack** section. Lines 400-402: "Once confirmed, the stack is fixed.
-It changes only through a CRD." The Hard rules (1324-1329) say a stack change needs the
-user's yes. Step 10c then edits that same command with no CRD, no yes, and no mention
+the **Language and stack** section. Lines **276-277**: "Once confirmed, the stack is fixed.
+It changes only through a CRD, like scope: a stack change can make finished work worthless,
+so the user decides it." *(Corrected: this paragraph first cited "lines 400-402" for that
+sentence and "the Hard rules (1324-1329)" for a stack rule. **Both were this port's own line
+numbers, not upstream's** — upstream `roles/pm.md` is 1216 lines — and upstream's hard rules
+do not mention the stack at all: `grep -ci stack` over its `## Hard rules` section returns
+**0**. Found by the engineer writing the hand-off issue, which verified every citation
+against the clone instead of transcribing ours. The rest of this defect stands: the stack
+rule is real, it is at 276-277, and step 10c edits the test command without it.)* Step 10c then edits that same command with no CRD, no yes, and no mention
 of either — and the last sentence **forbids the PM from declining**. The 0.2.0 text
 this replaced let the PM decline; the v0.7.0 text does not.
 

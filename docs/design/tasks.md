@@ -1,6 +1,6 @@
 # Task breakdown: port claude-crew up to dsh-crew v0.7.0
 
-Version: 15
+Version: 16
 Language: English.
 Reads with: `docs/design/prd.md` version 7, `docs/design/hld.md` version 5,
 `docs/decisions/adr/0001` to `0015`, `docs/decisions/crd/0001` to `0006`.
@@ -1480,7 +1480,7 @@ rewrites a `P` principle.
 | --- | --- | --- | --- |
 | 1 | `test -f principles.md && echo yes` | `yes` | 12 |
 | 2 | `test -e docs/principles.md \|\| echo gone` | `gone` | 12 |
-| 3 | `git log --follow --oneline principles.md \| tail -1` | a commit older than this job — `git mv` kept the history | 12 |
+| 3 | `git log --oneline -- docs/principles.md \| tail -1` | **corrected at tasks version 16 — measured, not argued.** This row expected `git log --follow --oneline principles.md` to reach the old path's first commit. It does not, and it cannot: git stores content, not renames, and `--follow` re-detects one at log time by similarity. This file is a **rewrite**, not a move — 1223 lines against 510, with 141 of the old file's 337 distinct lines surviving, a content similarity of about **0.29**. The `T-06` engineer worked this out and refused to pad the file to game the threshold; the PM then measured it after the commit: `--follow` stops at this job's commit at the default 50% **and at 20%**. So the check now asks the question that has a true answer — the old path's history is intact and reachable — and expects `7d4fbb6 feat: claude-crew 0.1.0`. | a commit older than this job — `git mv` kept the history | 12 |
 | 4 | `grep -cE '^## ([0-9]+\|P[0-9]+)\. ' principles.md` | `25` (20 numbered plus `P1`..`P5`; it is `19` before the task) | 12 |
 | 5 | `cd "$UP" && grep -E '^## [0-9]+\. ' principles.md > /tmp/up.txt; cd "$REPO" && grep -E '^## [0-9]+\. ' principles.md > /tmp/loc.txt; diff /tmp/up.txt /tmp/loc.txt` | prints nothing — the 20 numbers and titles are identical to upstream's | 12 |
 | 6 | `grep -c '^\| Lane \| Step, by name \|' principles.md` | `1` — the flow table header is there | 12 |

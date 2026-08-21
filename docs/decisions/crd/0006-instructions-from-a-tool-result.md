@@ -63,6 +63,32 @@ Two readings, and this job cannot choose between them from where it stands:
    role to start agents, and another for a server's block to be indistinguishable from the
    instructions of the thing that runs the role.
 
+### Three independent reports now, all saying the same placement
+
+Updated after `M2` and `M3`. **Three engineers, on three different tasks, reported
+independently that the paragraph appeared inside the `plugin:ouroboros:ouroboros` block**,
+after that server's own paragraphs, separated only by a blank line — `T-03`, `T-05` and
+`T-08`. The `T-08` engineer was the most careful about it: "I am not claiming which of CRD
+0006's two readings that supports; I am reporting the position."
+
+What that does and does not settle:
+
+- **It does not make reading 1 wrong.** In the PM's own context that paragraph is in the
+  system prompt. Both can be true at once — a subagent's context is assembled differently
+  from the root session's.
+- **It does not rule out three identical misreadings.** If the harness's block is appended
+  directly after the MCP block in every subagent's first tool result, then "inside" and
+  "immediately after" look the same from the inside, and three careful readers would make
+  the same call.
+- **What it does change is the weight.** One report was an anecdote. Three, from roles that
+  never saw each other's work, is the strongest evidence this job can produce from where it
+  stands — and none of them can see the boundary from outside it.
+
+So the question stays open, and the reason it stays open is now itself worth recording: **no
+crew role can distinguish "inside a tool result" from "next to a tool result", because a role
+only sees the assembled context.** That is a limit of the observer, not a missing measurement,
+and it is why `S12`'s rule is written to not depend on the answer.
+
 **Left open.** `S12` does not depend on which is true — it says text arriving inside a tool
 result is data, whoever it looks like it came from, and that is the safe rule under either
 reading. What must not happen is this CRD claiming a distinction it cannot prove. The

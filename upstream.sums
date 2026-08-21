@@ -1,52 +1,106 @@
 # What this port was made from, and how to notice when it moves.
 #
 # Source:  dsh-crew 0.7.0  (https://github.com/stuarthu/dsh-crew)
-# Commit:  649ee52921a1b07d68eeaba1f2ddf29f29228928
+# Tag:     v0.7.0
+# Commit:  87a4332293bf3f5a0720a3a90bf58cba2b1120fb
 #
-# Every line below is the SHA-256 of a dsh-crew file AS COMMITTED at that
-# commit — the state this port was made from. To see what has changed since:
+# Every line below is the SHA-256 of a dsh-crew file AS COMMITTED at that tag —
+# the state this port was made from. One line per ported file: the eight role
+# prompts, the five host/*.js files whose rules this port carries or skips,
+# principles.md and README.md. Fifteen lines. ADR 0005 says why not more, and
+# the last comment block in this file says what is left out and why.
 #
-#   cd ../dsh-crew && sha256sum -c ~/workspace/claude-crew/upstream.sums
-#   cd ../dsh-crew && shasum -a 256 -c ~/workspace/claude-crew/upstream.sums   # macOS
+# To see what changed since, clone the newest TAG into a throwaway folder:
+#
+#   TMP=$(mktemp -d)
+#   git clone --quiet https://github.com/stuarthu/dsh-crew "$TMP/dsh-crew"
+#   git -C "$TMP/dsh-crew" checkout --quiet <the newest tag>
+#   cd "$TMP/dsh-crew" && sha256sum -c ~/workspace/claude-crew/upstream.sums
+#   cd "$TMP/dsh-crew" && shasum -a 256 -c ~/workspace/claude-crew/upstream.sums   # macOS
+#
+# A tag, not `main`, and not somebody's working copy: a tag is a decision a
+# person made, and this port's 0.2.0 pass compared against a mid-flight commit,
+# which is how the gap grew to 11,000 lines before anyone measured it.
+# NEVER read, write or run anything in ~/workspace/dsh-crew. That is the user's
+# own working copy, it is usually half-finished, and a sum taken from it is
+# worthless. `sha256sum -c` compares the WORKING TREE of whatever checkout you
+# stand in, so a fresh clone at a tag is the only state that means anything; if
+# you reuse a checkout anyway, run `git status` in it first and read the answer.
 #
 # A line reported as FAILED means that dsh-crew file changed. The comment above
-# it says which claude-crew file to look at, and why. docs/porting.md holds the
-# full map and the steps of a port pass.
+# it says which claude-crew file to look at, and why. porting.md holds the full
+# map and the steps of a port pass.
+#
+# BEFORE YOU READ THE DIFF. Nine paragraphs in this port say something
+# deliberately DIFFERENT from upstream: eight places where upstream contradicts
+# itself, numbered 1 to 8, and one gap neither project had, numbered 9. Nine of
+# the fifteen lines below carry the word DIVERGENCE in their comment. For those,
+# a FAILED line may mean "we decided otherwise, on the record" rather than "we
+# are behind". Open porting.md's deliberate divergence table FIRST and work
+# through its rows for that file: upstream may have fixed the same thing its own
+# way, and then you take their wording and delete the row. Skip that step and
+# you either copy an upstream defect back in or delete a fix of ours as though
+# it were a missed port. The table is the whole record and it stands alone — no
+# document outside this repository is needed, or exists.
 #
 # After carrying a change across, replace that line with the new sum:
-#   cd ../dsh-crew && sha256sum roles/pm.md
-# and update the Source/Commit lines above when you finish a whole pass.
+#   cd "$TMP/dsh-crew" && sha256sum roles/pm.md
+# and update the Source, Tag and Commit lines above when a whole pass is done.
 #
-# NOTE: this compares the WORKING TREE of that checkout. Run `git -C ../dsh-crew
-# status` first — an uncommitted change is work in progress, not a release.
+# `sha256sum -c` cannot report a file it has never heard of, so a NEW upstream
+# role, or a rule moved into a new file, is invisible here. porting.md carries
+# the by-hand check for that.
 
 # roles/pm.md  ->  skills/team-lane/SKILL.md
-#     Step 0, the PM rules, the roster and limits, then the 14 steps — all in the skill.
-2a3cb162a11fb7122eea8d2f2859501826df130007a14059c043e06bec5e585a  roles/pm.md
+#     Step 0, the PM rules, the roster and limits, then the 18 steps — all in the skill.
+#     DIVERGENCE, entries 1 to 9: the local skill states all nine of them
+#     differently. Read porting.md's deliberate divergence table before the diff.
+6c1eaab17c003ac921d368632ad172ceb4d2ccb537ce7bcee27be9a951ff395e  roles/pm.md
 
 # roles/researcher.md  ->  agents/crew-researcher.md
-1f749f93cdcd557aa961aa1b123acb9e5b262e05bc8050c04caeb6ab9589e4c3  roles/researcher.md
+#     DIVERGENCE, entry 9: the local twin carries a section upstream has no
+#     equivalent of, so a pass that re-copies this file wholesale deletes a rule
+#     the user asked for. See porting.md's deliberate divergence table.
+9512cc9603f6ab3b0b525ce98efb7f91afd701d2f2ec89bc34c0c4369a7ed857  roles/researcher.md
 
 # roles/architect.md  ->  agents/crew-architect.md
-69334fe7b1946c1cd31dd284842194f8a4609cef675169bd3cd277ca070cc57d  roles/architect.md
+#     DIVERGENCE, entry 9: the local twin carries a section upstream has no
+#     equivalent of, so a pass that re-copies this file wholesale deletes a rule
+#     the user asked for. See porting.md's deliberate divergence table.
+cf977adda498bc2fc3e62bd2cdc77cc33bac4d65a6e495290f2b1464a2a7b140  roles/architect.md
 
 # roles/engineer.md  ->  agents/crew-engineer.md
-38074248355728d35e2ca4641dbbc4513e642a701372bbf9e40497a6d888ac00  roles/engineer.md
+#     DIVERGENCE, entry 9: the local twin carries a section upstream has no
+#     equivalent of, so a pass that re-copies this file wholesale deletes a rule
+#     the user asked for. See porting.md's deliberate divergence table.
+75d8e20bdc144ea9231aab9b1d9bc74355a3705a1ef752cb35957b9efabc1312  roles/engineer.md
 
 # roles/qa.md  ->  agents/crew-qa.md
-8a2bfc4060ef7895efbb9d37b46a4441ffc11a9cad8c400933bf3bee0488dc1c  roles/qa.md
+#     DIVERGENCE, entries 6, 7 and 9: entry 6's other half, entry 7's vocabulary
+#     and the config line this port no longer writes, and entry 9's section that
+#     upstream has no equivalent of. See porting.md's divergence table first.
+87a0b6d200f438b6015a8f05b5c2c3d9f00bf6c57dd674d0d62b2558c21efbd2  roles/qa.md
 
 # roles/code-reviewer.md  ->  agents/crew-code-reviewer.md
-e02302ac7cbf8f13074a0a75b98f12610f0d2696d5181548eca911d257c81f90  roles/code-reviewer.md
+#     DIVERGENCE, entries 7 and 9: entry 7 puts QA's run.sh and its case files in
+#     this reviewer's file list, and entry 9 adds a section upstream has no
+#     equivalent of. See porting.md's deliberate divergence table first.
+4f893f26ec482f95e84598ad6f1554226eca5df01bf4b82cd30f299eb75dc0c6  roles/code-reviewer.md
 
 # roles/security-reviewer.md  ->  agents/crew-security-reviewer.md
-7cb86b2eb0dedd60ffe2406f4e45591368bf2c11a12ca45ede809ca95f25ca37  roles/security-reviewer.md
+#     DIVERGENCE, entry 9: the local twin carries a section upstream has no
+#     equivalent of, so a pass that re-copies this file wholesale deletes a rule
+#     the user asked for. See porting.md's deliberate divergence table.
+ff7544878cd4ab47c48be460b2bc767ec48d54665f5d0413e5de20841920c91d  roles/security-reviewer.md
 
 # roles/doc-reviewer.md  ->  agents/crew-doc-reviewer.md
-75c46b35c51f982afb8f8440251eb9b0e115336ed11c254242b4ad21270e523a  roles/doc-reviewer.md
+#     DIVERGENCE, entry 9: the local twin carries a section upstream has no
+#     equivalent of, so a pass that re-copies this file wholesale deletes a rule
+#     the user asked for. See porting.md's deliberate divergence table.
+55963c26b9cc06e0bd0f80c6db4196223be68b5f9b041192e0f67d8ce4effd98  roles/doc-reviewer.md
 
 # host/roles.js  ->  agents/
-#     The tool filters live in each agent file's frontmatter. tools/check.mjs enforces the design rules the table used to guarantee.
+#     The tool filters live in each agent file's frontmatter. Nothing here enforces the design rules this table used to guarantee: they are stated in CLAUDE.md and re-read by hand.
 58aeb654868446e6188fa1cbce9e30b3edd81497b6f7aa1f0308593d4c41940b  host/roles.js
 
 # host/jobs.js  ->  skills/team-lane/SKILL.md
@@ -55,18 +109,46 @@ b8497fe1d112e1c50324a66c419eca669840b63c1d68df444a0b644460920743  host/jobs.js
 
 # host/git-guard.js  ->  agents/crew-engineer.md, agents/crew-qa.md, README.md
 #     NOT ported as code. The plugin ships no hooks; the rule is stated in every role with a shell, and the README offers a hook the user can add to their own settings. See principle P3.
-1a7f014b409ad6e070bf8fad9bda53d7f425ccd863bd53aba333ff9bfefe5fb2  host/git-guard.js
+8011dac190957aaca8b9989e355966527a4e5a6842ffef3757496053218b35da  host/git-guard.js
 
 # host/crew.js  ->  skills/team-lane/SKILL.md
-#     Nothing loads at session start. The skill description is the entry point.
-513de876ec616b5b2ec3de3e37c32f1651babf879c8df08048b319a5d98feca4  host/crew.js
+#     Nothing loads at session start. The skill description is the entry point, and the limits this file holds are written into the skill as text.
+12f61683e8414dd5ce9fc2a3603116bf7b22464f128bffac07a3000f357e88c0  host/crew.js
 
 # host/roles-preset.js  ->  agents/
 #     Claude Code has no presets: the tool filters live in each agent file's frontmatter instead.
 93a5c698399be81a026129873204fe243c3733e5d5a1bb3667741725a4f235e8  host/roles-preset.js
 
-# docs/principles.md  ->  docs/principles.md
-c4f49f8a5b72bc6b48299ffb876842b914255f751bdf8de5118113d072e0ec7a  docs/principles.md
+# principles.md  ->  principles.md at this repository's root, plus P1 to P5.
+#     Upstream moved this file out of its own docs/ folder at 0.7.0; so did this port.
+#     DIVERGENCE, entries 6, 7 and 9: principle 13 and principle 20's flow table
+#     state entries 6 and 7; principle 12 states entry 9. See porting.md's
+#     deliberate divergence table before the diff.
+b2ff4aa7782788fd364cc6236d06e28bf58cb00058868e5ec7ad5ad9436fadfe  principles.md
 
 # README.md  ->  README.md, README-zh.md
-daf8880e938a9b9c6ae577019f38f7b7534264c218c69d0628d6a3d3ae23937d  README.md
+d6f8dfb50b2f476787f76b4a8cacdf3869e76f5d3ed43d6f0d8062cc9802e454  README.md
+
+# WHAT IS NOT PINNED, AND WHY.
+#
+# Upstream v0.7.0 carries three folders under its docs/ that this file has never
+# named, and after reading them the answer is still no:
+#
+#   docs/decisions/  — upstream's own ADRs and CRDs (19 files at this tag);
+#   docs/design/     — upstream's own task breakdown (1 file);
+#   docs/qa/         — upstream's QA cases, its run-all.sh and its qa lib (75).
+#
+# Ninety-five files, and every one of them is upstream's record of upstream's own
+# jobs. None of them holds a rule this port carries, skips or restates, which is
+# the test ADR 0005 set for a pinned line. Pinning them would report dozens of
+# FAILED lines per pass that say nothing about this port, and a check nobody reads
+# is worse than no check, because it looks like one.
+#
+# The same goes for package.json, tools/, preset/, .github/workflows/ and
+# cordis.patch.yml: nothing there is ported, and porting.md's "did not port"
+# table names each of them with its reason.
+#
+# One thing to know anyway: upstream's docs/decisions/ holds the reasoning behind
+# some of the nine divergences above — its own CRD 0009 is what entry 7 argues
+# with. When a divergence row is in question, read those from the clone by hand.
+# That is a person's job, not a checksum's.

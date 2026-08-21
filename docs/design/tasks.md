@@ -1,6 +1,6 @@
 # Task breakdown: port claude-crew up to dsh-crew v0.7.0
 
-Version: 14
+Version: 15
 Language: English.
 Reads with: `docs/design/prd.md` version 7, `docs/design/hld.md` version 5,
 `docs/decisions/adr/0001` to `0015`, `docs/decisions/crd/0001` to `0006`.
@@ -1649,7 +1649,7 @@ this port closer to upstream, not further away.
 - Header: `Source: dsh-crew 0.7.0`, `Commit: 87a4332293bf3f5a0720a3a90bf58cba2b1120fb`.
 - The `roles/pm.md` map comment says **18** steps, not 14.
 - The `host/roles.js` comment loses its mention of `tools/check.mjs` — that file
-  was removed in 0.2.0 and does not exist.
+  was removed in commit `80ad92b` and does not exist.
 - `docs/principles.md` becomes `principles.md`, on the pinned line and in the
   map comment above it. `docs/porting.md` in the header comment becomes
   `porting.md` (CRD 0002).

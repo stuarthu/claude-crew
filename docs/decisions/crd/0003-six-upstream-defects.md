@@ -30,10 +30,10 @@ below is in `/tmp/.../scratchpad/dsh-crew/roles/pm.md` at `v0.7.0`:
 | # | Upstream | The defect | What it costs a real job |
 | --- | --- | --- | --- |
 | 1 | 638-641 | Step 11 stages the task's files plus "the documents this task produced: QA's case files, `gaps.md`, and any ADR or CRD you wrote" — and then says "If a file changed that no task owns, stop." The PM's own `docs/design/prd.md` and the architect's `docs/design/tasks.md` and `hld.md` are owned by no task. | The first commit of every job stops on the PM's own PRD. Step 17's "`git status --short` is empty" can then never pass. **This job hit it: the PM had to commit the design documents in a commit of its own, outside any task, using judgement the file does not grant.** |
-| 2 | 748, 771 | Step 13 says to put the shipping gap list and the two plans "in this milestone's commit" / "in the commit". Line 724 says "You commit once per task", and step 13 runs after every task in the milestone is already committed. | There is no such commit. The same hole swallows step 14's README, `CHANGELOG.md` and rules-file edits, and step 17 then demands a clean tree. |
+| 2 | 748, 771 | Step 13 says to put the shipping gap list and the two plans "in this milestone's commit" / "in the commit". Line **588** says "You commit once per task", and step 13 runs after every task in the milestone is already committed. | There is no such commit. The same hole swallows step 14's README, `CHANGELOG.md` and rules-file edits, and step 17 then demands a clean tree. |
 | 3 | 715 | "**Ship this milestone** — do step 13, then come back here and treat it as `go on`." Step 13 only *writes plans*; the push, the tag and the publish live in step 16. | Two readings, and one of them publishes a package. The user asked to ship and may get only two documents — or an unasked-for release. |
 | 4 | 571-573 | "A task is finished when code review passes, security review passes or was skipped for a stated reason, and QA says pass" — three checks. The **Verdicts** line (650-676, 1013) carries **four** values, the fourth being the doc review, and "A task with no Verdicts line is not finished". | A PM that reads 571 first commits with no doc review and still writes a complete-looking Verdicts line. |
-| 5 | 286, 331, 347, 468 | "in both lanes" appears four times. Upstream names **three** lanes at 214-218: `ask`, `quick`, `team`. | Read literally, the PM writes `docs/design/prd.md` for a typo — which lines 216-217 forbid in the same file. The intended meaning is "small work and big work, both inside `team`", and it is never said. |
+| 5 | 286, 347, 468 (and 331 in brackets) | "in both lanes" appears **three** times; a fourth place, 331, says "(both lanes)" in brackets. Upstream names **three** lanes at 214-218: `ask`, `quick`, `team`. | Read literally, the PM writes `docs/design/prd.md` for a typo — which lines 216-217 forbid in the same file. The intended meaning is "small work and big work, both inside `team`", and it is never said. |
 | 6 | 546-547, 1043 | QA writes `docs/qa/run-all.sh` and `docs/qa/gaps.md`; 1043 says "**QA writes it**". Roles run in parallel by default, and the parallel test is only whether *engineers'* file lists overlap. | Two QA roles that finish together overwrite both files. The second write wins, `run-all.sh` still reports a clean total, and one task's cases silently drop out of the suite. Silent test-coverage loss. |
 
 Defects 1, 2 and 3 stop or mislead a PM in the middle of a real job. Defect 6 loses
@@ -199,3 +199,28 @@ the hand-off issue. `T-12` gains it.
 
 Not yet — waiting on the architect round that writes these into
 `docs/design/tasks.md`. Revision one above must be folded into that same version.
+
+## Revision four — three wrong line numbers in this document, found by `T-12`
+
+The engineer writing the hand-off issue verified every quotation against the clone at
+`87a4332` instead of transcribing this table, and found three errors here. All three would
+have shipped in a document handed to dsh-crew's author. Corrected above, and recorded here
+because a record that quietly fixes itself teaches nobody:
+
+1. **Defect 2 cited line 724 for "You commit once per task".** It is line **588**. Line 724
+   is the tail of step 12's "Change something" answer and reads only `act.`
+2. **Defect 5 said "in both lanes" appears four times.** It appears **three** times — 286,
+   347, 468. The fourth place, 331, says `(both lanes)` in brackets, which is the same claim
+   in a different shape but not the same string.
+3. **Defect 7's write-up said upstream's hard rules mention the stack.** They do not:
+   `grep -ci stack` over upstream's `## Hard rules` section returns **0**. The stack rule is
+   at 276-277; the hard rule at 1192-1197 covers scope.
+
+**And one class of error worth naming.** Upstream `roles/pm.md` is **1216 lines** at this
+tag. Any citation above 1216 in our records that claims to be upstream's is our own file's
+numbering, mislabelled. CRD 0005 had one (`1324-1329`), corrected there.
+
+This is the same mistake as the `S9` mislabel that the `M2` review caught: **a line number
+attributed to upstream is a claim about their file, and it has to be checked in their file.**
+Three of this job's own records failed that test, and the only reason none of them reached
+upstream is that the engineer checked rather than trusted.

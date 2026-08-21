@@ -1,6 +1,6 @@
 # Task breakdown: port claude-crew up to dsh-crew v0.7.0
 
-Version: 8
+Version: 10
 Language: English.
 Reads with: `docs/design/prd.md` version 7, `docs/design/hld.md` version 5,
 `docs/decisions/adr/0001` to `0015`, `docs/decisions/crd/0001` to `0006`.
@@ -415,6 +415,24 @@ engineers cannot talk to each other. Copy them **character for character**.
     **It is a section, not a numbered check.** `agents/crew-doc-reviewer.md` still
     has exactly 13 numbered checks (`T-03` check 2) — `S12` does not become check
     14.
+
+> **Two check commands were corrected at tasks version 10.** `sed -n '1,5p' file1 file2`
+> numbers lines across the **concatenated** stream, so it prints the first five lines of
+> file 1 and can never show file 2's frontmatter — the expected value ("both files carry
+> ...") was unreachable as written. Two engineers, `T-04` and `T-05`, hit it independently,
+> neither changed the check, and both proved the intent per file instead. That is the
+> behaviour the briefings ask for and it is why the flaw was caught rather than papered
+> over. GNU `sed -s` treats each file separately:
+>
+> ```
+> $ sed -n '1,5p'    agents/crew-code-reviewer.md agents/crew-security-reviewer.md   # one stream
+> $ sed -s -n '1,5p' agents/crew-code-reviewer.md agents/crew-security-reviewer.md   # per file
+> ```
+>
+> Both commands now carry `-s`. A check that cannot see what it claims to check is a false
+> green, and this job has now found three of them: this one, the `CLAUDE.md` line-wrap in
+> check 21, and `T-04`'s check 32, which passed on two empty windows before the section it
+> compares existed.
 
 ## Task table
 
@@ -1114,7 +1132,7 @@ paraphrased apart.
 | 8 | `grep -ci 'acceptance check' agents/crew-qa.md` | `0` | 10 |
 | 9 | `git diff -- agents/crew-engineer.md \| grep -E '^[-+](name\|description\|tools\|disallowedTools):'` | prints nothing | 11 |
 | 10 | `git diff -- agents/crew-qa.md \| grep -E '^[-+](name\|tools\|disallowedTools):'` | prints nothing — only `description:` may change | 11 |
-| 11 | `sed -n '1,5p' agents/crew-engineer.md agents/crew-qa.md` | both `disallowedTools: Agent, Task, Workflow, SendMessage, ListAgents`; neither names `tools:`; both keep `Bash` by not denying it | 11 |
+| 11 | `sed -s -n '1,5p' agents/crew-engineer.md agents/crew-qa.md` | both `disallowedTools: Agent, Task, Workflow, SendMessage, ListAgents`; neither names `tools:`; both keep `Bash` by not denying it | 11 |
 | 12 | `sed -n '/^description:/p' agents/crew-qa.md` | one line; it names `docs/qa/`, and the words `docs/crew/qa/` are gone | 7, 11 |
 | 13 | `grep -c 'QA writes only inside' agents/crew-qa.md` | `1` — sentence `S1` | 10 |
 | 14 | `grep -c 'never writes either one' agents/crew-qa.md` | `1` — sentence `S2` | 10 |
@@ -1203,7 +1221,7 @@ to both — the text arrives whatever the role can do.
 | 7 | `grep -n '^## First, read' agents/crew-security-reviewer.md` | the new section | 10 |
 | 8 | `grep -c 'DoD section' agents/crew-code-reviewer.md agents/crew-security-reviewer.md` | `1` or more in each | 10 |
 | 9 | `git diff -- agents/crew-researcher.md agents/crew-code-reviewer.md agents/crew-security-reviewer.md \| grep -E '^[-+](name\|description\|tools\|disallowedTools):'` | prints nothing | 11 |
-| 10 | `sed -n '1,5p' agents/crew-code-reviewer.md agents/crew-security-reviewer.md` | both `tools: Read, Glob, Grep` — allow lists, no `Bash`, no `Write`, no `Edit` | 11 |
+| 10 | `sed -s -n '1,5p' agents/crew-code-reviewer.md agents/crew-security-reviewer.md` | both `tools: Read, Glob, Grep` — allow lists, no `Bash`, no `Write`, no `Edit` | 11 |
 | 11 | `sed -n '/release plan/,/^## /p' agents/crew-researcher.md \| grep -ci 'date'` | `1` or more — drift item 22 | 10 |
 | 12 | `grep -ci 'acceptance check' agents/crew-code-reviewer.md` | `0` — drift item 24 | 10 |
 | 13 | `grep -c 'docs/design/prd.md' agents/crew-code-reviewer.md agents/crew-security-reviewer.md` | `1` or more in each — drift items 23 and 25 | 10 |
@@ -1896,7 +1914,8 @@ QA files and one new check the PM runs, and `CLAUDE.md` describes both.
 | 18 | `grep -c 'before every commit and before any merge' CLAUDE.md` | `1` or more — clause `S4` | 16 |
 | 19 | `sed -n '/^4\. \*\*/,/^5\. \*\*/p' CLAUDE.md \| grep -ci 'architect'` | `1` or more — design rule 4 names all three shell-owning roles | 16 |
 | 20 | `grep -c 'one at a time' CLAUDE.md` | `0` — fact 3 | 9 |
-| 21 | `grep -ci 'runs once\|run once' CLAUDE.md` | `0` — CRD 0004; "Adding or changing a role" no longer demands the claim | 19 |
+| 21 | `tr -s ' \t\n' ' ' < CLAUDE.md \| /usr/bin/grep -ci 'runs once\|run once'` | `0` — CRD 0004; "Adding or changing a role" no longer demands the claim. **The command was corrected at tasks version 9: a plain `grep` gives a false green here.** The claim is wrapped across lines 73-74 of `CLAUDE.md` (`...must say it runs` / `once.`), so `grep -ci 'runs once'` returns `0` while the claim is still there. `tr -s ' \t\n' ' '` flattens the file **and squeezes runs of whitespace** — the PM's first correction used plain `tr '\n' ' '` and still read `0`, because line 74 begins with three spaces of indent, so the flattened text holds `runs    once`. A check has to be run to be trusted; this one was wrong twice before it was right. Two engineers reported the contradiction independently (`T-02`, `T-04`); the PM found the false green. | 19 |
+| 21b | `tr -s ' \t\n' ' ' < CLAUDE.md \| /usr/bin/grep -ci 'the check rejects'` | `0` — **new at tasks version 9.** `CLAUDE.md` line 73 says a role file is rejected if its body is "under 500 characters". Nothing rejects anything: `tools/check.mjs` was deleted in commit `80ad92b` and there is no `tools/` or `scripts/` folder. `upstream.sums` has the same stale mention and `T-08` check 5 already covers that one; this is the copy nobody owned. | 16 |
 | 22 | `grep -c 'as a message, or as a fresh role' CLAUDE.md` | `1` — what a new role's body must say instead | 19 |
 | 23 | `grep -c 'keeps its tool filter' CLAUDE.md` | `1` — design rule 2's second measurement | 19 |
 | 24 | `grep -c 'unit test' CLAUDE.md` | `1` or more, and `grep -c 'QA test' CLAUDE.md` is `1` or more — sentence `S7` | 20 |

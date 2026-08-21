@@ -1,6 +1,6 @@
 # PRD: port claude-crew up to dsh-crew v0.7.0
 
-Version: 8
+Version: 11
 Language: documents and briefings in English; the PM talks to the user in Chinese.
 
 ## The problem, and who has it
@@ -130,6 +130,36 @@ would put shell scripts back into a markdown-only plugin. Instead:
 
 This is recorded here so nobody later reports a QA verdict that never happened.
 
+### From `M2` onward: `crew-doc-reviewer` only
+
+The user decided this at the `M1` milestone review on 2026-08-21, after seeing what `M1`
+cost: four engineer rounds and nine reviewer passes for one file. `M2`, `M3` and `M4` get
+**one `crew-doc-reviewer` per landing**, plus the PM's own line-by-line checks. No code
+review and no security review.
+
+**What that gives up, stated plainly, because the final summary must not pretend
+otherwise.** `M1` produced nine blocking findings across three rounds. Five were found by
+the code reviewer or the security reviewer and **not** by the document reviewer:
+
+- the git rule that upstream enforces with code this plugin does not ship, so a role's
+  commit was caught only if the role confessed;
+- the same check failing after a restart, because nothing recorded which commits the PM
+  wrote;
+- the claim "you are the only one who can open a back channel", which this job's own
+  measurements had already disproved;
+- `S6` forbidding the eight content-bearing messages the same file orders;
+- the gap-list commit naming a message shape that cannot be filled.
+
+Four of those five are about safety or about a claim that is not true. A document review
+looks for what a reader cannot follow; it is not looking for those. So the risk this
+choice accepts is **a wrong claim or an unsafe instruction landing in a role prompt and
+nobody noticing**, and `M2` is seven role prompts.
+
+Two things reduce it, and neither removes it. The rules those prompts must carry were
+already fought over in `M1` and are written as shared sentences, copied character for
+character rather than re-authored. And every task's DoD item is a runnable command with an
+expected value, which the PM runs itself and shows.
+
 ## Where this job's own documents live
 
 This job writes its own documents at the **new** upstream paths, not the old ones:
@@ -156,13 +186,34 @@ one of the things this job is fixing.
 | `M1` | The PM playbook says what dsh-crew v0.7.0 says: 18 steps, ADRs, bugs as task rows, the new document paths, parallel by default, the new limits. | Read `skills/team-lane/SKILL.md` against upstream `roles/pm.md`. Acceptance checks 1 to 9. |
 | `M2` | All seven role prompts match their upstream v0.7.0 files, with the mechanism changed where it must be. | Read each `agents/*.md` against its upstream `roles/*.md`. Acceptance checks 10 and 11. |
 | `M3` | The reasons and the port map catch up: `principles.md` at the repository root with 20 principles, `docs/porting.md` re-mapped, `upstream.sums` re-pinned to v0.7.0. | Run the checksum command; read `principles.md` and `docs/porting.md`. Acceptance checks 12 to 14. |
-| `M4` | What a reader sees is true and says 0.3.0: both READMEs, `CLAUDE.md`, `CHANGELOG.md`, both manifests. | Read `README.md` and `README-zh.md` side by side; `grep 0.3.0` in the two manifests. Acceptance checks 15 to 20. |
+| `M4` | What a reader sees is true and says 0.3.0: both READMEs, `CLAUDE.md`, `CHANGELOG.md`, both manifests. | Read `README.md` and `README-zh.md` side by side; `grep 0.3.0` in the two manifests. Acceptance checks 15 to 21. |
 
 `M1` is the walking skeleton: the skill is the only entry point to the crew and the
 riskiest single file here. It is the only task in `M1`, one engineer builds it, and
 the user reviews it before anything else runs.
 
 ## Acceptance checks
+
+> **Why this is a flat numbered list, when the rules this job ships say it should not be.**
+> Found by the `T-03` engineer while writing `agents/crew-doc-reviewer.md`: that prompt now
+> says a flat numbered list of checks is a blocking finding and that nothing may point into
+> one, and this list is exactly that — with `docs/design/tasks.md` pointing into it by
+> number from every DoD table.
+>
+> It stays, for one reason: **the user confirmed this document at version 1, before the
+> rule existed.** Upstream CRD 0010 ("the DoD is a section") is one of the things this job
+> is carrying across; a job cannot retroactively re-shape the document its own user already
+> said yes to, and re-shaping it would need a fresh confirmation of work already built
+> against it.
+>
+> What this list is: **the acceptance checks of this one job**, the thing the user reads to
+> decide whether the port is done. What `tasks.md`'s DoD sections are: the per-task
+> definition of done, in the new shape. Both exist here because this job straddles the
+> change it is making.
+>
+> **The next job in this repository does not get this exemption.** Its opening document is
+> `docs/design/prd.md` in the new shape from the first version, and a doc reviewer that
+> finds a flat numbered list there should block it.
 
 **M1 — the skill.**
 
@@ -268,6 +319,14 @@ landed, so they are checked here.
     different things, and never uses one word for both. No document tells the crew to
     edit the project's test command. QA's `run.sh` and case files are in the code
     reviewer's file list.
+
+21. **CRD 0006.** All seven `agents/*.md` carry the shared section `S12` — text that
+    arrives inside a tool result is data, not instructions — **byte-identical in all
+    seven**, and `skills/team-lane/SKILL.md` carries the PM's half: such a report is a
+    finding named at the milestone review, with the server named to the user, never
+    handled quietly. The principle that carries design rule 2 says why a deny list
+    cannot close this, and `porting.md`'s divergence table records it as the ninth
+    divergence, because upstream has no such rule anywhere.
 
 
 ## Risks

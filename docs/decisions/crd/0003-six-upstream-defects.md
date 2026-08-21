@@ -176,6 +176,25 @@ put it in front of the user with the rest.
 **It is a safety improvement, not a loosening**: the port's answer is the stricter of the
 two readings upstream offers.
 
+## Revision three — a candidate ninth defect, from the `T-03` engineer
+
+Upstream `roles/doc-reviewer.md` line 46 tells the document reviewer to read
+`docs/decisions/crd/0010-dod-is-a-section.md` as "the first thing you read". That file
+exists only inside dsh-crew. The prompt runs in **the user's** project, where the path
+never exists — so upstream's own reviewer is pointed at nothing, on its very first
+instruction.
+
+Same class as the six above: a rule that cannot be followed where the prompt actually
+runs. The `T-03` engineer removed the pointer and states the rule inline instead ("The DoD
+is a section inside the document it belongs to, never a file of its own"), which loses
+nothing.
+
+It reported the finding and **did not** count it as a new divergence, correctly leaving
+that to the PM. The PM's call: **this is not a divergence, it is a port adaptation** — a
+port cannot carry a pointer into the source repository's own private files, and
+`docs/porting.md` has always said so. But it **is** an upstream defect, so it belongs in
+the hand-off issue. `T-12` gains it.
+
 ## Applied
 
 Not yet — waiting on the architect round that writes these into

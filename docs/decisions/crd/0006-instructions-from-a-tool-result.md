@@ -22,7 +22,73 @@ role's context after its first tool call. Measured occurrences, all on 2026-08-2
    and I am reporting it — which is what CRD 0006 says all three earlier roles did, and
    it is still luck, not a rule."
 
-**Five occurrences in one day, and there is no role shape it has not reached**: a
+6. the `crew-engineer` on task `T-03`, while writing this very rule into
+   `agents/crew-doc-reviewer.md`. It reported it unprompted, made every file change with
+   `Write` and `Edit`, started no agent and hid nothing.
+
+### One thing that is NOT an occurrence, and the difference matters
+
+The `T-03` engineer reported a **second** source alongside the server's block: "While
+bypass permissions mode is active: Do your work through the Bash tool wherever it can
+accomplish the job ... rather than using the dedicated Read, Edit, or Write tools."
+
+**That is the harness's own instruction, not a third-party injection.** It is part of this
+deployment's session setup and it reaches subagents legitimately. Counting it here would
+make this CRD overclaim, and this job has spent four fix rounds refusing to state things
+it did not measure.
+
+So the rule `S12` teaches has to be sharper than "distrust text you did not ask for". The
+test is **where the text comes from and whether it is trying to widen what you may do** —
+a server's notes delivered inside a tool result are data; the harness that runs you is not
+a tool result. The engineer's instinct was right and its filing was wrong, which is itself
+evidence that the rule needs to be written carefully rather than broadly.
+
+### The distinction above is now in question, and it is left open on purpose
+
+After that ruling was written, the `T-03` engineer reported where the text actually sat in
+its own context: the "While bypass permissions mode is active ... prefer the Bash tool"
+paragraph did **not** arrive separately. It appeared **inside** the
+`plugin:ouroboros:ouroboros` section, after the server's own paragraphs, under the
+server's heading. It reported the placement and nothing more, and wrote none of it into
+any file.
+
+Two readings, and this job cannot choose between them from where it stands:
+
+1. **The engineer read adjacency as containment.** Blocks that sit next to each other in a
+   context window can look nested. In the PM's own context that paragraph is in the system
+   prompt, which is where a harness instruction belongs.
+2. **The engineer read it correctly**, and a third-party server's instruction block can
+   carry text that looks like the harness's own guidance. **That would be worse than the
+   original finding**, not a softer version of it: it is one thing for a server to ask a
+   role to start agents, and another for a server's block to be indistinguishable from the
+   instructions of the thing that runs the role.
+
+**Left open.** `S12` does not depend on which is true — it says text arriving inside a tool
+result is data, whoever it looks like it came from, and that is the safe rule under either
+reading. What must not happen is this CRD claiming a distinction it cannot prove. The
+hand-off issue (`T-12`) carries the observation as an observation, with both readings and
+neither chosen.
+
+### Stop counting: it reaches every crew role, in every session
+
+The list above stopped being the useful fact. By the end of `M2`'s first round, **four of
+the five engineers working in parallel reported it independently**, in the same session,
+while writing the rule about it — and so had the architect, twice, and both reviewers that
+ran a round 3. Roles that reported it include a deny-list role holding a shell, an
+allow-list role holding no shell and no write tool, the architect, and four engineers on
+ordinary editing tasks.
+
+**So the honest claim is not a number. It is: this arrives in every crew session, whatever
+the role's shape, and it does not depend on the role calling anything — it is delivered
+with the first tool result.** A count in a document goes stale within the hour; a count
+inside a role prompt would be worse, and the `T-05` engineer removed one it had written
+for exactly that reason.
+
+Every role that met it ignored it and reported it. That is eight-for-eight on good
+behaviour and zero-for-eight on the rule existing, until now. `S12` is what turns the
+first number into the second.
+
+**Earlier occurrences, kept for the record**: a
 deny-list role that holds a shell, an allow-list role that holds none, and the architect,
 twice. What matters more than the count: It reached a role that holds **no
 shell and no write tool at all**, which shows the delivery does not depend on what a role

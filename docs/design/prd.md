@@ -1,6 +1,6 @@
 # PRD: port claude-crew up to dsh-crew v0.7.0
 
-Version: 11
+Version: 12
 Language: documents and briefings in English; the PM talks to the user in Chinese.
 
 ## The problem, and who has it
@@ -36,7 +36,7 @@ them one set of rules while dsh-crew tells them another.
 
 - The user of the `crew` plugin in Claude Code, who gets whatever rules ship here.
 - The next person to run a port pass, who needs `upstream.sums` and
-  `docs/porting.md` to be true.
+  `porting.md` to be true.
 
 ## What it must do
 
@@ -60,7 +60,7 @@ a person who did not do the work can run it.
 
 ## Not in scope
 
-These are dsh machinery. Each one gets its reason in `docs/porting.md` or in the
+These are dsh machinery. Each one gets its reason in `porting.md` or in the
 comment above its line in `upstream.sums`, so the next pass does not re-open it.
 
 - `host/git-guard.js` and its fixes, `host/crew.js`, `tools/verify-*.mjs`,
@@ -185,7 +185,7 @@ one of the things this job is fixing.
 | --- | --- | --- |
 | `M1` | The PM playbook says what dsh-crew v0.7.0 says: 18 steps, ADRs, bugs as task rows, the new document paths, parallel by default, the new limits. | Read `skills/team-lane/SKILL.md` against upstream `roles/pm.md`. Acceptance checks 1 to 9. |
 | `M2` | All seven role prompts match their upstream v0.7.0 files, with the mechanism changed where it must be. | Read each `agents/*.md` against its upstream `roles/*.md`. Acceptance checks 10 and 11. |
-| `M3` | The reasons and the port map catch up: `principles.md` at the repository root with 20 principles, `docs/porting.md` re-mapped, `upstream.sums` re-pinned to v0.7.0. | Run the checksum command; read `principles.md` and `docs/porting.md`. Acceptance checks 12 to 14. |
+| `M3` | The reasons and the port map catch up: `principles.md` at the repository root with 20 principles, `porting.md` re-mapped, `upstream.sums` re-pinned to v0.7.0. | Run the checksum command; read `principles.md` and `porting.md`. Acceptance checks 12 to 14. |
 | `M4` | What a reader sees is true and says 0.3.0: both READMEs, `CLAUDE.md`, `CHANGELOG.md`, both manifests. | Read `README.md` and `README-zh.md` side by side; `grep 0.3.0` in the two manifests. Acceptance checks 15 to 21. |
 
 `M1` is the walking skeleton: the skill is the only entry point to the crew and the
@@ -269,7 +269,7 @@ the user reviews it before anything else runs.
 13. `porting.md` — moved to the repository root by CRD 0002, so that `docs/` holds
     only crew job output — maps every upstream v0.7.0 path, and its "did not port"
     table names each skipped item from the "Not in scope" list above with its
-    reason. `docs/porting.md` no longer exists, and every reference to the old path
+    reason. `porting.md` no longer exists, and every reference to the old path
     points at the new one.
 14. `upstream.sums` records v0.7.0 (`87a4332`) in its header, one line per ported
     file, and `sha256sum -c` reports `OK` for every line when run in a `v0.7.0`

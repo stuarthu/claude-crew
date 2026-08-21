@@ -1,6 +1,6 @@
 # Task breakdown: port claude-crew up to dsh-crew v0.7.0
 
-Version: 16
+Version: 17
 Language: English.
 Reads with: `docs/design/prd.md` version 7, `docs/design/hld.md` version 5,
 `docs/decisions/adr/0001` to `0015`, `docs/decisions/crd/0001` to `0006`.
@@ -1480,7 +1480,7 @@ rewrites a `P` principle.
 | --- | --- | --- | --- |
 | 1 | `test -f principles.md && echo yes` | `yes` | 12 |
 | 2 | `test -e docs/principles.md \|\| echo gone` | `gone` | 12 |
-| 3 | `git log --oneline -- docs/principles.md \| tail -1` | **corrected at tasks version 16 — measured, not argued.** This row expected `git log --follow --oneline principles.md` to reach the old path's first commit. It does not, and it cannot: git stores content, not renames, and `--follow` re-detects one at log time by similarity. This file is a **rewrite**, not a move — 1223 lines against 510, with 141 of the old file's 337 distinct lines surviving, a content similarity of about **0.29**. The `T-06` engineer worked this out and refused to pad the file to game the threshold; the PM then measured it after the commit: `--follow` stops at this job's commit at the default 50% **and at 20%**. So the check now asks the question that has a true answer — the old path's history is intact and reachable — and expects `7d4fbb6 feat: claude-crew 0.1.0`. | a commit older than this job — `git mv` kept the history | 12 |
+| 3 | `git log --oneline -- docs/principles.md \| tail -1` | **corrected at tasks version 16 — measured, not argued.** This row expected `git log --follow --oneline principles.md` to reach the old path's first commit. It does not, and it cannot: git stores content, not renames, and `--follow` re-detects one at log time by similarity. This file is a **rewrite**, not a move — 1223 lines against 510, with 141 of the old file's 337 distinct lines surviving, a content similarity of about **0.29**. The `T-06` engineer worked this out and refused to pad the file to game the threshold; the PM then measured it after the commit: `--follow` stops at this job's commit at the default 50% **and at 20%**. So the check now asks the question that has a true answer — the old path's history is intact and reachable — and expects `7d4fbb6 feat: claude-crew 0.1.0`. | 12 |
 | 4 | `grep -cE '^## ([0-9]+\|P[0-9]+)\. ' principles.md` | `25` (20 numbered plus `P1`..`P5`; it is `19` before the task) | 12 |
 | 5 | `cd "$UP" && grep -E '^## [0-9]+\. ' principles.md > /tmp/up.txt; cd "$REPO" && grep -E '^## [0-9]+\. ' principles.md > /tmp/loc.txt; diff /tmp/up.txt /tmp/loc.txt` | prints nothing — the 20 numbers and titles are identical to upstream's | 12 |
 | 6 | `grep -c '^\| Lane \| Step, by name \|' principles.md` | `1` — the flow table header is there | 12 |
@@ -1553,7 +1553,7 @@ the hand-off document has left the repository (CRD 0003 revision one), so no row
 may point at it and every row must be self-contained.
 
 - **A new section, "Deliberate divergence".** One table row per defect, numbered
-  **1 to 7, the same numbers as CRD 0003 and CRD 0005** (fact 9). Each row's first
+  **1 to 9, the same numbers as `upstream.sums`' nine comments** (fact 9, fact 10). **Corrected at tasks version 17** — this said "1 to 7" from a version written before the force-push rule and CRD 0006's `S12` became entries 8 and 9. The `T-07` engineer built to nine, per fact 10, and reported the stale bullet. Each row's first
   cell is exactly `| defect 1 |` … `| defect 7 |`. Columns: the defect number, the
   upstream file and its line numbers at `v0.7.0`, what upstream says, what this
   port says instead, and the local file that says it. **A row that cannot be acted
@@ -1616,7 +1616,7 @@ this port closer to upstream, not further away.
 | --- | --- | --- | --- |
 | 1 | `test -f porting.md && echo yes` | `yes` | 13 |
 | 2 | `test -e docs/porting.md \|\| echo gone` | `gone` | 13 |
-| 3 | `git log --follow --oneline porting.md \| tail -1` | a commit older than this job — `git mv` kept the history | 13 |
+| 3 | `git log --oneline -- docs/porting.md \| tail -1` | `7d4fbb6 feat: claude-crew 0.1.0` — **corrected at tasks version 17, and measured.** This expected `git log --follow` on the new path to reach a commit older than this job. It does not: git stores content, not renames, and `--follow` re-detects one at log time by similarity. Both moved files are rewrites, so the similarity is far under the 50% default — the PM measured `principles.md` after committing it and `--follow` stopped at this job's commit **at 50% and at 20%**. Both moves are therefore committed the same way, deliberately: two files behaving differently would be worse for a reader than losing `--follow`. The old path's history is intact and this command reads it. | 13 |
 | 4 | `for p in roles/pm.md roles/architect.md roles/engineer.md roles/qa.md roles/researcher.md roles/code-reviewer.md roles/security-reviewer.md roles/doc-reviewer.md host/roles.js host/jobs.js host/git-guard.js host/crew.js host/roles-preset.js principles.md README.md; do grep -q "$p" porting.md \|\| echo "MISSING $p"; done` | prints nothing | 13 |
 | 5 | `for s in verify- boot-log.mjs workflows package.json 'CRD 0009' 'CRD 0011' roleAllow roleDeny roleModels rolesDir cordis.patch.yml web_fetch; do grep -q "$s" porting.md \|\| echo "MISSING $s"; done` | prints nothing | 13 |
 | 6 | `grep -c '18 steps' porting.md` | `1` or more | 13 |

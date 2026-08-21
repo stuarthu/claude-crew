@@ -1,6 +1,6 @@
 # PRD: port claude-crew up to dsh-crew v0.7.0
 
-Version: 2
+Version: 6
 Language: documents and briefings in English; the PM talks to the user in Chinese.
 
 ## The problem, and who has it
@@ -42,7 +42,12 @@ them one set of rules while dsh-crew tells them another.
 
 1. Carry across every dsh-crew v0.7.0 rule that applies to a Claude Code plugin.
 2. Carry each one with the mechanism this port has, where the mechanism differs
-   (tool names, a role that runs once, no approval file, no hooks).
+   (tool names, no approval file, no hooks). **Corrected by CRD 0004:** this list used
+   to name "a role that runs once" as one of this port's mechanisms. It is not one.
+   Measured on 2026-08-21: the `Agent` tool returns at once so roles run in the
+   background, `ListAgents` lists them, and a finished role can be resumed with its
+   context. Roles still cannot message each other — that is the deny list, and it
+   stays.
 3. Skip dsh machinery, and write the reason where the next pass will read it.
 4. Leave the repository markdown only. No `hooks/`, `scripts/`, `lib/`, `tools/`
    or `package.json` (design rule 6, principle P3).
@@ -151,7 +156,7 @@ one of the things this job is fixing.
 | `M1` | The PM playbook says what dsh-crew v0.7.0 says: 18 steps, ADRs, bugs as task rows, the new document paths, parallel by default, the new limits. | Read `skills/team-lane/SKILL.md` against upstream `roles/pm.md`. Acceptance checks 1 to 9. |
 | `M2` | All seven role prompts match their upstream v0.7.0 files, with the mechanism changed where it must be. | Read each `agents/*.md` against its upstream `roles/*.md`. Acceptance checks 10 and 11. |
 | `M3` | The reasons and the port map catch up: `principles.md` at the repository root with 20 principles, `docs/porting.md` re-mapped, `upstream.sums` re-pinned to v0.7.0. | Run the checksum command; read `principles.md` and `docs/porting.md`. Acceptance checks 12 to 14. |
-| `M4` | What a reader sees is true and says 0.3.0: both READMEs, `CLAUDE.md`, `CHANGELOG.md`, both manifests. | Read `README.md` and `README-zh.md` side by side; `grep 0.3.0` in the two manifests. Acceptance checks 15 to 17. |
+| `M4` | What a reader sees is true and says 0.3.0: both READMEs, `CLAUDE.md`, `CHANGELOG.md`, both manifests. | Read `README.md` and `README-zh.md` side by side; `grep 0.3.0` in the two manifests. Acceptance checks 15 to 20. |
 
 `M1` is the walking skeleton: the skill is the only entry point to the crew and the
 riskiest single file here. It is the only task in `M1`, one engineer builds it, and
@@ -174,10 +179,12 @@ the user reviews it before anything else runs.
 5. The skill says a bug becomes a task row and its DoD section is written first.
 6. The skill says the opening document is `docs/design/prd.md` in both lanes, and
    that the DoD is a section inside it, never a file of its own.
-7. Every crew document path in the skill is a new-layout path — `docs/design/`,
-   `docs/decisions/adr/`, `docs/decisions/crd/`, `docs/qa/`, `docs/research/`. The
-   string `docs/crew/` appears nowhere in the repository except older `CHANGELOG.md`
-   sections.
+7. Every crew document path in the skill is a new-layout path. The full v0.7.0 set
+   is `docs/design/`, `docs/design/api/` (boundary contracts), `docs/decisions/adr/`,
+   `docs/decisions/crd/`, `docs/qa/`, `docs/release/` (the release and upgrade plans
+   of a milestone that ships) and `docs/research/`. The skill holds no `docs/crew/`
+   path. *(The repository-wide sweep for `docs/crew/` is check 18, in `M4`, because
+   it cannot pass until every file has landed — CRD 0001.)*
 8. The skill states the fixed job-slug shape and says the PM announces the slug
    before it makes the job folder or the branch.
 9. The skill's frontmatter `description` still says **when** to use the crew, and no
@@ -200,14 +207,21 @@ the user reviews it before anything else runs.
 12. `principles.md` is at the repository root. It holds principles 1 to 20 with
     upstream's exact numbers and titles, plus this port's `P1` to `P5`.
     `docs/principles.md` no longer exists, and every reference to that path in the
-    repository points at the new one.
-13. `docs/porting.md` maps every upstream v0.7.0 path, and its "did not port" table
-    names each skipped item from the "Not in scope" list above with its reason.
+    repository points at the new one — **except** the published `0.2.0` section of
+    `CHANGELOG.md`, which the "Not in scope" list says must not be rewritten and
+    where the old path is history, not a pointer (CRD 0001, ADR 0003).
+13. `porting.md` — moved to the repository root by CRD 0002, so that `docs/` holds
+    only crew job output — maps every upstream v0.7.0 path, and its "did not port"
+    table names each skipped item from the "Not in scope" list above with its
+    reason. `docs/porting.md` no longer exists, and every reference to the old path
+    points at the new one.
 14. `upstream.sums` records v0.7.0 (`87a4332`) in its header, one line per ported
     file, and `sha256sum -c` reports `OK` for every line when run in a `v0.7.0`
     checkout.
 
-**M4 — what a reader sees.**
+**M4 — what a reader sees.** Checks 19 and 20 are cross-cutting: the work for them
+happens in every milestone, and they are only *verifiable* once the last file has
+landed, so they are checked here.
 
 15. `README.md` and `README-zh.md` say the same thing. Both show version 0.3.0, 18
     steps, parallel by default, and the new document paths. Both keep the "what is
@@ -218,6 +232,26 @@ the user reviews it before anything else runs.
     carried across, and says plainly that `0.2.0` only reached upstream's half-way
     commit `649ee52`. `.claude-plugin/plugin.json` and
     `.claude-plugin/marketplace.json` both say `0.3.0`.
+18. The string `docs/crew/` appears nowhere in the repository, **except** inside
+    this job's own documents under `docs/design/` and `docs/decisions/`, which quote
+    the old paths as history, and inside `CHANGELOG.md`'s sections for `0.2.0` and
+    earlier. Before the job the sweep found 75 lines in 10 files; outside those two
+    exclusions the target is 0. (Moved here from check 7 by CRD 0001, because it
+    cannot pass before `M4`.)
+19. **CRD 0004.** No document claims a crew role cannot be messaged, and none claims a
+    fresh role is the **only** way to run a second round. Saying that a later round may
+    reach a role as a message **or** as a fresh role is required, not forbidden — that
+    is shared sentence `S9`, and every role prompt must carry it. `skills/team-lane/SKILL.md` says the PM may
+    message a live role, carries the test that a message holds a document path and a
+    version and nothing else, carries the "user said stop" rule, and its `state.json`
+    shape holds an agent id per task. No `agents/*.md` frontmatter changed.
+20. **CRD 0005.** Every document names **unit test** (written by `crew-engineer`, in the
+    project's own suite, run by the project's test command) and **QA test** (written by
+    `crew-qa`, under `docs/qa/<task-id>/`, run by `bash docs/qa/run-all.sh`) as two
+    different things, and never uses one word for both. No document tells the crew to
+    edit the project's test command. QA's `run.sh` and case files are in the code
+    reviewer's file list.
+
 
 ## Risks
 

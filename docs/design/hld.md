@@ -1,15 +1,63 @@
 # High level design: port claude-crew up to dsh-crew v0.7.0
 
-Version: 1
+Version: 3
 Language: English.
-Reads from: `docs/design/prd.md` version 2 (confirmed by the user).
+Reads from: `docs/design/prd.md` version 5 (confirmed by the user).
+
+## What changed in version 3
+
+Three decisions landed after version 2, and two of them change the shape of the
+work rather than its content.
+
+1. **The hand-off document leaves the repository** (CRD 0003 revision one). It is
+   now `~/dsh-crew-0.7.0-defects.md`, written like an issue filed against
+   dsh-crew, sent by the user, and **kept nowhere here**. So the root holds
+   **six** markdown files, not seven; `T-12` owns no file in this repository; and
+   `porting.md`'s divergence table stops being a pointer and becomes the whole
+   record (ADR 0008 revision one, ADR 0009 revision one).
+2. **A central claim of this port is false, and was measured false** (CRD 0004).
+   "A role runs once and cannot be messaged" is not the mechanism: the `Agent`
+   tool returns at once so roles run in the background, `ListAgents` lists them,
+   and a finished role can be reached again with its context intact. This is a
+   **mis-port**, not a divergence — fixing it moves this port closer to upstream,
+   which has `send_message` and uses it. It reaches nine files.
+3. **A unit test and a QA test are two different things** (CRD 0005, in the shape
+   of its revision one). The user named the cause under the security review's
+   third blocking finding: one word, "test", was doing two jobs. The crew never
+   edits the project's test command, and QA's scripts get read before they are
+   committed. This is a seventh deliberate divergence, and the largest.
+
+New decisions: ADR 0013, ADR 0014, ADR 0015. Revised to version 2: ADR 0008,
+ADR 0009, ADR 0010.
+
+## What changed in version 2
+
+The shape of the work changed in three ways, all after `T-01` was built and
+reviewed. Nothing else in this document moved.
+
+1. **Two files move to the repository root**, not one: `principles.md` (`T-06`)
+   and `porting.md` (`T-07`, CRD 0002). Version 1 said `docs/porting.md` keeps
+   its path; that is no longer true.
+2. **A new document class arrives**: a hand-off written for a reader **outside
+   this project** (`T-12`, CRD 0003, ADR 0008). Version 2 put it at the root of
+   this repository; **version 3 moves it out** — see above.
+3. **Local files now differ from their upstream twin on purpose**, so the port
+   map gains a ledger and a procedure (ADR 0009). Version 2 said three files and
+   six differences; version 3 makes it four and seven. See "The seven deliberate
+   divergences" below.
+
+The riskiest file, the reason `M1` holds one task, and the "no modules, no
+boundary contracts" finding are all unchanged. `T-01`'s fix round runs alone in
+`M1`, like `T-01` itself.
 
 ## What is being built
 
 Nothing runs here. This repository is a Claude Code plugin made of markdown, two
 JSON manifests and one checksum file. So "building" means one thing only:
 **rewriting text files so they say what dsh-crew v0.7.0 says, in the mechanism
-this port has.**
+this port has** — with the seven places where it deliberately says something
+else, and the one place where the 0.2.0 port got the mechanism wrong and this job
+puts it back.
 
 The job is a copy with edits. For every local file there is an upstream file that
 feeds it, a list of things that change on the way, and a command a person can run
@@ -72,16 +120,17 @@ UP=/tmp/claude-1000/-home-stuart-workspace-claude-crew/8ec5abc5-4ba3-485c-b294-0
 | Upstream v0.7.0 file | Local file | Task | What changes on the way |
 | --- | --- | --- | --- |
 | `roles/pm.md` (1,216 lines) | `skills/team-lane/SKILL.md` | `T-01` | Keep the frontmatter. Keep step 0 (unfinished work), the roster table and the "how you start a role" section — those are this port's own. Replace everything else with the v0.7.0 text: 18 steps, the ADR section, the bug-as-task-row section, the new document paths, parallel by default, the new limits, the job-slug shape. Rename `crew_engineer` → `crew-engineer` and so on. Replace `~/.dsh/crew/jobs/` with `~/.claude/crew/jobs/`. Drop `send_message`, `interrupt_agent` and `list_agents`: a role runs once, so a document change means a **fresh** role with the new version. Drop the git-guard sentences and the push approval file. Keep `docs/qa/`, `docs/release/`, `docs/research/` and the Verdicts line as rules for the **user's** project. |
-| `roles/architect.md` | `agents/crew-architect.md` | `T-02` | Frontmatter stays. New paths. The whole new **ADR** block: every option, its cost, why it lost, the marked recommendation, the design never waits, the bug-fix ADR that quotes the engineer's `Q-` file. Task rows gain a test file and a **DoD section**; the flat numbered check list goes. |
+| `roles/architect.md` | `agents/crew-architect.md` | `T-02` | Frontmatter stays. New paths. The whole new **ADR** block: every option, its cost, why it lost, the marked recommendation, the design never waits, the bug-fix ADR that quotes the engineer's `Q-` file. Task rows gain a test file and a **DoD section**; the flat numbered check list goes. **Added in version 2 (ADR 0012):** a `## Git` section, which this prompt never had although its frontmatter leaves it holding `Bash` — a live breach of `CLAUDE.md` design rule 5. |
 | `roles/doc-reviewer.md` | `agents/crew-doc-reviewer.md` | `T-03` | Frontmatter stays. Read only what the PM names, and say the scope on the first line. Checks renumbered 1..13: the new check 1 (DoD sections), the new check 7 (ADR options all on the table), the new check 13 (the flow table matches the repository). Later rounds reach a **fresh** reviewer here, so the round-two wording says the PM's briefing must carry the blocking findings. |
 | `roles/engineer.md` | `agents/crew-engineer.md` | `T-04` | Frontmatter stays. New paths. New **"a false red is not evidence"** section. New **"when you fix a bug: find at least two ways first"** section, including that the bug's DoD section comes from the PM before the fix starts. |
-| `roles/qa.md` | `agents/crew-qa.md` | `T-04` | Frontmatter stays. Plan moves **out** of the repository into the job folder; cases stay, under `docs/qa/<task-id>/`. New **Git** section. New **"a false red is not evidence"** section. New **step 6**, the standing testability list `docs/qa/gaps.md`. Every "acceptance check" becomes "DoD item". Also update the frontmatter `description`, which still names `docs/crew/qa/`. |
+| `roles/qa.md` | `agents/crew-qa.md` | `T-04` | Frontmatter stays. Plan moves **out** of the repository into the job folder; cases stay, under `docs/qa/<task-id>/`. New **Git** section. New **"a false red is not evidence"** section. New **step 6**, the standing testability list. Every "acceptance check" becomes "DoD item". Also update the frontmatter `description`, which still names `docs/crew/qa/`. **Changed in version 2 (ADR 0010):** QA writes only inside `docs/qa/<task-id>/`; `docs/qa/run-all.sh` and `docs/qa/gaps.md` are the PM's files, and QA reports the lines to add. That is CRD 0003 defect 6, and it is a deliberate difference from upstream. |
 | `roles/researcher.md` | `agents/crew-researcher.md` | `T-05` | Frontmatter stays. Writes to `docs/research/`. New section on what a release and an upgrade plan look like, per project type, with a source and a date per claim. **Carried with a change:** upstream says "this preset has no `web_fetch`". Our researcher has `WebFetch`, so that paragraph is rewritten — it may open a page itself, and it still has no shell. |
 | `roles/code-reviewer.md` | `agents/crew-code-reviewer.md` | `T-05` | Frontmatter stays. Reads `docs/design/prd.md` plus the task row in `docs/design/tasks.md`; "acceptance checks" become the task's **DoD section**. |
 | `roles/security-reviewer.md` | `agents/crew-security-reviewer.md` | `T-05` | Frontmatter stays. Gains the new **"First, read"** section. |
 | `principles.md` (1,106 lines, at the upstream root) | `principles.md` (new, at this repository's root) | `T-06` | `git mv docs/principles.md principles.md`, then rewrite. Principles 1..20 with upstream's exact numbers and titles, in this port's short house style, plus `P1`..`P5` written in full. Principle 20's flow table is carried in full and adapted — see ADR 0006. |
-| — | `docs/porting.md` | `T-07` | No upstream twin: this file is the port's own. Re-map every row to the v0.7.0 paths, widen the "did not port" table to every item in the PRD's "Not in scope" list, and rewrite the port-pass steps to compare against a **tag in a throwaway clone** — see ADR 0005. |
-| — | `upstream.sums` | `T-08` | Re-pin to `87a4332`. Header says v0.7.0 and 18 steps. The `docs/principles.md` line becomes `principles.md`. The stale mention of `tools/check.mjs` goes — that file was removed in 0.2.0. |
+| — | `porting.md` (moved from `docs/porting.md`) | `T-07` | No upstream twin: this file is the port's own. `git mv` it to the root (CRD 0002), re-map every row to the v0.7.0 paths, widen the "did not port" table to every item in the PRD's "Not in scope" list, rewrite the port-pass steps to compare against a **tag in a throwaway clone** (ADR 0005), and add the **deliberate divergence** table — seven rows, self-contained, pointing at no other document — with the six-step procedure for a `FAILED` line (ADR 0009 revision one). Its "did not port" row for `send_message`, `interrupt_agent` and `list_agents` is **false** and is rewritten (CRD 0004). |
+| — | `upstream.sums` | `T-08` | Re-pin to `87a4332`. Header says v0.7.0 and 18 steps. The `docs/principles.md` line becomes `principles.md`. The stale mention of `tools/check.mjs` goes — that file was removed in 0.2.0. The comments above `roles/pm.md`, `roles/qa.md`, `roles/code-reviewer.md` and `principles.md` say their local twin deliberately differs, and point at `porting.md`'s divergence table. |
+| — | `~/dsh-crew-0.7.0-defects.md` — **outside this repository** | `T-12` | No upstream twin, no reader inside this project, and **no file here**: it is an issue for dsh-crew's author, in the user's home directory, sent by the user and recorded nowhere in the plugin (CRD 0003 revision one, ADR 0008 revision one). Seven defects — CRD 0003's six and CRD 0005's one — each with the upstream file and its line numbers at `v0.7.0`, the text as it stands, how it fails in a real job, what this port says instead, and the smallest fix upstream could make. |
 | `CLAUDE.md` | `CLAUDE.md` | `T-09` | Not a copy: this file is about **this** repository. The eight design rules stay eight rules and stay true. "State and documents" is rewritten for the new layout. "Documentation" says principles 1..20 are shared and `principles.md` is at the root. The upstream-check command points at a tag clone. |
 | `README.md` | `README.md` + `README-zh.md` | `T-10` | Not a translation of upstream: the install and the mechanics differ. Both local files change together, in one commit. Version 0.3.0, 18 steps, parallel by default, the new document paths, the new limits. Both keep the "what is not enforced" section and the `PreToolUse` hook the user can add. |
 | — | `CHANGELOG.md`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` | `T-11` | A new `0.3.0` section naming dsh-crew v0.7.0 and saying plainly that `0.2.0` only reached `649ee52`. Both manifests say `0.3.0`. `plugin.json`'s `description` loses "one at a time" — see ADR 0004. |
@@ -93,10 +142,13 @@ Reuse before you invent applies here too. These parts of the local files are
 
 - **Step 0, "is there unfinished work?"** — upstream gets this pushed at the PM
   every turn by `host/jobs.js`. Here the PM looks in `~/.claude/crew/jobs/`
-  itself. Principle P2.
+  itself. Principle P2. **Its procedure is kept and its promise is not**: "every
+  role from the old session is gone" is unverified, not known, so it is replaced
+  by a procedure that finds out (ADR 0013).
 - **The roster table and "how you start a role"** — upstream builds this at run
   time in `host/crew.js`. Here it is written out in the skill, because nothing
-  builds it.
+  builds it. **The section is kept; its central paragraph is deleted**, because
+  "a role runs once and then it is gone" is false in this deployment (CRD 0004).
 - **Every frontmatter block in `agents/*.md`** — `name`, `description`,
   `tools` / `disallowedTools`. Confirmed: `host/roles.js` is byte-identical
   between `649ee52` and `v0.7.0` (`sha256sum -c` reports it `OK`), so **no tool
@@ -127,6 +179,10 @@ The short version:
   `roleModels`, `rolesDir`. Claude Code has no presets.
 - **Upstream's own project record** — its `docs/decisions/*`, `docs/qa/*` and
   `docs/design/tasks.md`. That is dsh-crew's history, not a rule.
+- **No port-back job.** The six defects are fixed here and written down for
+  dsh-crew's author to read; nothing in this job writes into dsh-crew. CRD 0003's
+  Decision section is where the user chose that, and `~/workspace/dsh-crew` is
+  never read, written or run by any task.
 - **No new folder in this repository for `docs/qa/`, `docs/release/` or
   `docs/design/api/`.** Those are paths the rules tell a role to create in the
   **user's** project. Creating them here empty would be a file no rule asked
@@ -139,13 +195,91 @@ Before this job, and after it:
 | Before | After | Who moves it |
 | --- | --- | --- |
 | `docs/principles.md` | `principles.md` (repository root) | `T-06` |
-| `docs/porting.md` | `docs/porting.md` — **unchanged path** | `T-07` (content only) |
+| `docs/porting.md` | `porting.md` (repository root) | `T-07` (CRD 0002) |
 | `docs/crew/*` in prose, 75 lines across 10 files | `docs/design/`, `docs/decisions/adr/`, `docs/decisions/crd/`, `docs/qa/`, `docs/research/`, `docs/release/` | `T-01`, `T-02`, `T-03`, `T-04`, `T-05`, `T-06`, `T-09`, `T-10` |
 | — | `docs/design/prd.md`, `docs/design/hld.md`, `docs/design/tasks.md`, `docs/decisions/adr/*.md` — **this job's own record** | the PM and the architect, before `T-01` starts |
 
-`docs/porting.md` staying where it is, is a decision, not an oversight: the
-confirmed PRD's acceptance check 13 names that exact path. ADR 0002 holds the
-options and the cost.
+After the job the repository root holds **six** markdown files: `README.md`,
+`README-zh.md`, `CHANGELOG.md`, `CLAUDE.md`, `principles.md` and `porting.md`.
+`docs/` then holds only crew job output, which is what upstream principle 19 says
+it is. `T-11`'s sweep 4 counts those six.
+
+ADR 0002 holds the options for the layout; CRD 0002 is where the user said yes to
+moving `porting.md`; ADR 0008 revision one is why the hand-off to upstream is
+**not** a file here at all — the user's reason, in their words, is that it is an
+issue sent to another project, and an issue is not documentation.
+
+## The seven deliberate divergences, and the one mis-port
+
+This is where the job's stated goal — the two projects say the same thing — is
+knowingly given up, and where it turns out the two projects were **not** saying
+the same thing already.
+
+Three read-only reviews of `T-01` found **nine** distinct blocking findings in
+`skills/team-lane/SKILL.md` (eleven raised, two of them found twice). Eight had a
+settled cause: two this port's own, six dsh-crew v0.7.0's own, copied here word
+for word. CRD 0003 took the six to the user, who chose: fix them all here, and
+write a document dsh-crew's author can read. The ninth was CRD 0005, below.
+
+### Seven divergences (Class A)
+
+After this job **four** local files no longer say what their upstream twin says:
+`skills/team-lane/SKILL.md`, `agents/crew-qa.md`, `agents/crew-code-reviewer.md`
+and `principles.md`. Six of the seven are CRD 0003's. The seventh is CRD 0005 and
+is the largest: this port says a **unit test** and a **QA test** are two different
+things, written by two different roles and run by two different commands, and
+that the crew never edits the project's test command. Upstream's own CRD 0009
+exists to do the opposite.
+
+That is a new failure the design has to carry, because the next port pass sees
+only a `FAILED` line from `sha256sum -c` and cannot tell a missed port from a
+decision. Two ways it goes wrong, both silent: the pass copies the paragraph back
+and re-imports the defect, or upstream fixes it their own way and the two projects
+diverge for good.
+
+The answer is a **ledger and a procedure** (ADR 0009):
+
+- every difference is Class A (a rule stated differently — needs a CRD and the
+  user's yes), Class B (wording, an example, a cross-reference, a clarification)
+  or Class C (a mechanism difference, already in the port map);
+- **`porting.md`'s divergence table is the whole ledger**, seven rows plus one
+  Class B row, and every row is self-contained — it names the upstream file and
+  lines, what upstream says, what this port says, and the local file that says it.
+  It points at no other document, because after CRD 0003 revision one there is no
+  other document: the issue sent to upstream lives in the user's home directory
+  and this repository keeps no copy;
+- `upstream.sums` carries the pointer on the four lines that matter, because a
+  `FAILED` line is where a pass is already looking;
+- the port-pass steps say, in order, what to do when one of those four files comes
+  back `FAILED`, and the first instruction is **read the table before you read the
+  diff**.
+
+### One mis-port, which is the opposite thing (CRD 0004)
+
+Everything above moves this port **away** from upstream on purpose. CRD 0004 moves
+it **back**. The 0.2.0 port dropped `send_message`, `interrupt_agent` and
+`list_agents` and wrote the reason as "a role runs once; a second round is a fresh
+role". That reason is false in this deployment, and it was measured false:
+`SendMessage` and `ListAgents` exist, roles run in the background, and a finished
+role can be reached again with what it read.
+
+Two things follow for the design, and both are larger than they look:
+
+1. **The rule the falsehood was protecting has to be re-argued from a true
+   reason.** It is not "you cannot message a role". It is "a message reaches one
+   role and dies there", so two engineers building two sides of one boundary
+   cannot compare notes. The mechanical test — a message carries a document path
+   and a version number and nothing else — is what a tired PM can actually apply.
+   `principles.md`'s `P1` is built on the false premise and is rewritten (`T-06`).
+2. **What may be said about a session restart is now bounded by measurement.**
+   Whether a role from an earlier session can be reached is **unknown**, and the
+   documents may promise nothing either way (ADR 0013). `state.json` gets the
+   agent id back so the question can be answered cheaply the first time somebody
+   restarts mid-job.
+
+No agent frontmatter changes. Roles still cannot message each other — that is
+design rule 1, and it is what keeps the document rule enforceable: only the PM can
+open a back channel, so there is exactly one person to hold to the rule.
 
 ## How the work moves through the milestones
 
@@ -153,6 +287,7 @@ The PRD's four milestones are the user's and are not changed. Inside them:
 
 ```
 M1   T-01  the skill                      alone. Nothing runs beside it.
+     T-01  fix round                     alone as well: 28 fixes, one engineer
             |
             v  user reviews M1
 M2   T-02  crew-architect            \
@@ -161,9 +296,10 @@ M2   T-02  crew-architect            \
      T-05  researcher + the 2 reviewers /
             |
             v  user reviews M2
-M3   T-06  principles.md at the root  \  T-06 and T-08 in parallel
-     T-08  upstream.sums              /
-     T-07  docs/porting.md               after T-06 (its map must name real files)
+M3   T-06  principles.md at the root  \
+     T-08  upstream.sums               |  all three in parallel
+     T-12  the issue for upstream     /   (no file in this repository)
+     T-07  porting.md at the root        after T-06: its map must name real files
             |
             v  user reviews M3
 M4   T-09  CLAUDE.md                  \
@@ -172,7 +308,9 @@ M4   T-09  CLAUDE.md                  \
 ```
 
 Every task after `T-01` depends on `T-01`, because every one of them describes
-the flow the skill defines. Inside a milestone, tasks with no shared file start
+the flow the skill defines. `T-12` depends on `T-04` and `T-05` as well: it quotes
+what this port says instead of the upstream text, and two of the seven defects are
+written in `agents/crew-qa.md` and `agents/crew-code-reviewer.md`. Inside a milestone, tasks with no shared file start
 together, in one message — parallel by default, which is one of the rules this
 job is carrying across.
 

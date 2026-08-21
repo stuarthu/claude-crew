@@ -1,6 +1,6 @@
 # ADR 0013: what the documents may say about a role after a session restart
 
-Version: 1
+Version: 2
 
 ## The choice
 
@@ -91,3 +91,42 @@ Two words are banned in this area, because both are claims: **"gone"** as a
 statement of fact about a restart, and **"resumed"** as a promise. "Cannot
 reach" and "treated as gone" are procedures, and procedures are what this
 document is for.
+
+## Revision one — half of it is measured now, and the wording survives
+
+On 2026-08-21, in the middle of this job, the thing Option D said would cost a
+paused session happened by accident. The PM resumed three finished reviewers for
+review round 2 and all three failed:
+
+```
+{"success":false,"message":"Agent \"af45c087b7a8e66a0\" could not be resumed:
+ No transcript found for agent ID: af45c087b7a8e66a0"}
+```
+
+Two of those ids had been resumed **successfully** earlier in the same job. What
+changed in between was the session directory: the session was re-keyed, and an
+agent's transcript lives under it. Evidence file, section 11.
+
+**What is now measured.**
+
+- A resume works within a session, including after the agent has reported.
+- A resume **fails after the session is re-keyed**, and the failure is **clean and
+  loud** — a `No transcript found for agent ID` message, not a silent wrong
+  answer. That is the good case: the PM cannot mistake it for a reply.
+- An agent that was resumed shortly before the re-key came across with it. An
+  agent left untouched did not.
+
+**What is still unknown.** Whether a deliberate restart behaves the same way. A
+re-key inside one working session may or may not be the same event, and nothing
+has tested the other one.
+
+**The recommendation does not change, and neither does `S10`.** It was written to
+promise nothing in either direction and to give a procedure instead, and the
+procedure is exactly what the PM ran: try the id, fail loudly, treat the role as
+gone, start a fresh one. Nothing was lost but the reviewers' round-1 context,
+which is on disk in the job folder anyway.
+
+**One thing to add to the skill** (`F-51`): say what a failed resume looks like.
+A PM that has never seen `No transcript found for agent ID` may read it as a bug
+and retry it three times. It is not a bug — it is the answer, and the answer means
+take the fallback.

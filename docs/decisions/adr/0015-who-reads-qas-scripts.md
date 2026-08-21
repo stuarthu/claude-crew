@@ -1,6 +1,6 @@
 # ADR 0015: who reads QA's scripts before they are committed, and when
 
-Version: 1
+Version: 2
 
 ## The choice
 
@@ -92,3 +92,20 @@ Run 10c first, then 10a, always.
 which means nobody would ever have read it. It is created once per project, so
 the cost is one review, once: the first time the PM creates it, it goes into the
 same round as the first QA files.
+
+## Revision one — the contradiction with `S6` is closed, from `S6`'s side
+
+Round 2 of the `T-01` review found that this ADR contradicted shared sentence
+`S6`. It was right. This ADR tells the PM to send a reviewer "the QA file list,
+the pasted content of `run.sh` and the case files"; `S6` said a message carries a
+document path and a version number **and nothing else**.
+
+`S6` was the wrong sentence, not this one. It has been rewritten (see
+`docs/design/tasks.md` version 4, fact 11): a message may carry a **pointer** and
+**evidence you could copy again** — a diff, a command's output, a log, the text of
+a file — and nothing that is a decision. The pasted content of `run.sh` is
+evidence: it is a copy of a file that exists, and losing the message loses
+nothing.
+
+Nothing in this ADR changes. What it orders was always safe; the sentence that
+forbade it was too tight.

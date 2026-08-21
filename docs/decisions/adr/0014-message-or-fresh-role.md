@@ -1,6 +1,6 @@
 # ADR 0014: when the PM messages a live role, and when it starts a fresh one
 
-Version: 1
+Version: 2
 
 ## The choice
 
@@ -84,3 +84,61 @@ is reached:
 
 This is also why no role needs `SendMessage`: the rule is written so that being
 messaged and being replaced are the same thing from the role's side.
+
+## Revision one — the test was drawn in the wrong place
+
+Round 2 of the `T-01` review found that `S11` forbids something the skill orders
+**ten** times. The finding is right, and the fault is in this ADR's Option A, not
+in the skill.
+
+```sh
+grep -n 'send it\|message it\|Message the\|message the' skills/team-lane/SKILL.md
+```
+
+returns ten lines, and every one of them messages a role about work it has
+**already reported**: a researcher asked for a command's output, an architect
+asked what a task row was missing, a code reviewer given a test run it asked for,
+an engineer given CI's error text, a reviewer given QA's scripts (ADR 0015). The
+PM did it too, three times, resuming finished reviewers for review round 2 — and
+that was the right call, not a slip.
+
+**Where Option A went wrong.** It used "it has finished" as the trigger for a
+fresh role. Finishing is not the danger. The danger it was reaching for is
+narrower and it is written in Option B's own rejection, one paragraph below:
+rebuilding a task inside an old context produces a second report that quietly
+replaces the first, so the milestone review can no longer see that the task was
+built twice.
+
+So the test moves from **who** to **what**: not "has this role finished?" but
+"does the task's own history need a new start?"
+
+### Option A, as revised — the new-start test **(recommended)**
+
+> Message a role — live or finished — when you need it to look again at the work
+> it already did: another round of review, a question about its own report, the
+> output of a command it asked for. Start a fresh role when the work itself starts
+> again: a task built from the beginning, a document version the role never read,
+> or a role you cannot reach. The test is not whether it has finished. It is
+> whether the task's own history should show a new start.
+
+The rider that carries the reason stays with it:
+
+> A role asked to build the task again inside its old context produces a second
+> report that quietly replaces the first, and the milestone review can no longer
+> see that the task was built twice. That is the case a fresh role exists for.
+
+And "Either way, the fact lives in a document first" is unchanged.
+
+**What this costs.** "Should the history show a new start?" is a judgement, where
+"has it finished?" was a fact. The bound is the same as before: whichever way the
+PM calls it, the content is a pointer or evidence (`S6`), so a wrong call costs a
+wasted message and never a lost fact. And the expensive direction is now the
+default — the PM reaches for a message first, which is what CRD 0004 was accepted
+to make possible.
+
+**Options B, C and D are unchanged and still lose.** Option B — always message
+when the role can be reached — is still wrong, and its rejection is now the *whole
+reason* for the revised test rather than a footnote.
+
+**What follows.** `S11`'s copies in `skills/team-lane/SKILL.md` are the fix
+engineer's work (`F-45`), and `F-32`'s check anchors on the new first words.

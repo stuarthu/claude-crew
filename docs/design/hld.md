@@ -1,8 +1,17 @@
 # High level design: port claude-crew up to dsh-crew v0.7.0
 
-Version: 3
+Version: 4
 Language: English.
-Reads from: `docs/design/prd.md` version 5 (confirmed by the user).
+Reads from: `docs/design/prd.md` version 6 (confirmed by the user).
+
+## What changed in version 4
+
+Review round 2 of `T-01` corrected two sentences this document had quoted, and
+one of them was a claim about the mechanism rather than a rule. Both are fixed in
+"One mis-port" below: the message test is now upstream's own wording plus two
+named carve-outs, and the "only the PM can open a back channel" claim is gone —
+it was measured false (evidence sections 7.1 and 7.2). Nothing else moved: no
+task, no milestone, no file map.
 
 ## What changed in version 3
 
@@ -268,18 +277,26 @@ Two things follow for the design, and both are larger than they look:
 1. **The rule the falsehood was protecting has to be re-argued from a true
    reason.** It is not "you cannot message a role". It is "a message reaches one
    role and dies there", so two engineers building two sides of one boundary
-   cannot compare notes. The mechanical test — a message carries a document path
-   and a version number and nothing else — is what a tired PM can actually apply.
+   cannot compare notes. The test that carries it is upstream's own — **never
+   decide anything in a message**: a new rule, a new number, a new file name or a
+   new promise belongs in a document first. A message may carry a pointer and
+   evidence you could copy again, and nothing else is safe to say in one.
    `principles.md`'s `P1` is built on the false premise and is rewritten (`T-06`).
 2. **What may be said about a session restart is now bounded by measurement.**
-   Whether a role from an earlier session can be reached is **unknown**, and the
-   documents may promise nothing either way (ADR 0013). `state.json` gets the
-   agent id back so the question can be answered cheaply the first time somebody
-   restarts mid-job.
+   Whether a role from an earlier session can be reached is **unknown** — half
+   measured since: a resume fails loudly, `No transcript found for agent ID`,
+   once the session is re-keyed (evidence section 11). The documents promise
+   nothing either way and give a procedure instead (ADR 0013). `state.json` gets
+   the agent id back, and a list of the commits the PM made, so both the restart
+   question and the git check survive a new session.
 
-No agent frontmatter changes. Roles still cannot message each other — that is
-design rule 1, and it is what keeps the document rule enforceable: only the PM can
-open a back channel, so there is exactly one person to hold to the rule.
+No agent frontmatter changes, and no role holds a messaging tool: the deny list
+was measured and it really holds. What it does **not** do is close the channel —
+three roles hold a shell, and a shell can start a separate Claude process or write
+into the job folder (evidence sections 7.1 and 7.2). So the channel is closed by
+the rules those roles are given, not by the tools they hold, and the PM's is the
+only sanctioned one. That is the honest form of design rule 1, and it is what
+keeps the document rule enforceable.
 
 ## How the work moves through the milestones
 

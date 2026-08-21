@@ -1,6 +1,6 @@
 # PRD: port claude-crew up to dsh-crew v0.7.0
 
-Version: 6
+Version: 7
 Language: documents and briefings in English; the PM talks to the user in Chinese.
 
 ## The problem, and who has it
@@ -241,10 +241,21 @@ landed, so they are checked here.
 19. **CRD 0004.** No document claims a crew role cannot be messaged, and none claims a
     fresh role is the **only** way to run a second round. Saying that a later round may
     reach a role as a message **or** as a fresh role is required, not forbidden — that
-    is shared sentence `S9`, and every role prompt must carry it. `skills/team-lane/SKILL.md` says the PM may
-    message a live role, carries the test that a message holds a document path and a
-    version and nothing else, carries the "user said stop" rule, and its `state.json`
-    shape holds an agent id per task. No `agents/*.md` frontmatter changed.
+    is shared sentence `S9`, and every role prompt must carry it.
+    `skills/team-lane/SKILL.md` says the PM may message a role, live or finished; it
+    carries the rule that a message may hold a **pointer** (a document path with its
+    version) or **evidence** (something copied out of the world that could be copied
+    again — a diff, a command's output, a CI log, the text of a file) and that anything
+    which is neither is a decision, and decisions go in a document first; it carries the
+    "user said stop" rule; and its `state.json` shape holds an agent id and a list of the
+    commits the PM made. No `agents/*.md` frontmatter changed.
+
+    *(Reworded at PRD version 7. Version 6 required the test to read "a document path and
+    a version and nothing else". That wording forbade ten things the same file orders —
+    sending a diff to a reviewer, a command's output to a role with no shell — and was
+    stricter than upstream, whose `roles/pm.md` line 62 says only "Never decide anything
+    in a message". Found by code review round 2; the wording is `S6` in
+    `docs/design/tasks.md` version 4.)*
 20. **CRD 0005.** Every document names **unit test** (written by `crew-engineer`, in the
     project's own suite, run by the project's test command) and **QA test** (written by
     `crew-qa`, under `docs/qa/<task-id>/`, run by `bash docs/qa/run-all.sh`) as two

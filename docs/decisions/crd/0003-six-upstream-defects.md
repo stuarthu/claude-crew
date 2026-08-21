@@ -156,6 +156,26 @@ defects back in or delete the fixes. That is the exact failure `upstream.sums` e
 to prevent (principle `P5`). Task `T-07` writes it, and `T-08` puts the same warning in
 the comment above `roles/pm.md`'s line in `upstream.sums`.
 
+## Revision two — a seventh defect, found by code review round 3
+
+`skills/team-lane/SKILL.md` carried upstream's Hard rule "Push `main`, a tag, **or with
+force** only when the user has just said yes" (`roles/pm.md` 1164). Upstream's own step
+17 (933-934) already forbids a force push. So a PM reading only the Hard rules could get
+a force push with one yes, while the step it would run says the opposite — the same shape
+as the six above: **upstream contradicting itself.**
+
+`F-50` removed the clause and the file now says a force push is not something this
+playbook does; if the user wants one, they are handed the command. The change is already
+in the file — the architect ordered it from security review round 2's pre-existing note,
+and fix round 3 made it.
+
+What was missing was the record. It is divergence **eight** (this CRD's six, CRD 0005's
+one, and this), `docs/design/tasks.md` fact 10 is corrected at version 7, and the PM must
+put it in front of the user with the rest.
+
+**It is a safety improvement, not a loosening**: the port's answer is the stricter of the
+two readings upstream offers.
+
 ## Applied
 
 Not yet — waiting on the architect round that writes these into

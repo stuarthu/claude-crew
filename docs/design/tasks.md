@@ -1,9 +1,77 @@
 # Task breakdown: port claude-crew up to dsh-crew v0.7.0
 
-Version: 3
+Version: 7
 Language: English.
-Reads with: `docs/design/prd.md` version 5, `docs/design/hld.md` version 3,
+Reads with: `docs/design/prd.md` version 7, `docs/design/hld.md` version 4,
 `docs/decisions/adr/0001` to `0015`, `docs/decisions/crd/0001` to `0005`.
+
+## What changed in version 5
+
+The three round-2 review reports reached the job folder a moment after version 4
+was written, so version 4 was built by confirming all six blocking findings
+against primary sources instead. **Version 5 changes nothing about those six**:
+`F-44` to `F-51` are settled and the fix engineer has not started. This version
+does one narrow job — **round 2's optional findings**, which version 4 could not
+read.
+
+- **Seven new items, `F-52` to `F-58`**, in Group H. Nothing was dropped
+  outright: every optional in the three reports is taken, one of them narrowed
+  and one of them answered rather than built.
+- **Security review round 2's optional 4 is answered, not taken.** It says the
+  message test is a test of shape, so a message carrying both a path and a new
+  instruction passes it. That was true of version 3's `S6`. It is not true of
+  version 4's, which tests content: a new rule is caught by the first sentence and
+  by "anything that is neither is a decision". The one grain worth keeping is
+  `F-58`. Recorded here so round 3 does not raise it again.
+- **`F-45` gains one more check.** Its own text already says four lines carry the
+  old "it has finished" test; the doc review names a **fifth** that its greps
+  miss. The finding is not re-opened — the check is made to catch what the fix
+  already orders.
+- **One `M2` item**, in `T-10`: both READMEs say only two roles hold a shell.
+  Three do.
+
+PRD check 19 now quotes `S6` and records why the old wording was wrong, so the
+open item version 4 left for the PM is closed.
+
+## What changed in version 4
+
+Review round 2 of `T-01` came back with six blocking findings. **Two of them are
+in shared sentences, which an engineer may not change** — they are here, decided.
+The other four become fix items. Nothing is re-planned.
+
+1. **`S6` was too tight and this file is where it came from.** It said a message
+   carries a path and a version "and nothing else", and the skill orders
+   content-bearing messages **ten** times — a diff for a review round, a command's
+   output for a role with no shell, CI's error text, QA's pasted `run.sh`. ADR 0015
+   contradicted it too. The "nothing else" clause was this port's invention;
+   upstream says only "Never decide anything in a message". `S6` is rewritten below
+   around upstream's own wording plus two named carve-outs.
+2. **`S11` drew its line in the wrong place.** It said start a fresh role "when it
+   has finished", and the same ten lines message a role that has already reported.
+   The PM did it three times this round, correctly. The danger was never that a
+   role has finished — it is rebuilding a task inside an old context, where the
+   second report quietly replaces the first. `S11` is rewritten below, and
+   ADR 0014 is revised to version 2 to match.
+3. **Four new fix items from the other blocking findings** — `F-46` to `F-49` —
+   and two more: `F-50` from an optional finding the PM flagged, and `F-51` from
+   the evidence file's new section 11. `F-44` and `F-45` carry the two sentences
+   above into the skill. The round is now **51** items.
+4. **ADR 0013, ADR 0014 and ADR 0015 are all at version 2.** ADR 0013's decision
+   and `S10` survived a real measurement unchanged; ADR 0014's recommendation
+   changed; ADR 0015's contradiction was closed from `S6`'s side.
+
+**One thing I could not read, and the PM has to know before round 3.** The three
+round-2 review reports named in my briefing —
+`<job folder>/reviews/T-01-code-review-r2.md`, `-doc-review-r2.md` and
+`-security-review-r2.md` — **do not exist on disk**. The job folder holds only the
+three round-1 reports and `mechanism-evidence.md`. So every finding below was
+confirmed against primary sources instead: the built
+`skills/team-lane/SKILL.md`, `$UP/roles/pm.md`, and the evidence file. All six
+blocking findings are real — I verified each one by grep before writing its fix —
+but **the round-2 reviewers' proposed replacement texts and their optional
+findings were unavailable to me.** Two consequences: the wording below is mine,
+not theirs, and round 3 may raise optional findings that round 2 already raised.
+See the last note at the end of this file.
 
 ## What changed in version 3
 
@@ -139,21 +207,57 @@ engineers cannot talk to each other. Copy them **character for character**.
 9. **One numbering for the seven defects.** CRD 0003's table numbers six of them
    1 to 6; CRD 0005 is number 7. `porting.md` (`T-07`), `upstream.sums` (`T-08`)
    and the issue `T-12` writes use the **same** numbers. Nothing renumbers.
-10. **No task may invent an eighth divergence from upstream.** There are now
-    seven: CRD 0003's six, and CRD 0005's one. A rule this port states differently
-    needs a CRD and the user's yes (ADR 0009, Class A). A task that finds another
-    one reports it to the PM and stops there.
-11. **`S6` — the message test (CRD 0004).** Goes in `skills/team-lane/SKILL.md`,
-    wherever messaging a role is described:
+10. **No task may invent a ninth divergence from upstream.** There are now
+    **eight**: CRD 0003's six, CRD 0005's one, and the force-push rule below. A rule
+    this port states differently needs a CRD and the user's yes (ADR 0009, Class A).
+    A task that finds another one reports it to the PM and stops there.
 
-    > A message carries a document path and a version number, and nothing else.
-    > If the message you are about to send has no file path and no version in it,
-    > it is a decision — and a decision in a message is lost. Write it into the
-    > document, raise the version, then send the pointer.
+    **The eighth, found by code review round 3 and recorded at tasks version 7.**
+    `F-50` removed "Push `main`, a tag, **or with force** only when the user has just
+    said yes" from the Hard rules. Upstream `roles/pm.md` line 1164 has that clause;
+    this port now says a force push is not something the playbook does. It is the same
+    class as CRD 0003's six — upstream contradicting itself, because upstream's own
+    step 17 (lines 933-934) already forbids force. The code reviewer did exactly what
+    this fact tells it to do: it reported it rather than letting `T-07` hit it later.
+    Recorded as **CRD 0003 revision two**, and it is on the list of things the PM must
+    put in front of the user.
+11. **`S6` — never decide anything in a message (CRD 0004).** Goes in
+    `skills/team-lane/SKILL.md`, wherever messaging a role is described.
+    **Rewritten in version 4** — the old wording is below it, so nobody restores
+    it by accident.
 
-    This is the rule the false "you cannot message a role" was protecting. It has
-    to be written before any of the fourteen "start a fresh role" places is
-    relaxed, or the relaxation removes the guard with the falsehood.
+    > **Never decide anything in a message.** If what you are about to send holds
+    > a new rule, a new number, a new file name or a new promise, it belongs in a
+    > document first: write it there, raise the version, then send the pointer.
+    >
+    > A message may carry two things, and you will send both every day. A
+    > **pointer** — a document path with its version number. And **evidence**:
+    > something you copied out of the world and could copy again, such as a diff,
+    > a command's output, a CI log, or the text of a file. Anything that is
+    > neither is a decision. Test every sentence, not the whole message.
+
+    The last sentence was added by `F-58` in fix round 3, after security review
+    round 2 pointed out that a whole-message test passes a message that carries both
+    a pointer and a new instruction. It is part of `S6` now: a copy of `S6` without
+    it is out of date.
+
+    and the line that follows it:
+
+    > If a message's content is neither a pointer nor evidence you could produce
+    > again, you have just invented policy in a chat window. Stop and write it
+    > down.
+
+    **Why it changed.** Version 3 said "a document path and a version number, and
+    nothing else". The skill orders a content-bearing message ten times, and
+    ADR 0015 orders another. The first sentence above is upstream's own, word for
+    word (`$UP/roles/pm.md` 62-64), which also ends the awkwardness of this port
+    inventing a stricter rule than the project it is porting. The two carve-outs
+    are named on purpose: **evidence can be produced again, a decision cannot**,
+    and that is the whole reason the rule exists.
+
+    **This is the rule the false "you cannot message a role" was protecting.** It
+    has to be written before any "start a fresh role" place is relaxed, or the
+    relaxation removes the guard along with the falsehood.
 12. **`S7` — a unit test and a QA test (CRD 0005).** Goes in
     `skills/team-lane/SKILL.md`, `agents/crew-engineer.md`, `agents/crew-qa.md`,
     `agents/crew-code-reviewer.md`, `agents/crew-architect.md` and
@@ -196,14 +300,35 @@ engineers cannot talk to each other. Copy them **character for character**.
     **Promise nothing in either direction.** The evidence file's section 10 says
     this is unmeasured, not false. The words "gone" and "resumed" may not be used
     as statements of fact about a restart anywhere in any document.
-16. **`S11` — message or fresh role (ADR 0014).** Goes in
-    `skills/team-lane/SKILL.md`, at each of the fourteen places that today say
-    "start a fresh role":
+16. **`S11` — message or fresh role (ADR 0014 version 2).** Goes in
+    `skills/team-lane/SKILL.md`, at each of the places that say "start a fresh
+    role". **Rewritten in version 4.**
 
-    > Message the role that is still live when what changed is inside the work it
-    > is doing now. Start a fresh role when it has finished, when you cannot reach
-    > it, or when the task has to be built again from the beginning. Either way,
-    > the fact lives in a document first.
+    > Message a role — live or finished — when you need it to look again at the
+    > work it already did: another round of review, a question about its own
+    > report, the output of a command it asked for. Start a fresh role when the
+    > work itself starts again: a task built from the beginning, a document
+    > version the role never read, or a role you cannot reach. The test is not
+    > whether it has finished. It is whether the task's own history should show a
+    > new start.
+
+    with its reason, which travels with it:
+
+    > A role asked to build the task again inside its old context produces a
+    > second report that quietly replaces the first, and the milestone review can
+    > no longer see that the task was built twice. That is the case a fresh role
+    > exists for.
+
+    and, unchanged: **Either way, the fact lives in a document first.**
+
+    **Why it changed.** Version 3 made "it has finished" the trigger for a fresh
+    role. Ten lines in the skill message a role that has already reported, and
+    every one of them is right to; ADR 0015 adds an eleventh. Finishing was never
+    the danger. Run this to see them:
+
+    ```sh
+    grep -n 'send it\|message it\|Message the\|message the' skills/team-lane/SKILL.md
+    ```
 
 ## Task table
 
@@ -350,18 +475,22 @@ what `T-09`, `T-10` and `T-06` have to agree with):
 
 ---
 
-## `T-01` fix round (M1) — 43 fixes to the file `T-01` already produced
+## `T-01` fix round (M1) — 58 fixes to the file `T-01` already produced
 
 **This is not a re-plan.** `T-01` owns the same one file, the 18 checks above
 still hold, and round 1's judgement calls were all accepted by the code review.
 What follows is the fix list from three reviews and two later change requests:
 one engineer, one sitting.
 
-**Version 3 added fifteen items.** `F-01` to `F-28` came from the three reviews
-and CRD 0003. `F-29` to `F-38` come from **CRD 0004** (the PM can message a live
-role) and `F-39` to `F-43` from **CRD 0005** (a unit test and a QA test are two
-different things). `F-28`, "nothing regressed", runs **last of all**, after every
-group.
+**Where the items came from.** `F-01` to `F-28` — the three round-1 reviews and
+CRD 0003. `F-29` to `F-38` — **CRD 0004** (the PM can message a live role).
+`F-39` to `F-43` — **CRD 0005** (a unit test and a QA test are two different
+things). `F-44` to `F-51` — **review round 2**, and two of those, `F-44` and
+`F-45`, replace wording that `F-31` and `F-32` put in earlier this round: do the
+later one. `F-28`, "nothing regressed", runs **last of all**, after every group.
+
+**Groups run in order A, B, C, E, F, G, H, then D.** G undoes part of E, so doing
+G first wastes work; H touches lines G rewrites, so H comes after G.
 
 **How to work.** Anchor every edit on the **string** quoted below, not on the
 line number. The line numbers are from the round-1 file and every fix moves the
@@ -487,11 +616,10 @@ channel, so there is exactly one person to hold to the rule.
 | `F-30` | Say what the mechanism really is, in "How you start a role", from the evidence file and nothing else: the `Agent` tool returns at once, so a role runs in the background while you carry on; `ListAgents` lists the live ones, with their agent ids, so the awake limit is countable; `SendMessage` reaches a role by its agent id, including one that has already reported, and it keeps what it read. | `grep -c 'ListAgents' skills/team-lane/SKILL.md` | `2` or more |
 | | | `grep -c 'SendMessage' skills/team-lane/SKILL.md` | `2` or more |
 | | | `grep -c 'in the background' skills/team-lane/SKILL.md` | `1` or more |
-| `F-31` | Write the rule that the false claim was protecting: sentence `S6`, word for word, where messaging is described. Widen "never decide anything in a briefing" to "in a briefing **or a message**". Add: "If you cannot point at the document a message's content came from, you have just invented policy in a chat window. Stop and write it down." | `grep -c 'a document path and a version number, and nothing else' skills/team-lane/SKILL.md` | `1` |
-| | | `grep -c 'in a briefing or a message' skills/team-lane/SKILL.md` | `1` or more |
+| `F-31` | Write the rule that the false claim was protecting: sentence `S6`, word for word, where messaging is described. Widen "never decide anything in a briefing" to "in a briefing **or a message**". **Version 4: `S6` was rewritten — see `F-44`, which is the same edit done right. Do `F-44`; this row stays only so the round-1 check numbering does not move.** | `grep -c 'in a briefing or a message' skills/team-lane/SKILL.md` | `1` or more |
 | | | `grep -c 'invented policy in a chat window' skills/team-lane/SKILL.md` | `1` |
-| `F-32` | Apply sentence `S11` (ADR 0014) to the fourteen places CRD 0004's second table names — every "start a fresh role" that is true but needlessly expensive. Write the rule **once**, in "How you start a role", and make each of the fourteen obey it; none of them may still say a fresh role is the only way. | `grep -c 'Message the role that is still live' skills/team-lane/SKILL.md` | `1` |
-| | | `grep -n 'fresh engineer\|fresh reviewer\|fresh architect\|fresh role' skills/team-lane/SKILL.md` | read every line: each one is a case `S11` allows (finished, unreachable, or built again from the beginning), never a claim that messaging is impossible |
+| `F-32` | Apply sentence `S11` (ADR 0014) to the fourteen places CRD 0004's second table names — every "start a fresh role" that is true but needlessly expensive. Write the rule **once**, in "How you start a role", and make each of the fourteen obey it; none of them may still say a fresh role is the only way. **Version 4: `S11` was rewritten — anchor on `F-45`'s wording, not on version 3's.** | `grep -c 'Message a role — live or finished' skills/team-lane/SKILL.md` | `1` |
+| | | `grep -n 'fresh engineer\|fresh reviewer\|fresh architect\|fresh role' skills/team-lane/SKILL.md` | read every line: each one is a case `S11` allows (the work starts again, or the role cannot be reached), never a claim that messaging is impossible and never "because it has finished" |
 | `F-33` | Sentence `S10` (ADR 0013), word for word, at step 0 and in "After a restart". "Every role from the old session is gone" goes: it is unverified, not known. The procedure replaces the promise — run `ListAgents`, try the agent id, treat what you cannot reach as gone. | `grep -ci 'from the old session is gone' skills/team-lane/SKILL.md` | `0` |
 | | | `grep -c 'is not known' skills/team-lane/SKILL.md` | `1` or more |
 | | | `sed -n '/^## After a restart/,$p' skills/team-lane/SKILL.md \| grep -c 'ListAgents'` | `1` or more |
@@ -525,6 +653,87 @@ finding 3.
 | | | `grep -c 'after QA reports' skills/team-lane/SKILL.md` | `1` or more |
 | `F-43` | `docs/qa/run-all.sh` is the PM's own file (ADR 0010), so nobody would ever have read it. It goes into the same review round as the first QA files, **the first time you create it** — once per project, not once per task. | `grep -c 'the first time you create it' skills/team-lane/SKILL.md` | `1` |
 
+### Group G — review round 2 (eight items)
+
+Round 2 of the three reviews returned six blocking findings. Two of them are in
+shared sentences and were decided by the architect, not by an engineer: their new
+wording is facts 11 (`S6`) and 16 (`S11`) above, and `F-44` and `F-45` carry it
+into the file. The other four are `F-46` to `F-49`. `F-50` is an optional finding
+the PM flagged; `F-51` comes from the evidence file's new section 11.
+
+**The three round-2 reports were not on disk when this was written** (see the
+note at the end of this file). Every item below was confirmed by running its own
+check against the built file first, so each one is real — but the reviewers'
+proposed wording was not available, and the wording here is the architect's.
+
+| # | Fix | Check | Expected |
+| --- | --- | --- | --- |
+| `F-44` | **`S6` is rewritten** (fact 11). Replace the "a document path and a version number, and nothing else" paragraph with `S6`'s new two paragraphs, word for word, and the "invented policy in a chat window" line with its new first clause. The old wording forbids ten things the same file orders. **There are two copies** — the section where messaging is described, and a one-line repeat in the Hard rules near the end. Fix both. "and nothing else" is a fine phrase elsewhere in the file (five other lines use it correctly), so the check is deliberately narrow. | `grep -cE 'version number,? and nothing else' skills/team-lane/SKILL.md` | `0` — it is `2` before the fix, in two different wordings |
+| | | `grep -c 'Never decide anything in a message' skills/team-lane/SKILL.md` | `1` |
+| | | `grep -c 'evidence you could produce again' skills/team-lane/SKILL.md` | `1` |
+| | | `grep -c 'a new rule, a new number, a new file name or a new promise' skills/team-lane/SKILL.md` | `1` |
+
+> **`F-44`, recorded after fix round 3.** `F-44d` expects
+> `grep -c 'a new rule, a new number, a new file name or a new promise'` to be `1`, but
+> writing `S6` word for word makes it `2`: the bullet in "Documents are the only
+> channel" already carried the same enumeration. The check therefore forces an edit
+> `F-44` does not describe. The engineer resolved it the right way — it left `S6`
+> untouched and rewrote that bullet to point at `S6` instead of restating it, which is
+> the same anti-drift rule `F-44` exists to serve. Written down here so a later round
+> does not read the extra edit as unauthorised.
+
+| `F-45` | **`S11` is rewritten** (fact 16, ADR 0014 version 2). Replace the "Message the role that is still live ... Start a fresh role when it has finished" paragraph with `S11`'s new wording and its rider. **Four lines carry the old test, not one**: the rule itself, its one-line repeat in the Hard rules, and two steps that give "it has finished" as the reason for a fresh role — the defect that goes back to the engineer that owns the task, and the engineer sent to fix a red CI run. Both of those are a role looking again at its own work, so both become "message it — live or finished — and start a fresh engineer only if you cannot reach it". | `grep -c 'Message a role — live or finished' skills/team-lane/SKILL.md` | `1` |
+| | | `grep -c 'whether the task.s own history should show a new start' skills/team-lane/SKILL.md` | `1` |
+| | | `grep -c 'quietly replaces the first' skills/team-lane/SKILL.md` | `1` |
+| | | `grep -ci 'when it has finished' skills/team-lane/SKILL.md` | `0` — it is `4` before the fix, and all four have to move |
+| | | **Added in version 5.** `grep -ci 'that has finished' skills/team-lane/SKILL.md` | `0` — a **fifth** copy of the old test, in the paragraph about a document that changed while roles are running: "A role that has finished, or that you cannot reach, is replaced by a fresh role." It becomes "A role you cannot reach is replaced by a fresh role with the new version." The finding is not re-opened; `F-45`'s own text already orders this, and this check is what makes it land |
+| `F-46` | **After a restart the git check cannot tell your commits from anyone else's** (security r2 finding 1). `git log --oneline <startCommit>..HEAD` lists every commit on the branch; "a commit you did not write yourself" needs the PM to remember which it wrote, and after a restart it remembers nothing. Give it a record: `state.json` gains a `commits` list — the short sha and the task id — written in the **same turn** as each commit, and step 11 and step 17 compare `git log` against that list instead of against memory. A commit on the branch that is not in the list is the one that stops the step. Say plainly that a job with no `commits` list yet (nothing committed) expects an empty range. | `grep -c '"commits"' skills/team-lane/SKILL.md` | `2` or more — the shape and the sentence that explains it |
+| | | `sed -n '/^11\. \*\*Commit/,/^12\. /p' skills/team-lane/SKILL.md \| grep -c 'commits'` | `1` or more |
+| | | `sed -n '/^17\. /,/^18\. /p' skills/team-lane/SKILL.md \| grep -c 'commits'` | `1` or more |
+| | | `grep -c 'after a restart' skills/team-lane/SKILL.md` | `1` or more, and reading it shows the check still works |
+| `F-47` | **The fix round added an overclaim** (security r2 finding 2). "Roles cannot message each other. You are the only one who can open a back channel" is measured false in the second half: evidence section 7.1 — a role holding `Bash` can run `claude -p`, which starts a separate Claude process that holds `Agent`, `SendMessage` and `ListAgents` and is bound by no frontmatter; section 7.2 — the job folder is plain files, so an `echo` into `inbox/` puts a role's words in front of the PM and the next role. Write the honest version: **no role has a messaging tool and the deny list really holds** (section 6, verbatim errors), **and** three roles hold a shell — `crew-architect`, `crew-engineer`, `crew-qa` — and a shell can start a separate process or write into the job folder, so what closes the channel is the rule those roles are given, not the tools they hold. Then the two rules below it are yours to keep because yours is the only **sanctioned** channel. | `grep -c 'open a back' skills/team-lane/SKILL.md` | `0` — the claim wraps across two lines in the file, so grep the short form |
+| | | `grep -c 'claude -p' skills/team-lane/SKILL.md` | `1` — the hole is named, not implied |
+| | | `grep -c 'job folder is' skills/team-lane/SKILL.md` | `1` or more — the second hole |
+| | | `grep -ci 'three roles' skills/team-lane/SKILL.md` | `1` or more, and the three named are the architect, the engineer and QA |
+| `F-48` | **Step 13's gap-list branch still names a commit no step makes** (doc r2 finding 1). `F-04` fixed the two plans and left this one: "the file `docs/release/<milestone>-gaps.md`, in the user's language, **in this milestone's commit**". There is no milestone commit. It goes in the same extra commit `F-04` already describes. | `grep -ci "in this milestone.s commit" skills/team-lane/SKILL.md` | `0` |
+| | | `grep -n 'gaps.md`, in the user' skills/team-lane/SKILL.md` | read the sentence: it points at the step 13 commit `F-04` names, or at no commit at all |
+| `F-49` | **Step 11's staging exception is a closed list and it is short** (doc r2 finding 3). It names the PRD, the task table, the design, the contracts, `run-all.sh`, `gaps.md` and your own ADRs and CRDs — and omits `docs/research/<short-name>.md`, which a researcher writes at step 2, step 3 or step 13 and which no task owns. Make it a **rule with examples** instead of a list: a document this playbook tells you to write, which belongs to no task, is expected — and then the examples, `docs/research/` among them. A closed list will be short again the next time a step gains an output. | `sed -n '/^11\. \*\*Commit/,/^12\. /p' skills/team-lane/SKILL.md \| grep -c 'docs/research/'` | `1` or more |
+| | | `grep -n 'no task owns' skills/team-lane/SKILL.md` | read it: a rule first, examples second, and it does not read as exhaustive |
+| `F-50` | **A Hard rule still licenses a force push** (security r2's pre-existing note; PM flagged). "Push `main`, a tag, or with force only when the user has just said yes" — but step 17 says `git push --force` and `--force-with-lease` on `main` are never part of the step, and the round-1 security review's main finding of merit was that no force flag appears anywhere. One sentence contradicts the whole step. Drop "or with force" and say instead that a force push is not something this playbook does; if the user asks for one, give them the command to run themselves. | `grep -c 'or with force' skills/team-lane/SKILL.md` | `0` |
+| | | `grep -ci 'force' skills/team-lane/SKILL.md` | read every hit: each one either forbids a force push or hands it to the user |
+| `F-51` | **Say what a failed resume looks like** (evidence section 11, ADR 0013 version 2). A resume can fail with `No transcript found for agent ID` — it happened in this job, three times in one turn, after the session was re-keyed. It is not a bug and not worth retrying: it is the answer, and the answer means take `S10`'s fallback. A PM that has not seen it will retry it three times and then guess. | `grep -c 'No transcript found' skills/team-lane/SKILL.md` | `1` |
+| | | `grep -n 'No transcript found' skills/team-lane/SKILL.md` | read it: it says do not retry, treat the role as gone, start a fresh one with the current document version |
+
+### Group H — review round 2, the optional findings (seven items)
+
+Version 4 could not read the three round-2 reports; they reached the job folder
+minutes later. Every optional finding in them is taken below, except one that the
+new `S6` had already answered — see `F-58`.
+
+| # | Fix | Check | Expected |
+| --- | --- | --- | --- |
+| `F-52` | **code r2 optional 2.** Step 2 starts a `crew-researcher` and no longer says what upstream says next: "**and let it find out while you carry on**" (`$UP/roles/pm.md` 37-38). Round 1 dropped that clause on the grounds that the `Agent` call blocks the PM's turn, which evidence section 1 measured false, and this round's `F-30` states the true mechanism 70 lines later. Restore upstream's clause where upstream puts it — at the **first** role start in the whole flow, which is where a PM learns the habit. | `grep -c 'let it find out while you carry on' skills/team-lane/SKILL.md` | `1` |
+| `F-53` | **code r2 optional 3.** One prose line runs to about 100 characters where the whole file wraps near 80; `F-27b`'s insert pushed it out. Re-wrap it. The check below skips the frontmatter, the roster table and the `state.json` block, so it finds prose only. | `awk 'length>88 && $0 !~ /^ *[\|{"]/ && NR>4 {print NR" ("length")"}' skills/team-lane/SKILL.md` | prints nothing — it prints one line before the fix |
+| `F-54` | **doc r2 optional 4.** The doc review is the **fourth** verdict but the only one of the four with no labelled sub-step: there is `10a`, `10b`, `10c`, and then an unlabelled paragraph. Give it `**10d. Doc review — on every landing.**`, with a start instruction of the same shape as the other three: start a `crew-doc-reviewer`, give it the task id, the file list from the landing list below, and the scope line to write. **Then move the "A task is finished when..." paragraph to after `10d`**, because it is the summary of all four and it currently sits before one of them. That paragraph is also `F-55a`'s — one edit, done once. Adding `10d` does not change the count of numbered steps: the marker is indented and bold, not a line starting with a digit. | `grep -c '\*\*10d\. Doc review' skills/team-lane/SKILL.md` | `1` |
+| | | `grep -nE '\*\*10[abcd]\.' skills/team-lane/SKILL.md` | four lines, in order, each starting a role the same way | 
+| | | `grep -cE '^[0-9]{1,2}\. \*\*' skills/team-lane/SKILL.md` | still `18` — `T-01` check 1 is unmoved |
+| `F-55` | **doc r2 optionals 5, 6 and 7** — three sentences over 25 words, in three of the most-read places in the file. Same class as `F-27`, same treatment. Three sub-items below. | see `F-55a` to `F-55c` | |
+| `F-56` | **doc r2 optional 8.** The message-or-fresh-role choice is written once and then applied in **twenty** places, none of which points back at the rule, so a reader meets twenty local instructions and never learns they are one rule. Do not annotate all twenty — that is noise. Give the rule a real heading, `### Message or fresh role`, and point at it from the **three** places where the choice is hardest and the PM is most under pressure: the document-change paragraph, review round 2 with the new diff, and the defect that goes back to the engineer. All three are lines `F-45` is already editing. | `grep -c '^### Message or fresh role' skills/team-lane/SKILL.md` | `1` |
+| | | `grep -c 'see \*\*Message or fresh role\*\*' skills/team-lane/SKILL.md` | `3` |
+| `F-57` | **security r2 optional 3 — the one to take even if nothing else is taken.** The stop rule says to report what a role left unfinished and stops there. It says nothing about the **working tree**, and nothing stops the job moving while a role the PM could not stop is still running: step 17's five checks are one snapshot, so `git status --short` can be clean at 12:01 and the live role writes at 12:02, between the check and the merge. Two clauses: after stopping what you can, run `git status --short`, show the user, and name the files a stopped role left half-written — and commit nothing from a role that did not report; and **do no merge, no push and no publish while a role you could not stop is still live.** Put the second clause in the Hard rules as well, beside the three yeses, because that is where a PM reads before a merge. | `sed -n '/If the user says stop/,/^$/p' skills/team-lane/SKILL.md \| grep -c 'git status --short'` | `1` or more |
+| | | `grep -c 'could not stop is still live' skills/team-lane/SKILL.md` | `2` — the stop rule and the Hard rules |
+| | | `grep -c 'half-written' skills/team-lane/SKILL.md` | `1` or more |
+| `F-58` | **security r2 optional 4, answered rather than taken.** The finding is that the message test is a test of **shape**, so "re-read `docs/design/tasks.md` v3 — and for `T-07` use `--json`, not `--format`" passes it: it has a path and a version. That was true of the old `S6`. The new `S6` (fact 11) tests **content**, and catches it twice: `--json` instead of `--format` is "a new rule", and it is "neither a pointer nor evidence". Nothing more is needed — except one four-word guard against reading `S6` as a test of the message as a whole. Add to `S6`, as its last sentence: **"Test every sentence, not the whole message."** Do **not** add the reviewer's second sentence ("if you had to type a new fact, you are writing a document, not a message"): it says what upstream's enumeration already says, and a second wording of one rule in a 1,533-line file is how documents drift. | `grep -c 'Test every sentence, not the whole message' skills/team-lane/SKILL.md` | `1` |
+
+**`F-55` in detail.** Each split keeps every word that carries a rule.
+
+| # | Fix | Check | Expected |
+| --- | --- | --- | --- |
+| `F-55a` | The definition of **finished** — 37 words, four ideas, and the most consequential sentence in step 10. Make it four bullets, one per verdict, then the sentence about writing them into the **Verdicts** line. Same edit as `F-54`'s move. | `sed -n '/A task is finished when/,/step 11 gives you/p' skills/team-lane/SKILL.md \| grep -cE '^ +- '` | `4` |
+| `F-55b` | `run-all.sh`'s review sentence — 33 words, three ideas. Split as the reviewer proposes: "It is your own file, so nobody else would ever read it. Put it in the code reviewer's file list **the first time you create it**. That is once per project, not once per task." | `grep -c 'It is your own file' skills/team-lane/SKILL.md` | `1` |
+| | | `grep -c 'Because it is your own' skills/team-lane/SKILL.md` | `0` — the long version is gone. Do not check the closing phrase "once per project, not once per task" alone: it is in the file already and would pass without the split |
+| `F-55c` | The reason a message may not carry a decision — 29 words, two ideas. Split: "Two engineers building the two sides of one boundary cannot compare notes. Tell only one of them a fact, and the other keeps building against a different truth." | `grep -c 'keeps building against a different truth' skills/team-lane/SKILL.md` | `1` |
+
 ### Group D — nothing regressed
 
 | # | Check | Expected |
@@ -540,12 +749,14 @@ description, which must still say when to use the crew, name the seven roles, sa
 'docs/design/prd.md'` is `10` or more — `F-29` to `F-38` delete whole paragraphs,
 and some of them name that file).
 
-**One more sweep for this round**, because Group E deletes a claim that is
-repeated in this file's own prose as well as in the steps:
+**Two more sweeps for this round**, because Group E deletes a claim that is
+repeated in this file's own prose as well as in the steps, and Group G undoes two
+sentences Group E wrote:
 
 | # | Check | Expected |
 | --- | --- | --- |
 | `F-28b` | `grep -ni 'runs once\|run once\|gone' skills/team-lane/SKILL.md` | read every hit. None may be a claim that a role cannot be messaged, and none may be a claim about what a restart does to a role |
+| `F-28c` | `grep -cE 'version number,? and nothing else' skills/team-lane/SKILL.md; grep -ciE 'when it has finished\|that has finished' skills/team-lane/SKILL.md; grep -c 'open a back' skills/team-lane/SKILL.md` | `0`, `0` and `0` — the three sentences Group E wrote and Group G replaced left no copy behind, in the steps or in the Hard rules |
 
 ---
 
@@ -1472,6 +1683,7 @@ false, and both are user-visible.
 | 22 | `grep -c 'unit test' README.md; grep -c 'QA test' README.md` | `1` or more each, and the same two counts in `README-zh.md` for whatever the Chinese words are, used consistently — sentence `S7` | 20 |
 | 23 | `grep -c 'never edits the project' README.md` | `1` — sentence `S8`, and the Chinese file says the same thing in its own words | 20 |
 | 24 | `sed -n '/What changed from dsh-crew/,/^## /p' README.md \| grep -cE '^\| '` | `7` — the header, the separator and five rows; the table did not grow | 15 |
+| 25 | `grep -n 'shell' README.md README-zh.md` | **added in version 5.** Read every hit: "What is not enforced" says **three** roles hold a shell — `crew-engineer`, `crew-qa` and `crew-architect` — not two. `T-02` gave the architect its Git section (ADR 0012), and the security review of round 2 found both READMEs still saying two | 15, 16 |
 
 ---
 
@@ -1594,7 +1806,42 @@ say, and the sweeps have one more thing to catch.
    unmeasured, and `S10` is the only sanctioned wording). And that any specific
    tool stops a live role: nothing has measured one working from the PM's seat, so
    `F-37` describes the action without naming a tool.
-7. **A note for whoever runs the next port pass, if a session is ever restarted
-   mid-job.** Write down what happened to the live roles. It is the one measurement
-   that would close section 10 of the evidence file, it costs nothing to record at
-   the time, and it cannot be reproduced on purpose without pausing a real job.
+7. **The restart question is half answered, and the note stands for the other
+   half.** Section 11 of the evidence file records what happened when the session
+   was re-keyed mid-job: three resumes failed with `No transcript found for agent
+   ID`, loudly and cleanly, and `S10`'s fallback carried it. What is still not
+   measured is a **deliberate restart**. If one ever happens mid-job, write down
+   what became of the live roles — it costs nothing at the time and it cannot be
+   reproduced on purpose without pausing a real job.
+8. **The three round-2 review reports were missing when version 4 was written.**
+   My briefing named `<job folder>/reviews/T-01-code-review-r2.md`,
+   `-doc-review-r2.md` and `-security-review-r2.md`. The folder holds only the
+   three round-1 reports and `mechanism-evidence.md`:
+
+   ```sh
+   ls ~/.claude/crew/jobs/port-dsh-crew-0-7-0/reviews/
+   ```
+
+   Every one of the six blocking findings was confirmed against primary sources
+   before its fix was written — the built `skills/team-lane/SKILL.md`,
+   `$UP/roles/pm.md` and the evidence file — and each fix item's own check was run
+   against the file first, so all six are real and all six are covered. **Two
+   things are not covered**, and the PM has to decide what to do about them before
+   round 3, because round 3 is the last one:
+
+   - **round 2's optional findings.** I could not read them. Version 3 took 17 of
+     19 optional findings from round 1; this version takes exactly one from round
+     2 (`F-50`), because it is the only one the briefing named. A round-3 reviewer
+     that raises the same optional findings again will look like a new round of
+     findings when it is not.
+   - **the reviewers' own proposed wording.** The briefing says the code review
+     proposed a carve-out paragraph for `S6` and the doc review proposed a
+     narrower rule for `S11`. The wording in facts 11 and 16 is mine, reached from
+     upstream `roles/pm.md` 62-64 and from ADR 0014's own rejection of Option B.
+     It may not be theirs. If the reports are recovered and their wording is
+     better, that is a documents change, not an engineer's judgement: it comes
+     back to an architect.
+
+   If the reports exist somewhere I could not see, the cheapest fix is to put them
+   in the job folder and re-run this round's architect with one instruction: read
+   the optional findings only.

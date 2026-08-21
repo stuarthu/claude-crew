@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "The crew plugin for Claude Code: run work as a small team of role agents with a product manager in front.",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "plugins": [
     {

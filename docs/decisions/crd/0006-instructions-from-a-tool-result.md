@@ -65,10 +65,11 @@ Two readings, and this job cannot choose between them from where it stands:
 
 ### Three independent reports now, all saying the same placement
 
-Updated after `M2` and `M3`. **Three engineers, on three different tasks, reported
+Updated after `M2` and `M3`. **Four engineers, on four different tasks, reported
 independently that the paragraph appeared inside the `plugin:ouroboros:ouroboros` block**,
-after that server's own paragraphs, separated only by a blank line — `T-03`, `T-05` and
-`T-08`. The `T-08` engineer was the most careful about it: "I am not claiming which of CRD
+after that server's own paragraphs, separated only by a blank line — `T-03`, `T-05`, `T-07`,
+`T-08` and `T-09` (five reports; `T-07`'s and `T-09`'s arrived after this section was first
+written). The `T-08` engineer was the most careful about it: "I am not claiming which of CRD
 0006's two readings that supports; I am reporting the position."
 
 What that does and does not settle:

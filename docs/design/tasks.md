@@ -1,6 +1,6 @@
 # Task breakdown: port claude-crew up to dsh-crew v0.7.0
 
-Version: 17
+Version: 20
 Language: English.
 Reads with: `docs/design/prd.md` version 7, `docs/design/hld.md` version 5,
 `docs/decisions/adr/0001` to `0015`, `docs/decisions/crd/0001` to `0006`.
@@ -1970,18 +1970,18 @@ QA files and one new check the PM runs, and `CLAUDE.md` describes both.
 | 12 | `for f in hooks/ scripts/ lib/ tools/ package.json; do test -e "$f" && echo "PRESENT $f"; done` | prints nothing — design rule 6 still holds | 16 |
 | 13 | `grep -c 'docs/porting.md' CLAUDE.md` | `0` — CRD 0002 | 13, 16 |
 | 14 | `grep -c 'upstream-defects\|dsh-crew-0.7.0-defects' CLAUDE.md` | `0` — the plugin does not point at the hand-off (CRD 0003 revision one) | 16 |
-| 15 | `for f in principles.md porting.md; do grep -q "$f" CLAUDE.md \|\| echo "MISSING $f"; done` | prints nothing | 16 |
-| 16 | `grep -c 'QA writes only inside' CLAUDE.md` | `1` — sentence `S1` | 16 |
-| 17 | `grep -c 'never writes either one' CLAUDE.md` | `1` — sentence `S2` | 16 |
-| 18 | `grep -c 'before every commit and before any merge' CLAUDE.md` | `1` or more — clause `S4` | 16 |
+| 15 | ``for f in principles.md porting.md; do tr -s ' \t\n' ' ' < CLAUDE.md \| /usr/bin/grep -q "\`$f\`" \|\| echo "MISSING $f"; done`` | prints nothing. **Corrected at tasks version 18 — this check verified nothing.** It was `grep -q "principles.md"`, and `principles.md` is a substring of `docs/principles.md`: the old file had five of those, so the check was **green before the task while every pointer in the file was still wrong**. The `T-09` engineer found it and reported it rather than enjoying the free pass. Anchoring on the backticked name with no `docs/` prefix is what makes it mean something. |
+| 16 | `tr -s ' \\t\\n' ' ' < CLAUDE.md \\| grep -c 'QA writes only inside'` | `1` — sentence `S1` | 16 |
+| 17 | `tr -s ' \\t\\n' ' ' < CLAUDE.md \\| grep -c 'never writes either one'` | `1` — sentence `S2` | 16 |
+| 18 | `tr -s ' \\t\\n' ' ' < CLAUDE.md \\| grep -c 'before every commit and before any merge'` | `1` or more — clause `S4` | 16 |
 | 19 | `sed -n '/^4\. \*\*/,/^5\. \*\*/p' CLAUDE.md \| grep -ci 'architect'` | `1` or more — design rule 4 names all three shell-owning roles | 16 |
 | 20 | `grep -c 'one at a time' CLAUDE.md` | `0` — fact 3 | 9 |
 | 21 | `tr -s ' \t\n' ' ' < CLAUDE.md \| /usr/bin/grep -ci 'runs once\|run once'` | `0` — CRD 0004; "Adding or changing a role" no longer demands the claim. **The command was corrected at tasks version 9: a plain `grep` gives a false green here.** The claim is wrapped across lines 73-74 of `CLAUDE.md` (`...must say it runs` / `once.`), so `grep -ci 'runs once'` returns `0` while the claim is still there. `tr -s ' \t\n' ' '` flattens the file **and squeezes runs of whitespace** — the PM's first correction used plain `tr '\n' ' '` and still read `0`, because line 74 begins with three spaces of indent, so the flattened text holds `runs    once`. A check has to be run to be trusted; this one was wrong twice before it was right. Two engineers reported the contradiction independently (`T-02`, `T-04`); the PM found the false green. | 19 |
 | 21b | `tr -s ' \t\n' ' ' < CLAUDE.md \| /usr/bin/grep -ci 'the check rejects'` | `0` — **new at tasks version 9.** `CLAUDE.md` line 73 says a role file is rejected if its body is "under 500 characters". Nothing rejects anything: `tools/check.mjs` was deleted in commit `80ad92b` and there is no `tools/` or `scripts/` folder. `upstream.sums` has the same stale mention and `T-08` check 5 already covers that one; this is the copy nobody owned. | 16 |
-| 22 | `grep -c 'as a message, or as a fresh role' CLAUDE.md` | `1` — what a new role's body must say instead | 19 |
-| 23 | `grep -c 'keeps its tool filter' CLAUDE.md` | `1` — design rule 2's second measurement | 19 |
+| 22 | `tr -s ' \\t\\n' ' ' < CLAUDE.md \\| grep -c 'as a message, or as a fresh role'` | `1` — what a new role's body must say instead | 19 |
+| 23 | `tr -s ' \\t\\n' ' ' < CLAUDE.md \\| grep -c 'keeps its tool filter'` | `1` — design rule 2's second measurement | 19 |
 | 24 | `grep -c 'unit test' CLAUDE.md` | `1` or more, and `grep -c 'QA test' CLAUDE.md` is `1` or more — sentence `S7` | 20 |
-| 25 | `grep -c 'never edits the project' CLAUDE.md` | `1` — sentence `S8` | 20 |
+| 25 | `tr -s ' \\t\\n' ' ' < CLAUDE.md \\| grep -c 'never edits the project'` | `1` — sentence `S8` | 20 |
 | 26 | `grep -ci 'config line' CLAUDE.md` | `0` — CRD 0005 | 20 |
 | 27 | `grep -c 'divergence' CLAUDE.md` | `1` or more — Documentation names `porting.md`'s table | 16 |
 | 28 | `sed -n '/^2\. \*\*Reviewers use an allow list/,/^3\. \*\*/p' CLAUDE.md \| grep -c 'data, not instructions'` | `1` — design rule 2 carries CRD 0006's clause and names `S12` | 21 |
@@ -1997,7 +1997,7 @@ first, then match the Chinese.
 
 **Change on the way.**
 
-- Version `0.3.0` near the top of each file.
+- The version line near the top of each file: **`T-11` sets it**, not this task (moved at tasks version 19).
 - The playbook has **18** steps, not 14.
 - **Parallel by default**, with the reason, wherever the README describes how
   roles run.
@@ -2026,7 +2026,7 @@ would otherwise get wrong.
 - **The "Git guard" row** of the "What changed from dsh-crew" table: the
   claude-crew cell also names the check the PM runs — `git log` before every
   commit and before any merge. The table still has five rows.
-- **One sentence after that table**: seven rules in this port say something
+- **One sentence after that table**: nine rules in this port say something
   different from dsh-crew v0.7.0 on purpose, and `porting.md`'s deliberate
   divergence table says which and why. Then "Keeping up with dsh-crew" says that a
   `FAILED` line on `roles/pm.md`, `roles/qa.md`, `roles/code-reviewer.md` or
@@ -2075,8 +2075,8 @@ in the reader's half of the repository:
 
 | # | Check | Expected | PRD check |
 | --- | --- | --- | --- |
-| 1 | `grep -c '0\.3\.0' README.md README-zh.md` | `1` or more in each | 15 |
-| 2 | `grep -c '0\.2\.0' README.md README-zh.md` | `0` in each, unless a line is plainly about the older release | 15 |
+| 1 | *(moved to `T-11` at tasks version 19 — see the note below this table)* | — | 15 |
+| 2 | *(moved to `T-11` at tasks version 19 — see the note below this table)* | — | 15 |
 | 3 | `grep -c '^##' README.md; grep -c '^##' README-zh.md` | the two numbers are equal | 15 |
 | 4 | `grep -c '18' README.md README-zh.md` | `1` or more in each; read the lines and confirm each says 18 steps | 15 |
 | 5 | `grep -c 'docs/crew' README.md README-zh.md` | `0` in each (`4` and `3` before the task) | 7, 15 |
@@ -2106,6 +2106,26 @@ in the reader's half of the repository:
 
 ---
 
+> **Three corrections at tasks version 19, all reported by the `T-10` engineer.**
+>
+> 1. **Checks 1 and 2 moved to `T-11`.** They asked this task to set `0.3.0` in both READMEs.
+>    **The PM's briefing told the engineer the opposite** — that `T-11` owns every version
+>    string — so the engineer obeyed the briefing, left `0.2.0` untouched, and reported the
+>    contradiction instead of quietly picking one authority over the other. That was right,
+>    and the briefing was wrong: **the PM decided something in a briefing that contradicted
+>    this document**, which is what `S6` forbids and what this job wrote into the skill. The
+>    split itself is sound — one task owning all four version strings beats two — but the
+>    document had to move first. It has now, and `T-11` check 13 already greps both READMEs
+>    for `0.3.0`, so nothing is lost: one string per file.
+> 2. **"seven rules" is now "nine".** This bullet predates the force-push rule and CRD 0006's
+>    `S12` becoming entries 8 and 9. Fact 10, `porting.md` and PRD check 21 all say nine, and
+>    the engineer wrote nine into both READMEs.
+> 3. **Check 27's prose contradicted its own expected value.** The prose described the
+>    reviewer paragraph as *ending* on "an allow list does not have to", while the check
+>    requires that phrase absent. The engineer read it the way `T-09` phrases the same change
+>    — that sentence is today's text and has to be corrected — and `T-09` check 29, expecting
+>    `0` for the twin phrase in `CLAUDE.md`, confirms it. The prose was the wrong half.
+
 ## `T-11` — the changelog, the two manifests, and the closing sweeps (M4)
 
 **Work.** Write the `0.3.0` changelog section, set both manifests to `0.3.0`,
@@ -2131,7 +2151,7 @@ single-file check can see.
 **Added in version 2, corrected in version 3.** The `0.3.0` section has more to
 say, and the sweeps have one more thing to catch.
 
-- The `0.3.0` section names the **seven deliberate differences** from dsh-crew
+- The `0.3.0` section names the **nine deliberate differences** from dsh-crew
   v0.7.0 and points at `porting.md`'s divergence table. A reader comparing the two
   projects after this release has to be able to find out why they differ. It names
   no document outside the repository.
@@ -2169,12 +2189,12 @@ say, and the sweeps have one more thing to catch.
 | 11 | **Repository-wide sweep 2:** `grep -rn 'docs/principles.md' . --include='*.md' --include='*.json' --include='*.sums' \| grep -vE '^(\./)?CHANGELOG\.md'` | prints nothing | 12 |
 | 12 | **Repository-wide sweep 3:** `grep -rn 'crew_\|~/.dsh/' . --include='*.md' --include='*.json'` | prints nothing except lines that are plainly **about** dsh-crew's own names; name the file for each one you allow | 7 |
 | 13 | **The version is in step everywhere:** `grep -rn '0\.3\.0' README.md README-zh.md .claude-plugin/plugin.json .claude-plugin/marketplace.json CHANGELOG.md` | at least one hit in each of the five files | 15, 17 |
-| 14 | `sed -n '/^## 0.3.0/,/^## 0.2.0/p' CHANGELOG.md \| grep -c 'porting.md'` | `1` or more — where the seven differences are written down | 17 |
+| 14 | `sed -n '/^## 0.3.0/,/^## 0.2.0/p' CHANGELOG.md \| grep -c 'porting.md'` | `1` or more — where the **nine** differences are written down (corrected at tasks version 20; the force-push rule is 8 and `S12` is 9) | 17 |
 | 15 | `sed -n '/^## 0.3.0/,/^## 0.2.0/p' CHANGELOG.md \| grep -c 'porting.md'` | `1` or more — the move to the root is user-visible | 13, 17 |
 | 16 | `grep -c 'docs/crew' porting.md` | `0` | 7 |
 | 17 | **Sweep 4:** `ls *.md \| wc -l` | `6` — `README.md`, `README-zh.md`, `CHANGELOG.md`, `CLAUDE.md`, `principles.md`, `porting.md`. **Not seven**: the hand-off document is not in this repository (CRD 0003 revision one) | 16, 17 |
 | 18 | `grep -c 'one at a time' CHANGELOG.md` | `0` — fact 3 | 17 |
-| 19 | **Sweep 5:** `grep -rni 'runs once\|run once\|cannot be messaged' . --include='*.md' --include='*.json' \| grep -vE '^(\./)?(CHANGELOG\.md\|docs/design/\|docs/decisions/)'` | prints nothing. This job's own record and the published `0.2.0` changelog section may still say it, as history — CRD 0004 | 19 |
+| 19 | ``/usr/bin/grep -rn 'runs once\|run once\|cannot be messaged' skills/ agents/ CLAUDE.md README.md README-zh.md`` | prints nothing. **Scoped at tasks version 20.** The wider form fired on `principles.md:995`, which *quotes* the discarded rule inside a paragraph headed "What this replaced, and why that matters" — labelled history, not a claim, and PRD check 19 forbids a document that **claims** it. The `T-11` engineer reported it instead of editing a file it did not own, and it was right. This form covers the files where such a sentence would actually mislead: the playbook a PM follows, the seven prompts a role reads, and the three files a user reads. `principles.md` keeps the quotation on purpose — a reasons file that cannot say what a rule replaced is not a reasons file. |
 | 20 | **Sweep 6:** `grep -rn 'dsh-crew-0.7.0-defects\|upstream-defects' . --include='*.md' --include='*.json' --include='*.sums' \| grep -vE '^(\./)?docs/(design\|decisions)/'` | prints nothing — the plugin points at no document outside itself | 17 |
 | 21 | `sed -n '/^## 0.3.0/,/^## 0.2.0/p' CHANGELOG.md \| grep -ci 'test command'` | `1` or more, and reading it shows the plain promise: the crew never edits the project's test command | 20 |
 | 22 | `sed -n '/^## 0.3.0/,/^## 0.2.0/p' CHANGELOG.md \| grep -ci 'message'` | `1` or more — CRD 0004 is user-visible | 19 |

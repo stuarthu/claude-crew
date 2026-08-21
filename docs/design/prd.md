@@ -1,6 +1,6 @@
 # PRD: port claude-crew up to dsh-crew v0.7.0
 
-Version: 13
+Version: 14
 Language: documents and briefings in English; the PM talks to the user in Chinese.
 
 ## The problem, and who has it
@@ -18,7 +18,7 @@ since tagged **v0.7.0** (commit `87a4332`). Between the two:
   `docs/research/` (upstream CRD 0006 and CRD 0008).
 - The DoD is no longer a file. There is one opening document, `docs/design/prd.md`,
   in both lanes, and the DoD is a section inside it (upstream CRD 0010).
-- The PM playbook went from 14 steps to 18: a new step 13 (release and upgrade
+- The PM playbook went from **16** steps to 18. *(Corrected at PRD version 14. This said "from 14 steps" from the first version, and the PM repeated it to the user several times. The shipped 0.2.0 skill had **16** numbered steps — measured with `git show c096867:skills/team-lane/SKILL.md | grep -cE '^[0-9]{1,2}\. \*\*'`; 0.1.0 had 15. The "14" came from this repository's own `docs/porting.md` and `upstream.sums` comments, written at 0.1.0 and never updated, while `CHANGELOG.md`'s 0.2.0 section said "sixteen steps" — three of our own documents disagreeing, and the PM quoted the wrong one without counting. The `T-01` engineer's red value for the step-count check was 16, in front of the PM, and was not reconciled. Found by the `T-11` engineer, which measured it.)* The two new ones are a new step 13 (release and upgrade
   plans for a milestone that ships) and a new step 17 (merge the work branch and
   clean up, on three separate yeses).
 - Step 10's three checks — code review, security review, QA — now run in parallel,

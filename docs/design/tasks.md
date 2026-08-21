@@ -1,6 +1,6 @@
 # Task breakdown: port claude-crew up to dsh-crew v0.7.0
 
-Version: 11
+Version: 13
 Language: English.
 Reads with: `docs/design/prd.md` version 7, `docs/design/hld.md` version 5,
 `docs/decisions/adr/0001` to `0015`, `docs/decisions/crd/0001` to `0006`.
@@ -338,8 +338,14 @@ engineers cannot talk to each other. Copy them **character for character**.
     > at the milestone review, and let the user decide whether they want it in
     > their CI.
 
-14. **`S9` — either way (CRD 0004).** Upstream's own wording
-    (`$UP/roles/doc-reviewer.md` 242-244). Goes in **all seven** `agents/*.md`,
+14. **`S9` — either way (CRD 0004).** **Half upstream's, half this port's — the label
+    was corrected at tasks version 13.** Upstream `$UP/roles/doc-reviewer.md` 242-244
+    reads: "A later round may reach you as a message, or as a fresh **reviewer**. Either
+    way, **check only the blocking findings of the earlier round** — if you do not have
+    them, the PM's message does, and it must." `S9`'s first clause is upstream's; the
+    rest is this port's. The `M2` document review caught the mislabel, and it had to be
+    fixed before `T-12`: **a document handed to dsh-crew's author must not tell them a
+    sentence is theirs when it is not.** Goes in **all seven** `agents/*.md`,
     in place of every "you run once" claim:
 
     > A later round may reach you as a message, or as a fresh role. Either way,
@@ -973,7 +979,7 @@ table in `principles.md` 20 matches the repository, run in both directions). New
 paths throughout. **Corrected in version 3 (CRD 0004):** version 2 said the
 "later rounds" section must say a later round reaches a **fresh** reviewer here,
 because "the upstream sentence about a message does not apply". **It does apply.**
-Carry upstream's own wording, sentence `S9` — "as a message, or as a fresh role.
+Carry sentence `S9` — "as a message, or as a fresh role.
 Either way..." — which is what makes a role safe whichever way it is reached, and
 is why no role needs `SendMessage`. Keep the half that is still true: whichever
 way the round arrives, the briefing or the message names the earlier round's
@@ -1238,6 +1244,62 @@ to both — the text arrives whatever the role can do.
 | 24 | `grep -n 'data, not instructions' agents/crew-researcher.md` | read the section in the researcher: it is the role most likely to meet the case, because it opens web pages | 21 |
 
 ---
+
+## `T-14` — CRD 0007 option B: the skill says what upstream says (M2)
+
+**Written by the PM, not the architect.** The architect owns this file; this section is an
+exception and is marked as one. The change is a removal specified line by line in
+`docs/decisions/crd/0007-roles-cannot-talk-is-a-rule-not-a-wall.md`, the user chose it
+after the `M2` review, and a fresh architect round to transcribe a removal would have cost
+more than it protects. If a later reader thinks this section should have been the
+architect's, they are probably right.
+
+**Owns:** `skills/team-lane/SKILL.md`. Alone. `T-13` is finished and committed.
+
+**Work.** The user chose option B of CRD 0007. Two things follow, and the second is the
+one to get right.
+
+1. **The disclosure paragraph goes.** `skills/team-lane/SKILL.md` currently carries a
+   paragraph beginning "**Three roles hold a shell**" that names `claude -p` and the
+   `<job folder>/inbox/` channel. **That paragraph is this port's own invention** — upstream
+   `roles/pm.md` has nothing like it anywhere. Upstream's canonical statement is
+   `principles.md` principle 1: "Only the PM starts agents. A role talks to the PM and to
+   nobody else. Two roles can never talk to each other." Say that, and stop there.
+   Upstream's commit `78639ac` — "stop handing a child the recipe" — is the reasoning.
+2. **Do not restore the sentence `F-47` removed.** "You are the only one who can open a
+   back channel" was never upstream's, and security review round 2 called it an overclaim
+   for good reason. Option B is *upstream's wording, and nothing added* — not the older
+   port text.
+
+Keep the paragraph above it (the measured tool-layer refusal, the quoted error, the
+allow-list distinction) **as it is**: it is a statement about what was measured, it names no
+route around anything, and nothing in CRD 0007 touches it.
+
+**DoD.**
+
+| # | Check | Expected |
+| --- | --- | --- |
+| 1 | `/usr/bin/grep -c 'claude -p' skills/team-lane/SKILL.md` | `0` — it is `1` before the work |
+| 2 | `/usr/bin/grep -ci 'three roles hold a shell' skills/team-lane/SKILL.md` | **`1` — corrected at tasks version 13.** The PM wrote `0` and the note "`1` before" and **miscounted**: the phrase has been in the file **twice** since `aa064d3`. Hit 1 is the disclosure paragraph, which `T-14` removes. Hit 2 is a different paragraph — the caveat on the `"commits"` list: "The job folder is plain files and three roles hold a shell, so this list is a record you keep, not proof that nobody else could have written a commit." **That one stays.** It names no route — no `claude -p`, no channel — and it is required in substance by `T-13` check 10, which is live and green. Removing it would make the skill claim the `commits` list is proof, which is the overclaim security review round 2 blocked on. CRD 0007's reasoning (upstream `78639ac`, "stop handing a child the recipe") is about what a **role prompt** tells a child; the skill is the PM's own file and hit 2 is a limit on trusting a record. The `T-14` engineer refused to force this to `0` and wrote `Q-01` instead — the right call, and the second time in this job an engineer has caught a bad expected value rather than bending a file to it. |
+| 3 | `/usr/bin/grep -c 'open a back' skills/team-lane/SKILL.md` | `0` — must stay `0`; the overclaim does not come back |
+| 4 | `/usr/bin/grep -c 'a rule they are given, not a wall' skills/team-lane/SKILL.md` | `0` — `1` before, in the hard rules at line 89 |
+| 5 | `/usr/bin/grep -c 'talks to the PM and to nobody else' skills/team-lane/SKILL.md` | `1` — upstream's own words |
+| 6 | `/usr/bin/grep -c 'inbox/' skills/team-lane/SKILL.md` | `2` or more — the `Q-` file path stays; only the *channel* framing goes |
+| 7 | `/usr/bin/grep -c 'No such tool available: ListAgents' skills/team-lane/SKILL.md` | `1` — the measured paragraph is untouched |
+| 8 | `/usr/bin/grep -c 'see \*\*Message or fresh role\*\*' skills/team-lane/SKILL.md` | `3` — `F-56`'s pointers survive the edit |
+| 9 | `/usr/bin/grep -c '^### Message or fresh role' skills/team-lane/SKILL.md` | `1` |
+| 10 | `sed -n '/If the user says stop/,/^$/p' skills/team-lane/SKILL.md \| /usr/bin/grep -c 'git status --short'` | `1` or more — `F-57` survives |
+| 11 | `/usr/bin/grep -cE '^[0-9]{1,2}\. \*\*' skills/team-lane/SKILL.md` | `18` |
+| 12 | every other check of `T-01` and `T-13` | unchanged |
+
+**`F-47` is superseded by this task.** Its own row expects `claude -p` to be `1`; CRD 0007
+option B makes that `0`. `F-47` did two things — it removed the port-invented overclaim, and
+it added the disclosure. **The first half stands** (check 3 above keeps it). The second half
+is reversed here. A later reader comparing `F-47` and `T-14` should read them in that order.
+
+**What this task does not touch.** `agents/crew-engineer.md` and `agents/crew-architect.md`
+need no change: they already carry upstream's wording, which is why the `M2` review found
+them inconsistent with the skill. Under option B the skill moves to them, not the reverse.
 
 ## `T-13` — the PM's half of CRD 0006, and what round 3 left (M2)
 

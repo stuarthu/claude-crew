@@ -1,0 +1,58 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the tagged commit
+        uses: actions/checkout@v4
+
+      - name: The tag and the two manifests must say the same version
+        run: |
+          set -euo pipefail
+          tag="$GITHUB_REF_NAME"
+          version="${tag#v}"
+          plugin=$(jq -r '.version' .claude-plugin/plugin.json)
+          market=$(jq -r '.metadata.version' .claude-plugin/marketplace.json)
+          echo "tag=$tag  version=$version  plugin.json=$plugin  marketplace.json=$market"
+          fail=0
+          if [ "$version" != "$plugin" ]; then
+            echo "::error::plugin.json says $plugin, the tag says $version"
+            fail=1
+          fi
+          if [ "$version" != "$market" ]; then
+            echo "::error::marketplace.json says $market, the tag says $version"
+            fail=1
+          fi
+          [ "$fail" = 0 ]
+
+      - name: Take the release notes out of CHANGELOG.md
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="$version" '
+            $0 ~ "^## " v "[[:space:]]*$" { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > notes.md
+          if ! grep -q '[^[:space:]]' notes.md; then
+            echo "::error::CHANGELOG.md has no '## $version' section, or that section is empty"
+            exit 1
+          fi
+          echo "notes: $(grep -c '' notes.md) lines"
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file notes.md

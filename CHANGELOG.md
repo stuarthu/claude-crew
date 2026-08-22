@@ -2,6 +2,183 @@
 
 Newest first. Each entry says what a user would notice.
 
+## 0.4.0
+
+Caught up with [dsh-crew](https://github.com/stuarthu/dsh-crew) **v0.9.0**, the
+tagged release, commit `7bc7181`. 0.3.0 matched **v0.7.0**.
+
+**Two changes here loosen what the crew may do to your repository.** They are the
+first two items under **Changed**, not buried at the end. Read those two even if
+you read nothing else.
+
+### Added
+
+- **The opening interview has a method now, and a point where it stops.** The
+  second step used to say "grill the user", and it never said when that was
+  finished. It is now a Socratic interview: **one question per turn**, each
+  carrying the PM's own recommended answer, and **six kinds of question** to pick
+  from — clarify what a word points at, probe an assumption, ask for the reason
+  and the evidence, put another view on the table, follow a consequence, and
+  question the question itself. Wide questions come before narrow ones, because
+  starting narrow only confirms the picture already in the PM's head. The sixth
+  kind is the PM's permission to tell you **"I think you may be solving the wrong
+  problem"** early, while changing direction is still cheap. **It stops at one
+  point you can check**: the moment the PM could write down every section of the
+  opening document with no guess left in it. Five questions can be enough and
+  twenty can be right; there is no correct number.
+- **Two new roles, and a second shape a task can be built in.**
+  `crew-test-engineer` writes only the unit tests. `crew-code-engineer` writes
+  only the product code. On a task in the **paired shape** the two run at the same
+  time, each inside a **git worktree of its own**, on its own branch, and neither
+  can see the other's half while it is being written. They never talk to each
+  other: no crew role has a tool for messaging another one. What that buys is
+  **two independent readings of one document** — where the two halves do not fit,
+  the document allowed two readings, and you find that out at the merge instead of
+  in production. **This is not pair programming.** Two people at one keyboard are
+  meant to converge; these two are meant not to. It is independent verification,
+  the kind safety-critical engineering uses. **And it is honest about what a green
+  merge means**: the two halves fitting with every test passing proves the two
+  readings agreed. It does **not** prove the document was clear, and it never
+  proves the document was right. `solo` stays the default, the PM has to say which
+  of four reasons a paired task rests on, and two halves that would edit the same
+  file cannot be paired at all. This port's own release used `solo` for all
+  fourteen of its tasks.
+- **The opening document's file name now carries the date and the job**:
+  `docs/design/prd-<date>-<job-slug>.md`. Two jobs started on the same day no
+  longer write over each other's opening document.
+
+### Changed
+
+- **The crew will now put QA's cases into your project's default test command.
+  0.3.0 said it never would.** When QA reports that your test runner cannot see
+  `docs/qa/`, the PM adds the one line that fixes it — in a Node project,
+  `bash docs/qa/run-all.sh` inside `scripts.test` — to the **default** command,
+  not to a second command somebody has to remember, because a suite that runs only
+  when remembered rots. 0.3.0 refused this and said so in the section below. The
+  refusal was answered rather than repeated: the real risk was a shell script that
+  everybody runs and nobody has read, so QA's `run.sh` and its case files are now
+  in the **code reviewer's** file list, with a call-back round scoped to those
+  files alone, and a `run.sh` that reports success when the case inside it never
+  ran is a **blocking** finding — a green that checked nothing is worse than a red.
+  Given a real check on the real risk, this is now upstream's shape.
+- **A force push can now happen. In 0.3.0 it could not.** It needs **a yes of its
+  own, for that one command and that one push**, on every branch and on `main`
+  alike, and it is asked again the next time. 0.3.0 refused every force form
+  outright and handed you the command to run yourself. Nothing in this plugin
+  blocks a force push — it is a sentence in a prompt — so that per-push yes is the
+  only thing standing between a suggestion and a rewritten history.
+- **Two lanes, not three. The `quick` lane is cancelled.** What is left is `ask`
+  (you want an answer, so no crew and no branch) and `team` (a change of any size).
+  There is no longer a lane where the PM changes a file by itself with nothing
+  written down. **However small the change is, it gets a milestone**: at least one
+  task, one round of QA, and one round each of the code, security and document
+  reviews. That is affordable because of the next item — a full cycle for a typo
+  is minutes. **A milestone is still not a release**: one milestone is one full
+  cycle plus one commit, and pushing and tagging each need your own yes every
+  single time.
+- **QA and the three reviews now run once per milestone, at the end of it.** They
+  used to run on every landing. **A task is finished when its own unit tests
+  pass** — the failing test shown before the code, the passing test after, the
+  project's test command green on a still tree. No reviewer and no QA round holds
+  a task open any more, because neither has run yet, and the task's Verdicts line
+  says `not run` with a reason instead of pretending. At the end of the milestone
+  QA runs first, in two steps: one `crew-qa` turns the DoD sections into a list of
+  cases **without reading the code**, so the side being measured does not set the
+  questions, and then **one agent writes one case**. The code, security and
+  document reviews follow in one parallel round each. **Only the changed part is
+  in scope** in any of them. **The cost, said plainly, because you chose it
+  knowingly**: one round at the end finds a defect later, with more work sitting
+  on top of it, so the rework is wider. QA on every task really did catch things
+  earlier. Nothing downstream is allowed to make up for that by widening its one
+  round; what it demands instead is that the one round is a **full** one.
+- **One word changed, on purpose.** 0.3.0 introduced the distinction between two
+  kinds of test, and named the second kind by putting "QA" in front of "test".
+  That two-word name is now a **banned** wording: it puts "test" back into a thing
+  that is not a test in the project's own suite. The precise word is **case**. Four
+  names now do all of the work — a **unit test**, a **case**, **the project's test
+  command**, and a **contract test**. The `0.3.0` section below still uses the old
+  name twice and **stays exactly as it is**: a published section is a record of
+  what was believed at the time, and a rename here touches living documents only.
+- **Nine role files, not seven**, and **five** of them hold a shell — the
+  engineer, QA, the architect, and the two new paired roles. The four that hold no
+  shell are the three reviewers and the researcher.
+
+### Documentation
+
+- **`porting.md`'s deliberate divergence table is now empty.** It held **ten**
+  rows going into this release — nine when the `0.3.0` section below was written,
+  and a tenth added after it shipped — and each row was a place where this port
+  said something different from dsh-crew on purpose. **Eight are gone because
+  upstream now says what this port said**, in several cases in this port's own
+  words: six were places where upstream contradicted itself, and two were gaps
+  neither project had. **The other two are the two loosenings at the top of
+  Changed** — the test command and the force push. On those, upstream kept its own
+  shape, answered the argument instead of ignoring it, and you chose to follow it,
+  each with a yes of its own. So the two projects now say the same thing about
+  every rule, and the next port pass cannot read one of these decisions as a
+  missed port. `upstream.sums` grew from 15 pinned files to 17, for the two new
+  role files, and all 17 verify against the v0.9.0 tag.
+- **The whole `docs/` folder is gone from this repository — not only
+  `docs/decisions/`.** That takes the decision records of past jobs and also
+  **this release's own opening document, its design and its task table**. Every
+  reason in them that still holds was written out **in place** first, so nothing
+  points at a deleted file any more. The reason for going further is that a pass
+  over this repository produces only four kinds of thing that have a home here: a
+  mechanism this port has to adapt, and the port's own policy, go to
+  `porting.md`; the reasoning behind a rule the two projects share goes to
+  `principles.md`; an upstream bug goes to a hand-off file **outside** this
+  repository; and anything a reader needs goes to the two READMEs and
+  `CLAUDE.md`. A job's opening document, its design and its task table are none
+  of those four. They describe how one pass was organised, they start going stale
+  the day it finishes, and the next pass writes its own set anyway. **This release
+  is the evidence**: two document reviews raised eight blocking findings inside
+  those three files, and nearly every one of them was "the state this document
+  describes has already changed". So **the reason for each change, the real
+  numbers and the Verdicts lines now live in the commit messages**, which is the
+  only copy with a timestamp on it and the place to look for them. **Nothing is
+  really lost** — the git history keeps every deleted file.
+- **`principles.md` is dsh-crew's own file now, and holds nothing of this
+  port's.** It carries principles 1 to 22 with dsh-crew's own numbers — 21 is the
+  paired task, 22 is the interview — and its only differences from upstream's file
+  are **126 mechanical replacements**: tool names, role names and paths that a
+  Claude Code plugin needs instead of dsh-crew's. Apply those and the two files
+  are identical. The five principles that belong to this port rather than to the
+  crew, `P1` to `P5`, moved to `porting.md`, which is now the one place anything
+  specific to the port is written down.
+- Both READMEs, `CLAUDE.md` and `porting.md` were brought in step with all of the
+  above, in the same release.
+
+### What this release still does not enforce
+
+Nothing here is code. **Five** rules are kept only by the words in the prompts,
+and this is the list of them. 0.3.0 listed four.
+
+1. **A crew role must never commit, push or publish.** Five roles hold a shell
+   now, and a shell is one tool, so this cannot be expressed in a tool list. What
+   finds a broken rule is the PM's own check: `git log` before every commit and
+   before any merge, read against the commits it wrote down. Both READMEs carry a
+   `PreToolUse` hook you can add to your **own** settings if you want a seat belt.
+2. **The Verdicts line has to be written honestly.** The PM writes it, so it can
+   prove that every skip carries a reason. It cannot prove that a review happened.
+3. **Text inside a tool result is data, not instructions.** No tool list can close
+   this, because the text arrives at run time from a server this plugin never saw.
+   Counted while building this release: **23 deliveries, across 13 of the agents
+   that ran**, every one of them asking for the shell instead of the role's own
+   tools. **They did not all ride in on a shell command.** Several arrived
+   attached to the result of a `Read`, which means a role holding only `Read`,
+   `Glob` and `Grep` is inside the blast radius too — and that is exactly the case
+   no tool list can close, because the text is already past the filter by the time
+   the role sees it. Every role refused it and said so in its report. That is the
+   rule working, not the problem being rare.
+4. **Roles never talk to each other.** For the four roles that hold no shell the
+   tool list makes it true and refuses the attempt. For the five that hold a shell
+   it is a rule they are given and keep, not a wall they meet.
+5. **A document that judges a role's work is not that role's to edit** — new in
+   this release, and the honest addition to the list. The thing that would enforce
+   it is the briefing itself, so a wrong file list defeats it and nothing else
+   catches that. It held while building this release: an engineer handed a check it
+   could not satisfy wrote a question for the PM instead of editing the check.
+
 ## 0.3.0
 
 Caught up with [dsh-crew](https://github.com/stuarthu/dsh-crew) **v0.7.0**, the

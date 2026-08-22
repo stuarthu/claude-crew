@@ -1,7 +1,7 @@
 {
   "name": "crew",
-  "version": "0.3.0",
-  "description": "Your session becomes a product manager that runs the work as a small crew: researcher, architect, engineer, QA, code reviewer, security reviewer and doc reviewer, started in parallel by default and made to wait only when they share a file or one needs what another wrote, talking only through files on disk. The PM is the only voice to the user and the only one who uses git.",
+  "version": "0.4.0",
+  "description": "Your session becomes a product manager that runs the work as a small crew: researcher, architect, engineer, test engineer, code engineer, QA, code reviewer, security reviewer and doc reviewer, started in parallel by default and made to wait only when they share a file or one needs what another wrote, talking only through files on disk. The PM is the only voice to the user and the only one who uses git.",
   "author": {
     "name": "Stuart Hu"
   },

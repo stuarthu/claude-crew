@@ -90,7 +90,7 @@ which it was on the scope line. Usually it names some of:
   decision, and — when it adds work — which task or milestone got the new DoD
   items, and how many?
 - `docs/design/api/*.md` — the module boundary contracts
-- `docs/design/tasks.md`
+- `docs/tasks/`
 - any crew **role prompt** or **skill file** the job changed — `agents/*.md` and
   `skills/*/SKILL.md` here. These are documents too, and a wrong line in one of
   them is acted on by every job that comes after
@@ -118,13 +118,13 @@ and language-file halves of item 10 need the README files.
    the document it belongs to — one on every task row, one on every milestone —
    and never a document of its own. A separate one is dropped when the job folder
    is dropped, and it takes every check inside it along:
-   - every row in `docs/design/tasks.md` has a **DoD section**. A row without one
+   - every row in `docs/tasks/` has a **DoD section**. A row without one
      is a **blocking** finding — nobody but the person writing the code would then
      say what "done" means;
    - every milestone in the opening document has one too, when that document has
      milestones;
    - each item says how **somebody else** checks it: a QA case under
-     `docs/qa/<task-id>/`, or an exact command. "It works" is not an item;
+     `qa/<task-id>/`, or an exact command. "It works" is not an item;
    - each item is something a person can carry out and get a yes or no from.
      "Fast", "clean", "user friendly" are not items;
    - no document holds a flat numbered list of checks any more, and nothing
@@ -155,7 +155,7 @@ and language-file halves of item 10 need the README files.
    - it says who owns the data behind the boundary and what the caller may
      believe about it; for events, the schema and the delivery promise;
    - it says which task builds each side, and those task ids exist in
-     `docs/design/tasks.md`;
+     `docs/tasks/`;
    - the two sides could be built from this file alone, by two people who never
      speak. If you would have to ask a question, that is blocking;
    - it names no library or framework — the architect picks the style, the
@@ -163,7 +163,7 @@ and language-file halves of item 10 need the README files.
    - the "Changing this" rule is there: frozen once a side starts, only the
      architect edits it.
 
-   Also check the order in `docs/design/tasks.md`. When there is a boundary, `T-01`
+   Also check the order in `docs/tasks/`. When there is a boundary, `T-01`
    must be a walking skeleton: one thin real path across the riskiest boundary,
    owned by one engineer, with every other task depending on it. It is the only
    task allowed to own files on both sides, and no later task may own its files.

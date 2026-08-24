@@ -2,6 +2,99 @@
 
 Newest first. Each entry says what a user would notice.
 
+## 0.5.0
+
+Caught up with [dsh-crew](https://github.com/stuarthu/dsh-crew) **v0.10.0**, the
+tagged release, commit `09c6e03`. 0.4.0 matched **v0.9.0**.
+
+**Three folders moved or went away.** `docs/research/` is gone, `docs/qa/` is now
+`qa/` at the root of your repository, and the single file `docs/design/tasks.md`
+is now a folder, `docs/tasks/`. If you have crew documents from an older release,
+nothing moves them for you. Read the first three items even if you read nothing
+else.
+
+### Changed
+
+- **The researcher no longer writes files, and `docs/research/` is gone.** Its
+  tool list is now `Read`, `Glob`, `Grep`, `WebSearch` and `WebFetch` — `Write`
+  was taken away. An answer comes back inside the researcher's report, and the PM
+  puts the part that has to last into a document it already owns: the opening
+  document, a decision record, or a change request. What you notice is that a
+  finished job leaves fewer files behind, and that a fact you can still read
+  somewhere is a fact somebody decided to keep.
+- **QA's cases live in `qa/` at the root of your repository, not in `docs/`.**
+  The command is now `bash qa/run-all.sh`, and the standing list of what no case
+  can check is `qa/gaps.md`. One task's cases still sit together in their own
+  folder, now `qa/<task-id>/`, with a `run.sh` beside them. The reason for the
+  move is plain: these are scripts you run, not documents you read, and `docs/`
+  should hold the things you read. Nothing else about QA changed — QA still
+  writes only inside its own task folder, and `qa/run-all.sh` and `qa/gaps.md`
+  are still the PM's files, never QA's.
+- **The task table became a folder.** Instead of one long `docs/design/tasks.md`,
+  there is `docs/tasks/` with one `T-<n>.md` file per task. Each file carries its
+  own Verdicts line and its own DoD section, exactly as a row did. Two roles
+  reading two tasks now open two files, and a task that changes touches one file
+  instead of one shared one.
+- **A question in the opening interview can be left undecided.** Before, every
+  question the PM asked wanted an answer. Now a question that would change
+  neither what gets built nor what gets released arrives with a second option
+  beside the PM's recommended one: leave it undecided. What that buys you is
+  written into the rules in as many words — **the thing you set aside is written
+  down nowhere.** It does not go into the table of what the interview settled,
+  it does not go into "not in scope", and it does not go into a "still
+  undecided" list. So asking for it later reopens nothing and costs you no
+  argument. **The change-request rule is not loosened by this.** If a later yes
+  would move the scope, a DoD item or the milestone list, that is still a change
+  of scope, and the PM still stops and asks you.
+- **The "not in scope" list has a much harder bar.** A line belongs there only
+  when crossing it would force finished work to be built a second time, or do
+  something nobody can take back — a package published, a tag pushed, data
+  deleted — or leave a safety guard or a permission rule weaker than it was.
+  Work the PM simply did not get to does **not** go on that list any more. It
+  used to, and the cost was real: a cheap request you made later read like you
+  reversing a decision, when in truth nobody had ever decided anything.
+
+### Added
+
+- **The PM now has a written list of what it may write.** Upstream added running
+  code for this: a wrapper that refuses a write or an edit on any path that is
+  not on the list, and asks the user for that one write. This plugin ships no
+  code at all, so the same limit is carried here as words in the skill — the
+  paths the PM may write itself (the opening document, change requests, decision
+  records, `docs/tasks/`, `qa/run-all.sh`, `qa/gaps.md`, the project's own rules
+  file, the principles file, the skill itself and the job state file), and
+  everything else refused, with the PM asking you instead. Product code, the
+  other roles' files under `agents/`, the interface contracts, QA's cases, the
+  READMEs and the project manifest are all outside it: each belongs to a task and
+  to a role, so the answer is to write the task and start the role. The list is
+  fixed in the skill and is never read out of `docs/tasks/`, so no task and no
+  briefing can widen it.
+  **Nothing here enforces it.** There is no wrapper, no hook and no check in this
+  repository — the words are the whole of it, exactly like the git rule beside
+  them. And even where upstream's wrapper does run, it only ever reads the path
+  of a write or an edit: a file written through a shell command, `echo x > file`,
+  never passes through such a guard at all.
+
+### Documentation
+
+- **Both READMEs are much shorter.** They now hold the title, one short
+  paragraph, the version, how to install the plugin, the role table and the
+  licence — what you need to decide whether to install it and how to start.
+  Everything else moved into `CLAUDE.md`, which is now the **only** copy: the
+  design rules, how to edit a role, the list of rules nothing enforces, the
+  `PreToolUse` hook snippet you can add to your own settings as a seat belt,
+  and where the crew's documents live. Two copies of the same rule drift apart,
+  and this release found several places where they already had. If you used to
+  read a README for any of that, read `CLAUDE.md` now.
+- **The list of rules nothing enforces still has five entries**, and they are the
+  rules the **roles** carry in their own prompts. The PM's write limit above is
+  counted apart from those five, because upstream keeps that one with code rather
+  than with words.
+- The `0.4.0` and older sections below still name `docs/qa/`, `docs/research/`
+  and `docs/design/tasks.md`. They **stay exactly as they are**: those paths were
+  real when those versions shipped, and a published section is a record of what
+  was true at the time, not a page to keep up to date.
+
 ## 0.4.0
 
 Caught up with [dsh-crew](https://github.com/stuarthu/dsh-crew) **v0.9.0**, the

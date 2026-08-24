@@ -23,9 +23,9 @@ Five things live here, and a port pass needs all five:
    **hand-off file, outside this repository**, and that one holds upstream's bugs
    rather than this port's rules.
 
-This port was made from dsh-crew **v0.9.0**, commit `7bc7181`. `upstream.sums`
-holds one checksum line per file below. The pass before it carried **v0.7.0**
-(`87a4332`).
+This port was made from dsh-crew **v0.10.0**, commit `09c6e03`. `upstream.sums`
+holds one checksum line per file below. The pass before it carried **v0.9.0**
+(`7bc7181`).
 
 ## What a port pass may change, and what it may not
 
@@ -43,7 +43,7 @@ never fixes upstream's bugs.**
 
 **Why:** this repository's only value is that the two projects say the same thing. A local fix,
 however good, is a paragraph somebody must reconcile by hand forever — and they will be reading
-a diff, under time pressure, with `sha256sum -c` reporting fifteen moved files. A port that
+a diff, under time pressure, with `sha256sum -c` reporting eighteen moved files. A port that
 improves upstream turns `upstream.sums` from a tool into a liability: `FAILED` stops meaning
 "upstream moved" and starts meaning "look it up".
 
@@ -96,7 +96,7 @@ So there is exactly one place for each kind of thing a pass produces:
 | the port's own policy, like the three rules above | **this file**, at the top |
 | the *reason* behind a rule the crew shares with dsh-crew | `principles.md` — **which this port does not edit**. The reason is upstream's, in upstream's words |
 | the *reason* behind a rule that is this port's own | **this file**: principles `P1` to `P5` |
-| what a reader or an editor needs to know | `README.md`, `README-zh.md`, `CLAUDE.md` — each pointing here, never restating |
+| what a reader or an editor needs to know | `CLAUDE.md`, which is the only copy since 0.5.0; the two READMEs stay thin and carry only the title, the version, Install, the role table and the licence. Both point here, and neither restates |
 
 **A rule written in two places is the next drift.** The 0.7.0 pass found three documents
 disagreeing about how many deliberate divergences there were, and a check that passed in both
@@ -153,24 +153,35 @@ repository is reading dsh-crew's reasons, and they should get dsh-crew's words.
 
 ### The substitution table
 
-126 substitutions at v0.9.0, in five classes. Every one exists because leaving
-upstream's token would name **a thing this deployment does not have** — which is a
-silent hole, not a wording preference.
+127 substitutions at v0.10.0, in the six classes below — the three `roles/` rows are
+one class written out three ways, because the replacement differs. Every one exists
+because leaving upstream's token would name **a thing this deployment does not
+have** — which is a silent hole, not a wording preference.
 
 | Upstream | Here | Count | Why |
 | --- | --- | --- | --- |
-| `crew_researcher`, `crew_qa`, `crew_test_engineer`, … | `crew-researcher`, `crew-qa`, `crew-test-engineer`, … | 28 | An underscore name is not an agent this deployment can start |
-| `roles/pm.md` | `skills/team-lane/SKILL.md` | — | The file does not exist here |
-| `roles/<name>.md` | `agents/crew-<name>.md` | 89 with the row above | Same |
-| `roles/*.md` | `agents/*.md` | included above | Same |
+| `crew_researcher`, `crew_qa`, `crew_test_engineer`, … | `crew-researcher`, `crew-qa`, `crew-test-engineer`, … | 27 | An underscore name is not an agent this deployment can start |
+| `roles/pm.md` | `skills/team-lane/SKILL.md` | 22 of the 90 below | The file does not exist here |
+| `roles/<name>.md` | `agents/crew-<name>.md` | 90 with the row above and the row below | Same |
+| `roles/*.md` | `agents/*.md` | 2, included above | Same |
 | `~/.dsh/crew` | `~/.claude/crew` | 3 | The job folder is elsewhere |
-| `` `send_message` ``, `` `list_agents` `` | `` `SendMessage` ``, `` `ListAgents` `` | 1 | Design rule 3: every tool name must be one Claude Code really has |
+| `` `send_message` ``, `` `list_agents` `` | `` `SendMessage` ``, `` `ListAgents` `` | 1 | Design rule 3: every tool name must be one Claude Code really has. Only `send_message` is left in the file at v0.10.0; `list_agents` no longer appears |
 | `This file ships with the npm package` (`package.json`'s `files` names it) | `This file ships with the plugin` | 1 | This repository has no `package.json` and design rule 6 forbids one. Naming it in the first line of a shipped file sends the reader looking for a file that must never exist |
 | Five sentences where upstream says **"this repository"** about **itself** | `dsh-crew` | 5 | Carried unchanged, each one becomes false |
 
+**Recount these numbers every pass, and do not copy them forward.** The classes have not
+changed since 0.4.0, but upstream's file grows, so the counts move under them: at v0.9.0
+the same six classes gave 89 `roles/` paths and 28 underscore names, and at v0.10.0 they
+give 90 and 27. The total happens to be 127 both times, which is exactly the kind of
+coincidence that makes an unchecked number look safe. Count them in the throwaway clone,
+not from this table. *(This figure read `126` in 0.4.0, while its own per-class numbers
+added up to 127. That was an arithmetic slip in this file, not a missed substitution: the
+substituted `principles.md` diffed clean against upstream at every pass in between. 0.5.0
+corrected the total to 127.)*
+
 **Nothing else is substituted, and that is deliberate.** Where `principles.md` names
 `host/roles.js`, `npm test`, `package.json`, `scripts.test`, `tools/verify-*.mjs`,
-`.github/workflows/` or `docs/qa/lib/`, it is **describing dsh-crew's own machinery**,
+`.github/workflows/` or `qa/lib/qa.mjs`, it is **describing dsh-crew's own machinery**,
 and the sentence is true as written. This plugin has none of it; the map below says what
 stands in its place. Rewriting those sentences would be editing, and editing is what
 this rule exists to stop.
@@ -291,8 +302,8 @@ the plugin.
 
 **Rule.** No hooks, no scripts, no code. Nine agent files and one skill file.
 The rules that cannot be enforced are written in the prompt of every role they
-apply to, and both READMEs say plainly that nothing stops them. There are **five**,
-and this is the whole list:
+apply to, and `CLAUDE.md`, under **The rules nothing enforces**, says plainly that
+nothing stops them. There are **five**, and this is the whole list:
 
 1. a role must never commit, push or publish;
 2. the **Verdicts** line has to be written honestly;
@@ -307,6 +318,14 @@ The count grew from three to five in the v0.9.0 port, and not because the plugin
 weaker: two rules that were always unenforced were only written down later, and two
 more roles now hold a shell.
 
+**It stayed five at v0.10.0, and that needs saying, because upstream added a guard.**
+Its new `host/pm-write-guard.js` limits what the **PM** may write, and this port carries
+that limit as words in `skills/team-lane/SKILL.md`. It is not a sixth item here: these
+five are rules the **roles** carry in their own prompts, and the PM's write set is the
+PM's own, with its own section in `CLAUDE.md`. Nothing enforces that one either — it is
+the same shape as the git guard, minus the hook snippet, which the user decided against
+on 2026-08-24.
+
 **Why.** Three reasons, in order of weight.
 
 *It is the only honest shape.* An earlier version shipped a `PreToolUse` hook
@@ -318,17 +337,17 @@ is not worth becoming the only plugin in the directory that needs an interpreter
 *A hook needs a runtime the user may not have.* Claude Code ships as a single
 binary, so node may be absent. Of Anthropic's own forty plugins, thirty-four have
 no hooks at all; the six that do use `bash` or `python3`, and none uses node. A
-hook that silently does nothing is worse than no hook, because the README
-promises it.
+hook that silently does nothing is worse than no hook, because the document
+offering it promises it.
 
 *A rule you cannot enforce should be said out loud.* Claude Code asks the user
 before each `Bash` call unless permissions are skipped. For the case where they
-are, the README carries a small hook the **user** can add to their own settings.
+are, `CLAUDE.md` carries a small hook the **user** can add to their own settings.
 It stays theirs, so it cannot break anyone who did not choose it.
 
 **And it was measured, on the machine this port was built on.** No settings file
 had a `hooks` key at all, and the default permission mode was set to skip the
-prompts. So the seat belt the READMEs offer was not in place, and nothing but the
+prompts. So the seat belt `CLAUDE.md` offers was not in place, and nothing but the
 prompt stood between a role and a `git commit`. That is what makes the mechanism
 this port does have load-bearing: the PM runs `git log` before every commit and
 before any merge, compares it against the commits it wrote down, and a commit it
@@ -339,19 +358,22 @@ ships running code that refuses a child's git write.
 and `agents/crew-architect.md`, `agents/crew-test-engineer.md` and
 `agents/crew-code-engineer.md` — **five** roles hold a shell now, not three — the
 `S12` section of all nine `agents/*.md`,
-`skills/team-lane/SKILL.md` (step 11 **Commit**, the hard rules), the "what is
-not enforced" section of both READMEs, and design rules 5 and 6 in `CLAUDE.md`.
+`skills/team-lane/SKILL.md` (step 11 **Commit**, the hard rules, and the
+**What you may write with Write and Edit** section), and `CLAUDE.md` — its
+**The rules nothing enforces** section, which carries the list and the hook
+snippet, its **The PM write guard** section, and design rules 5 and 6.
 
 ---
 
 ## P4. Nothing is checked, so the rules are written where the editor will look
 
 **Rule.** There is no check to run. The design rules — exactly one filter per role,
-a reviewer never writes, **no allow-list role gets a shell**, **no reviewer gets a
-write tool** (two different rules, and the researcher is an allow-list role that is
-not a reviewer, so it holds `Write` and is right to), a deny-list role denies all five
-delegation tools, the five maker roles keep `Bash`, every tool name is a real one —
-are written out in `CLAUDE.md` and in the "Editing a role" section of both READMEs.
+**no allow-list role gets a shell and none gets a write tool** (one rule since v0.10.0,
+which took `Write` off the researcher; it was two rules over two different sets before
+that, and `CLAUDE.md` design rule 2 says how they collapsed), a deny-list role denies
+all five delegation tools, the five maker roles keep `Bash`, every tool name is a real
+one — are written out in `CLAUDE.md`, under **Design rules a change must not break** and
+**Adding or changing a role**.
 
 **Why.** This started as four verify scripts, then one. Each version was useful,
 and each one made node a requirement for anyone touching a repository whose whole
@@ -366,8 +388,11 @@ time from one table. A markdown-only plugin has no run time, and now no check
 either, so the only thing between that mistake and a release is somebody reading
 the frontmatter line carefully.
 
-That is why the rules are repeated in three places instead of one, and why the
-README puts them under a heading somebody editing a role will actually open.
+That is why `CLAUDE.md` puts them under a heading somebody editing a role will
+actually open, and repeats the ones that matter most in its **Adding or changing a
+role** checklist. Until 0.5.0 they were in the READMEs as well; that second copy is
+gone, because two copies of a rule is how the two drift — and the one that survives
+is the one in the file a person editing this repository already has open.
 
 **The same shape, one level up: a rule the briefing enforces cannot defend
 against the briefing.** "Touch only the files your task owns. Not one file more"
@@ -406,7 +431,7 @@ step, two separate shared sentences, and a role's own prompt — and the one doc
 that mattered most, the opening document, was in none of them.
 
 **Lives in** `CLAUDE.md` ("Design rules a change must not break" and "Adding or
-changing a role"), the "Editing a role" section of `README.md` and `README-zh.md`,
+changing a role" — the only copy since 0.5.0, when the READMEs went thin),
 sentence `S13` and the `## What you may write` section of all nine `agents/*.md`, and
 the PM's own `## What you may write` in `skills/team-lane/SKILL.md`.
 
@@ -420,8 +445,8 @@ saying which file here it feeds. Running `sha256sum -c upstream.sums` inside a
 dsh-crew checkout of the pinned tag reports what moved. Beside it, `porting.md`
 holds the file-by-file map, the "did not port" table, and the **Deliberate
 divergence** table — one row per place this port states a rule differently, each row
-self-contained because there is no other document to send the reader to. **At 0.4.0
-that table has no rows**, and the section says so and says where the ten it used to
+self-contained because there is no other document to send the reader to. **That table
+has had no rows since 0.4.0**, and the section says so and says where the ten it used to
 hold went.
 
 **Why the checksums.** A port without them becomes a fork within a few months,
@@ -437,7 +462,7 @@ version stated a rule differently from upstream in ten places. Every one of thos
 ten was a place where the diff was not the whole story, and the only way to know
 was to have read a table first.
 
-**At 0.4.0 the table is empty, and that is the goal rather than an accident.**
+**The table has been empty since 0.4.0, and that is the goal rather than an accident.**
 Upstream v0.9.0 adopted eight of the ten — several of them in this port's own
 words — and on the last two the user chose upstream's shape, once upstream had
 answered the argument behind them rather than only their conclusion. So **a `FAILED` line means
@@ -465,55 +490,63 @@ by hand forever.
 checksum file only knows the names already in it. `porting.md` carries the git
 command for that, run against two tags in a throwaway clone.
 
-**Lives in** `upstream.sums`, `porting.md`, and the "Keeping up with dsh-crew"
-section of both READMEs.
+**Lives in** `upstream.sums`, this file, and the **Commands** section of `CLAUDE.md`,
+which carries the upstream check itself. The READMEs used to hold a "Keeping up with
+dsh-crew" section; it went at 0.5.0 with the rest of the detail, and nothing replaced
+it there — a reader who wants to run a pass is sent to this file.
 
 ---
 
 ## The map
 
-Upstream paths are as they are at tag `v0.9.0`.
+Upstream paths are as they are at tag `v0.10.0`.
 
 | dsh-crew file | claude-crew file(s) | What changes on the way |
 | --- | --- | --- |
 | `roles/pm.md` | `skills/team-lane/SKILL.md` | All of it goes in the skill: step 0 (unfinished work), the PM rules, the roster and limits, then the 18 steps. Nothing is stated differently on purpose any more: the divergence table is empty. The 18 steps keep their numbers; step 2 is now the interview, step 10 has two gates, and step 9 carries the paired flow. |
-| `roles/researcher.md` | `agents/crew-researcher.md` | Add frontmatter. Rename tools (`web_search` → `WebSearch`, and this deployment does have a page fetcher, so that paragraph is rewritten rather than copied). Add the shared sentence `S12`. |
+| `roles/researcher.md` | `agents/crew-researcher.md` | Add frontmatter. Rename tools (`web_search` → `WebSearch`, and this deployment does have a page fetcher, so that paragraph is rewritten rather than copied and `WebFetch` stays in the allow list). Add the shared sentence `S12`. **At v0.10.0 its write set became empty**: upstream took `Write` off it and deleted `docs/research/`, so its answer is its report to the PM and it writes no file. That is what collapsed `CLAUDE.md` design rule 2 from two rules into one. |
 | `roles/architect.md` | `agents/crew-architect.md` | Add frontmatter, rename tools, add `S12` and `S13`. The architect holds a shell here — this port's own call, because it reads the code and the git history before it designs anything — so it also carries the git clause. |
 | `roles/engineer.md` | `agents/crew-engineer.md` | Add frontmatter, rename tools, add `S12` and `S13`. Says at the top that it is the **solo** shape, now that a paired one exists. |
 | `roles/test-engineer.md` | `agents/crew-test-engineer.md` | **New at v0.9.0.** Add frontmatter (`disallowedTools`, all five delegation names), rename tools, add `S12` and `S13`. Holds a shell, so it carries the git clause. Writes only a task's unit tests, before the code exists. |
 | `roles/code-engineer.md` | `agents/crew-code-engineer.md` | **New at v0.9.0.** Same frontmatter shape. Holds a shell, so it carries the git clause. Writes only the product code, and never a unit test for the behaviour it is building. |
 | `roles/qa.md` | `agents/crew-qa.md` | Add frontmatter, rename tools, add `S12` and `S13`. Rebuilt into upstream's Job 1 / Job 2 shape: QA runs once per milestone, not once per task. Nothing is stated differently any more — upstream adopted both of the rules this port used to diverge on. |
-| `roles/code-reviewer.md` | `agents/crew-code-reviewer.md` | Add frontmatter (an **allow** list, never a deny list), rename tools, add `S12` and `S13`. QA's `run.sh` and its case files are added to the file list it reads — divergence entry 7. |
+| `roles/code-reviewer.md` | `agents/crew-code-reviewer.md` | Add frontmatter (an **allow** list, never a deny list), rename tools, add `S12` and `S13`. QA's `run.sh` and its case files — now under `qa/<task-id>/` — are added to the file list it reads, with a call-back round scoped to those files and a `run.sh` that greens without running its case as a blocking finding. That came here as old divergence row 7; see **Where the ten rows went** below. |
 | `roles/security-reviewer.md` | `agents/crew-security-reviewer.md` | Add frontmatter (allow list), rename tools, add `S12` and `S13`. |
 | `roles/doc-reviewer.md` | `agents/crew-doc-reviewer.md` | Add frontmatter (allow list), rename tools, add `S12` and `S13`. Upstream's first instruction points at a file inside dsh-crew's own repository; a port cannot carry a pointer into the source project's private files, so the rule is stated inline instead. |
-| `host/roles.js` | every `agents/*.md` frontmatter | dsh builds the tool filters at run time; Claude Code reads them from the agent file. Nothing checks them here — the design rules are written out in `CLAUDE.md` and in both READMEs instead. |
+| `host/roles.js` | every `agents/*.md` frontmatter | dsh builds the tool filters at run time; Claude Code reads them from the agent file. Nothing checks them here — the design rules are written out in `CLAUDE.md` instead, and since 0.5.0 that is the only copy. Since v0.10.0 all four allow-list roles have an empty write set, which is why design rule 2 is one rule and not two. |
 | `host/jobs.js` | `skills/team-lane/SKILL.md`, step 0 | Not code here. The PM looks in `~/.claude/crew/jobs/` itself when the skill loads. |
-| `host/git-guard.js` | the `## Git` section of all **five** shell-holding roles — `agents/crew-architect.md`, `agents/crew-engineer.md`, `agents/crew-qa.md`, `agents/crew-test-engineer.md`, `agents/crew-code-engineer.md` — and the "What is not enforced" section of both READMEs | **Not ported as code.** The plugin ships no hooks. The rule is stated in every role that owns a shell, and the README offers a hook the user can add to their own settings. See principle `P3`. |
+| `host/git-guard.js` | the `## Git` section of all **five** shell-holding roles — `agents/crew-architect.md`, `agents/crew-engineer.md`, `agents/crew-qa.md`, `agents/crew-test-engineer.md`, `agents/crew-code-engineer.md` — and the **The rules nothing enforces** section of `CLAUDE.md` | **Not ported as code.** The plugin ships no hooks. The rule is stated in every role that owns a shell, and `CLAUDE.md` offers a hook the user can add to their own settings. It was in both READMEs until 0.5.0. See principle `P3`. |
+| `host/pm-write-guard.js` | the **What you may write with Write and Edit** section of `skills/team-lane/SKILL.md`, and the **The PM write guard** section of `CLAUDE.md` | **New at v0.10.0, and not ported as code.** Upstream wraps `tools/execute` and refuses a `write` or `edit` from the root agent — the PM — on any path off the PM's whitelist, asking the user for that one write instead. This plugin ships no code, so the limit is carried as **words in the skill only**: the list of paths the PM writes, fixed in that file and never read out of `docs/tasks/`, so no task row can widen it. Same shape as `host/git-guard.js` above, with one difference — **no hook snippet is offered for this one**, which the user decided on 2026-08-24. |
 | `host/crew.js` | `skills/team-lane/SKILL.md` | Nothing loads at session start. The skill's description is what makes Claude reach for the crew, so that description is load-bearing. |
 | `host/roles-preset.js` | `agents/*.md` frontmatter | Claude Code has no presets. |
 | `principles.md` (upstream root) | `principles.md` (this root) | **Carried across with nothing added and nothing reworded** — only the substitutions the rule near the top of this file lists, and the test is that the diff against the substituted upstream file is **empty**. Upstream moved this file out of its own `docs/` folder at v0.7.0 and made it a shipped file at v0.9.0; it ships here too, because `agents/crew-doc-reviewer.md` check 13 and the three shared wording blocks both read it at run time, in the user's project, where there is no upstream clone. Principles 1 to 22 keep upstream's numbers so one can be quoted across both projects. **Nothing in it is this port's**: the port's own five principles, `P1` to `P5`, are in **this** file. |
-| `README.md` | `README.md` + `README-zh.md` | Rewritten, not translated — the install and the mechanics differ. Both READMEs must be updated together. |
+| `README.md` | `README.md` + `README-zh.md` + `CLAUDE.md` | Rewritten, not translated — the install and the mechanics differ. Both READMEs must be updated together, English first. **Since 0.5.0 they are thin**: a title and one paragraph, the version, Install, the role table, the licence, and nothing else. Everything an editor needs — the design rules, how to edit a role, what is not enforced, the hook snippet, where documents live — moved into `CLAUDE.md`, which is now the only copy. Carry an upstream README change into `CLAUDE.md` unless it belongs to one of those five sections. |
 
 Nothing else upstream is read by this port. `upstream.sums` pins exactly these
-**seventeen** files — fifteen at 0.3.0, plus the two role files v0.9.0 added.
+**eighteen** files — fifteen at 0.3.0, plus the two role files v0.9.0 added, plus
+`host/pm-write-guard.js` at v0.10.0. **A new upstream file that holds a rule earns a
+pinned line whether or not its code is ported**, because the line is the only way the
+next pass notices that rule moving; the comment above it says where the rule lives here.
 
 **Why not more.** A pass compares against a **tag** in a throwaway clone, never against
 `~/workspace/dsh-crew`, and it pins only the files whose rules this port carries. Pinning
-upstream's own project record — its `docs/decisions/*`, its `docs/design/*`, its `docs/qa/*`,
-around a hundred files — would report dozens of `FAILED` lines per pass that say nothing about
-this port. Read those by hand from the clone when a question needs them.
+upstream's own project record — its `docs/decisions/*`, its `docs/design/*`, its
+`docs/tasks/*` and its `qa/*`, 415 files at v0.10.0 — would report dozens of `FAILED` lines
+per pass that say nothing about this port. Read those by hand from the clone when a question needs them.
 
 ## Which folders this repository keeps
 
 **This repository has no `docs/` folder at all, and that is the settled shape.** Upstream
-v0.9.0 carries 335 files under its own `docs/` — its decisions, its designs, its QA cases,
-its research. Every one of them is dsh-crew's record of dsh-crew's own jobs.
+v0.10.0 carries 89 files under its own `docs/` — its decisions, its designs and its task
+table — and 326 more under `qa/`, which came out of `docs/` at that tag. Every one of
+them is dsh-crew's record of dsh-crew's own jobs.
 
 This port keeps none of the equivalent. A port pass produces exactly four kinds of thing,
 and the table near the top of this file says where each one goes: a mechanism adaptation
 and the port's own policy come **here**; the reason behind a shared rule is upstream's,
 in `principles.md`, unedited; an upstream bug goes to the **hand-off file, outside this
-repository**; and what a reader or an editor needs is in the two READMEs and `CLAUDE.md`.
+repository**; and what a reader or an editor needs is in `CLAUDE.md`, with the two thin
+READMEs carrying only the title, the version, Install, the role table and the licence.
 **A pass's own opening document, design and task table are not on that list**, so they
 are not kept: they describe how one pass was organised, they are stale the day it ends,
 and the next pass writes its own. What survives a pass is the ported files, this file,
@@ -553,12 +586,23 @@ paragraph exists because a role read it that way once.
 - **None.** `docs/` was deleted at 0.4.0 and is not recreated. The 0.7.0 and 0.9.0
   passes had both written a `docs/design/` and a `docs/decisions/` of their own; both
   are gone, and git history keeps them.
-- **Never created here, and not missing:** `docs/qa/`, `docs/release/`,
-  `docs/research/`, `docs/design/` and `docs/design/api/`. Those are paths the rules
-  tell a crew role to create in the **user's** project. This plugin is markdown with no
-  boundary between modules, no release plan of its own written by a crew, and no
-  QA folder — the user skipped `crew-qa` for the port job and no check here
-  depends on a test runner.
+- **Never created here, and not missing:** `docs/design/`, `docs/design/api/`,
+  `docs/tasks/`, `docs/release/`, and `qa/` — which since v0.10.0 sits at the
+  **repository root**, beside `docs/`, not inside it, because QA's cases are runnable
+  scripts rather than documents. Those are paths the rules tell a crew role to create in
+  the **user's** project. This plugin is markdown with no boundary between modules, no
+  release plan of its own written by a crew, and no QA folder — the user skipped
+  `crew-qa` for the port job and no check here depends on a test runner.
+- **`docs/research/` is a different case: it is gone, not merely uncreated.** Upstream
+  deleted the folder at v0.10.0 and took the researcher's `Write` with it, so the path is
+  not in the crew's rules any more, here or upstream — a researcher's answer is its
+  report to the PM and it writes no file at all. Do not add the folder back to any list
+  of "paths a role may create". The only place the name is left in **the crew's own rules**
+  is one sentence in `principles.md` that records it as history, and that sentence is
+  upstream's own wording, carried unedited like the rest of that file. The name also
+  appears in `CHANGELOG.md`, in `upstream.sums` and in this file, where each time it is a
+  record of the change rather than a rule — so a check written from this bullet must look
+  at the rules, not at every file.
 
 If a later job in this repository does have a boundary or does ship, it creates
 the folder then. Absence is the normal state, not a defect to fix.
@@ -575,7 +619,8 @@ out to be false.
 | --- | --- |
 | The preset installer and the `.bak` rescue (`host/roles-preset.js`), and its temp-folder fix (upstream CRD 0005, upstream ADR 0003) | Claude Code plugins install themselves. There is no folder to overwrite, so there is nothing to rescue and no temporary folder to leak. |
 | `maxDepth: 1` | No equivalent setting, and none needed: Claude Code applies each agent's tool list itself, so a role has no delegation tool to use. |
-| The git guard, as running code (`host/git-guard.js`) | The plugin is markdown only. The rule is stated in every role that owns a shell, and both READMEs say plainly that nothing enforces it. See principle `P3`. |
+| The git guard, as running code (`host/git-guard.js`) | The plugin is markdown only. The rule is stated in every role that owns a shell, and `CLAUDE.md` says plainly that nothing enforces it — and offers a `PreToolUse` hook the **user** may add to their own settings. See principle `P3`. |
+| The PM write guard, as running code (`host/pm-write-guard.js`, new at v0.10.0) | Same reason: the plugin is markdown only, so there is nothing here to refuse a call. Upstream's guard stops the root agent — the PM — using `write` or `edit` on a path off the PM's whitelist and asks the user for that one write. The **rule** is carried in full, as words in `skills/team-lane/SKILL.md`: the list of paths the PM may write, fixed in that file and never read out of `docs/tasks/`, so no task row and no briefing can widen it. Two things differ from the git guard row above. **No hook snippet is offered for this one** — the user decided that on 2026-08-24 — and the guard would be a weaker seat belt anyway: it reads only the file path of a `write` or an `edit`, so `echo x > file` walks past it even upstream. |
 | The one-shot push approval file | A crew role may never push, so there is nothing to approve. The guard that consumed the file is not here either. |
 | The per-turn job notice (`host/crew.js`, `host/jobs.js`, `tools/lib/boot-log.mjs`) | Claude Code adds hook text to context instead of replacing it, so a notice would be printed once at session start rather than each turn. Step 0 of the skill does the job instead: the PM looks for an unfinished job itself. |
 | `host/crew.js` as a loader | Nothing loads at session start here. The skill's description is the entry point, and the limits this file held are written into the skill as text. |
@@ -583,16 +628,17 @@ out to be false.
 | `tools/lib/boot-log.mjs` | Same reason, and it is what produced the session-start notice above. This is why the skill may not promise a note headed "Unfinished crew work": nothing here writes one. |
 | `.github/workflows/test.yml`, `.github/workflows/publish.yml` | There is nothing to build, nothing to test with a runner and nothing to publish to a package registry. The plugin is installed from the repository. |
 | `package.json` | No dependencies, no scripts, no build step. Design rule 6. |
-| Upstream **CRD 0009** (QA's cases inside `npm test`, and CI on every push) **as machinery** | The wiring is dsh-specific and this repository has no `npm test` to wire into. The rule underneath — QA's cases are real files that run again — **is** carried, in principle 13, because the crew applies it to the *user's* project. How the two projects differ about the test command is divergence entry 7. |
+| Upstream **CRD 0009** (QA's cases inside `npm test`, and CI on every push) **as machinery** | The wiring is dsh-specific and this repository has no `npm test` to wire into. The rule underneath — QA's cases are real files that run again — **is** carried, in principle 13, because the crew applies it to the *user's* project. The two projects used to differ about who may edit the test command; they no longer do — that was old divergence row 7, and **Where the ten rows went** below says how it ended. |
 | Upstream **CRD 0011** (a Verdicts gate inside `npm test`, `tools/verify-tasks.mjs`) **as machinery** | Same: no `npm test`, no script. The Verdicts **rule** is carried in full — four values, a reason on every `not run` and `skipped` — with nothing pretending to enforce it. This plugin ships no code, so the line is written honestly and nothing checks it — which is exactly what the rule says about itself. |
 | The dsh preset's configuration comments: `roleAllow`, `roleDeny`, `roleModels`, `rolesDir`, and `cordis.patch.yml` | Claude Code has no presets and no bundle patch. A role's tool filter is its own frontmatter, and there is no configuration file to read — every setting here is a file. |
-| Upstream's own project record: its `docs/decisions/*`, its `docs/design/*` and its `docs/qa/*` (335 files at v0.9.0) | That is dsh-crew's history of dsh-crew's own jobs, not a rule this port carries, skips or restates. Pinning it would report dozens of `FAILED` lines a pass that say nothing about this port. Read them from the clone by hand when a divergence row is in question — some of them hold upstream's reasoning for the rules entry 7 argues with. |
+| Upstream's own project record: its `docs/decisions/*`, its `docs/design/*`, its `docs/tasks/*` and its `qa/*` (415 files at v0.10.0) | That is dsh-crew's history of dsh-crew's own jobs, not a rule this port carries, skips or restates. Pinning it would report dozens of `FAILED` lines per pass that say nothing about this port. Read them from the clone by hand when a divergence row is in question — some of them hold upstream's reasoning for the rules **old divergence row 7** argued with. |
 | `send_message`, `interrupt_agent`, `list_agents` | **Not absent, and the old reason here was measured false.** The **idea is ported**: the PM may reach a role that is already working, and `SendMessage` and `ListAgents` are this deployment's names for two of the three. `interrupt_agent` has no ported twin, and the honest reason is not that there is no such thing: an interrupt can land between two `Edit` calls, so carrying it needs a rule this port has not written yet — after an interrupt the PM must run `git status --short` and say what was left half-written. No role holds `SendMessage` or `ListAgents`, and that is design rule 1, not a gap. This is not a divergence and never had a row: it moves the port **closer** to upstream. |
 | The researcher's "this preset has no `web_fetch`" note (`roles/researcher.md` 18 and 67) | **Not skipped — carried with a change.** Our researcher holds `WebFetch`, so the paragraph is rewritten to say what is true here: `WebSearch` returns snippets and cannot open a page, `WebFetch` opens one. The upstream rule the paragraph exists for — make the query narrow, and do not guess past what the snippet says — is kept word for word in meaning. |
 
 ## Deliberate divergence
 
-**There are no rows in this table, and that is the point.** As of the v0.9.0 port,
+**There are no rows in this table, and that is the point.** The v0.9.0 port emptied it and
+the v0.10.0 port added nothing:
 this repository says nothing different from dsh-crew on purpose. A `FAILED` line from
 `sha256sum -c` therefore means exactly one thing again — **upstream moved, go and read
 the diff** — which is the property the rule at the top of this file exists to protect.
@@ -786,7 +832,10 @@ pass should not re-decide them:
 
 6. **Update the header of `upstream.sums`** — its Source, Tag and Commit lines —
    when the whole pass is done, and add a line to `CHANGELOG.md` saying which
-   dsh-crew version was carried across.
+   dsh-crew version was carried across. If the pass pinned a new file, the header's
+   **count sentence** has to move with it: it names how many lines the file holds and
+   how many `host/*.js` files are among them, and a count that disagrees with the file
+   is the kind of small lie that makes a reader stop trusting the rest of it.
 
 7. **Anything you had to decide** that is more than wording is **not yours to settle.**
    Write it into the hand-off file, outside this repository, as an issue the user can
@@ -814,6 +863,19 @@ Read every `A` line, plus every `R` line — a rule that moved to a new path loo
 like a rename, and the pinned line for the old path will report `FAILED` with no
 explanation. Pay attention to three places: `roles/`, `host/`, and the repository
 root, where upstream now keeps `principles.md`.
+
+**A new `host/` file that holds a rule gets a pinned line even when its code is not
+ported.** That is not obvious, because nothing of the file itself comes across, and the
+v0.10.0 pass had to settle it: `host/pm-write-guard.js` is running code this plugin can
+never have, yet the limit it enforces is now carried as words in the skill, and without a
+line in `upstream.sums` nobody would notice upstream changing that limit. The test is
+whether the file **holds a rule this port carries, skips or restates** — not whether the
+code came across. Add the line, and write in the comment above it where the rule lives
+here and why the code did not follow.
+
+**Watch the `D` lines too.** A deleted upstream file can quietly delete a rule: v0.10.0
+removed `docs/research/`, and with it the researcher's whole write set. Nothing in
+`sha256sum -c` reports that either — the pinned role file simply changed.
 
 To add a new role:
 

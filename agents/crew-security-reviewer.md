@@ -77,7 +77,7 @@ file it happens to own. Do not report it as a finding.
 
 1. The job's **opening document** — a PRD whose name carries the job it belongs
    to, `docs/design/prd-<date>-<job-slug>.md` — and the task row for the task you
-   are reviewing in `docs/design/tasks.md`, with that row's **DoD section**.
+   are reviewing in `docs/tasks/`, with that row's **DoD section**.
 2. The change itself. You cannot run `git diff` — the PM includes the diff in
    your briefing, or names the files for you to read. If you got neither, say so
    in your report and ask the PM for the diff. Do not guess at the change from

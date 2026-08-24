@@ -1,18 +1,22 @@
 # What this port was made from, and how to notice when it moves.
 #
-# Source:  dsh-crew 0.9.0  (https://github.com/stuarthu/dsh-crew)
-# Tag:     v0.9.0
-# Commit:  7bc7181
+# Source:  dsh-crew 0.10.0  (https://github.com/stuarthu/dsh-crew)
+# Tag:     v0.10.0
+# Commit:  09c6e03
 #
 # Every line below is the SHA-256 of a dsh-crew file AS COMMITTED at that tag —
 # the state this port was made from. One line per ported file: the ten role
-# prompts, the five host/*.js files whose rules this port carries or skips,
-# principles.md and README.md. Seventeen lines. The last comment block in this
+# prompts, the six host/*.js files whose rules this port carries or skips,
+# principles.md and README.md. Eighteen lines. The last comment block in this
 # file says what is left out and why, and porting.md says why not more.
 #
 # The count went from fifteen to seventeen at 0.9.0: upstream added
 # roles/test-engineer.md and roles/code-engineer.md, the two halves of the
-# paired shape.
+# paired shape. It went from seventeen to eighteen at 0.10.0, for the same kind
+# of reason: upstream added host/pm-write-guard.js, a new host file whose rule
+# this port carries as words. A new upstream file that holds a rule gets a line
+# here whether or not the code behind it is ported — the line is how the next
+# pass notices that rule moving.
 #
 # To see what changed since, clone the newest TAG into a throwaway folder:
 #
@@ -78,72 +82,91 @@
 # roles/pm.md  ->  skills/team-lane/SKILL.md
 #     Step 0, the PM rules, the roster and limits, then the 18 steps — all in the skill.
 #     Step 2 is the interview, step 9 carries the paired flow, step 10 has two gates.
-61085f48a0bbba0a4e3a64d306802f36cb015ea110ab4c92b78d7d1c2f1b0fb6  roles/pm.md
+6d6942dec75946f22d8a016243908a610aeae8b61b335b64ea748ee9fa870a0d  roles/pm.md
 
 # roles/researcher.md  ->  agents/crew-researcher.md
-#     Allow list (tools:), and the one allow-list role that is NOT a reviewer, so it
-#     holds Write for docs/research/. This deployment has a page fetcher; upstream's
-#     preset does not, so that paragraph is rewritten rather than copied.
-45852990b7f75eebd4197d10cb2f812f705f3d6597687ef71b5f7ddb449f58c6  roles/researcher.md
+#     Allow list (tools:). Its write set is EMPTY as of v0.10.0: upstream took Write
+#     off it and deleted docs/research/, so its answer is its report to the PM. That
+#     is what collapsed CLAUDE.md's design rule 2 into one rule — all four allow-list
+#     roles now hold Read, Glob and Grep and no way to change a file. This deployment
+#     has a page fetcher; upstream's preset does not, so that paragraph is rewritten
+#     rather than copied, and WebFetch stays in the frontmatter.
+36fe2b733d1a6169930db7a98d1da50dc9d8c01b586536542141e7761ed706fa  roles/researcher.md
 
 # roles/architect.md  ->  agents/crew-architect.md
 #     Holds a shell here — this port's own call, so it carries a ## Git section
 #     upstream has never had. Do not delete that section when re-copying.
-0ea2c55a6045c6e9bb04d9ec75e6ecfa65113ee62e79dedeb7fb0ece66ee7757  roles/architect.md
+9b82f69f2217f34b59b231faf22c61b12994fec4e3b8f84a20b6f1c306acaf4e  roles/architect.md
 
 # roles/engineer.md  ->  agents/crew-engineer.md
 #     Says at the top that it is the SOLO shape, now that a paired one exists.
-0293468c7aa71101a1ab64ab23686064835d07585636add6c58205715103d27b  roles/engineer.md
+589e221cdcce98ae42bd84d69ae817b2e3545308ba8372c50ce62058a50bc262  roles/engineer.md
 
 # roles/test-engineer.md  ->  agents/crew-test-engineer.md
 #     NEW at v0.9.0. Writes only a task's unit tests, before the code exists.
 #     A programmer, not QA. Holds a shell, so it carries the git clause.
-1e2a7c97945f8a06d2a6bddf987ec98514df83b0ad84e9993f4dc4c8a3d0c55b  roles/test-engineer.md
+2d0dbd84bd7b11e1ed271215eefcfb0912eebda67c9e152b012760c714098015  roles/test-engineer.md
 
 # roles/code-engineer.md  ->  agents/crew-code-engineer.md
 #     NEW at v0.9.0. Writes only the product code, never a unit test for the
 #     behaviour it is building. Holds a shell, so it carries the git clause.
-70ab659cb358eda81acdf0bd04d798f74267129725b1bbaba0750e4b1e5a2bf4  roles/code-engineer.md
+fd49202750c81fa79c9b746d740d2cd7514f75016ec73539c92fd8f22e9cb6ea  roles/code-engineer.md
 
 # roles/qa.md  ->  agents/crew-qa.md
 #     Rebuilt into upstream's Job 1 / Job 2 shape: one round per milestone, not per
 #     task. Its tempRepo() paragraph names dsh-crew's own helper and paths, which do
 #     not exist in a user's project: the rule is kept, the commands are not.
-c6000af900fe6f06594b2143a961cb907631c2df569835765ed01d73b07ea212  roles/qa.md
+3804b9077c071e562fc33c0b58eeb0ac914d1f8e5d7eb45df3a6645ace8c3c9f  roles/qa.md
 
 # roles/code-reviewer.md  ->  agents/crew-code-reviewer.md
 #     Allow list. Carries the section that closes the unread-script hole: QA's
 #     run.sh and case files are in this reviewer's file list, with a call-back
 #     round scoped to those files, and a run.sh that greens without running its
 #     case is a blocking finding.
-87c2bd0c7bc5e4b302fb7e5d6f9c8019dc0ff33f79cd78c50a279d0e22a049ad  roles/code-reviewer.md
+c2028991ded0ddc6c38d310c22375f7c67ef211f836042c94b09339d6c7cb77e  roles/code-reviewer.md
 
 # roles/security-reviewer.md  ->  agents/crew-security-reviewer.md
 #     Allow list. Empty write set: its report is its only output.
-0873fc06ad9161b5bc151e76f8d048d108255c52e7a0bacf85bd8c078f1a347c  roles/security-reviewer.md
+bbcf28463c93176445929d4db24e92943270d13a631887ae6aba1031f7dc641d  roles/security-reviewer.md
 
 # roles/doc-reviewer.md  ->  agents/crew-doc-reviewer.md
 #     Allow list, empty write set. Its check 13 runs the repository against
 #     principles.md's principle 20 flow table in both directions, which is why that
 #     table is carried in full there and must not be shortened.
-155e64c605ad89897c1cd838b83f5897e1e63d983df5e14a2acf1551fa4fad43  roles/doc-reviewer.md
+e85852e8c697fa19ac8e171591e46b53a35590c1777201bf2dbb3026bedba0f2  roles/doc-reviewer.md
 
 # host/roles.js  ->  agents/
 #     The tool filters live in each agent file's frontmatter. Nothing here enforces
 #     the design rules this table used to guarantee: they are stated in CLAUDE.md and
 #     re-read by hand. Nine roles now: four on an allow list, five on a deny list.
-668af7699a726b6efe6c0bdc483bd9dd506b974978050bbfe3b23ab8c9e19adb  host/roles.js
+#     Since v0.10.0 all four allow-list roles have an empty write set, so CLAUDE.md's
+#     design rule 2 is one rule instead of two.
+ed05bf3ee29baf7941d8c42e03238c754be58941323e09d87cefb752ebf49908  host/roles.js
 
 # host/jobs.js  ->  skills/team-lane/SKILL.md
 #     Not code here: step 0 of the skill tells the PM to look in ~/.claude/crew/jobs itself.
 b8497fe1d112e1c50324a66c419eca669840b63c1d68df444a0b644460920743  host/jobs.js
 
-# host/git-guard.js  ->  the ## Git section of all five shell-holding roles, plus README.md, README-zh.md
+# host/git-guard.js  ->  the ## Git section of all five shell-holding roles, plus CLAUDE.md
 #     NOT ported as code. The plugin ships no hooks; the rule is stated in every role
 #     that owns a shell — FIVE now, not three: architect, engineer, qa, test-engineer,
-#     code-engineer — and both READMEs offer a hook the user can add to their own
-#     settings. See principle P3.
+#     code-engineer — and CLAUDE.md, under "The rules nothing enforces", offers a hook
+#     the user can add to their own settings. The READMEs went thin at 0.5.0 and no
+#     longer carry it. See principle P3.
 8011dac190957aaca8b9989e355966527a4e5a6842ffef3757496053218b35da  host/git-guard.js
+
+# host/pm-write-guard.js  ->  skills/team-lane/SKILL.md, "### What you may write with `Write` and `Edit`",
+#                             plus CLAUDE.md, "## The PM write guard"
+#     NEW at v0.10.0, and NOT ported as code — this plugin ships no code at all, so
+#     there is nothing here to refuse a call. Upstream's file wraps tools/execute and
+#     stops the ROOT agent, the PM, using write or edit on a path that is not on the
+#     PM's whitelist, asking the user for that one write instead. Here the same limit
+#     is carried as WORDS in the skill's own "What you may write" section: the list of
+#     paths the PM may write, fixed in that file and never read out of docs/tasks/, so
+#     no task row can widen it. Same shape as host/git-guard.js above, with one
+#     difference the user decided on 2026-08-24: no hook snippet is offered for this
+#     one. porting.md's "did not port" table carries the row.
+f108a6a5e278842b9c12391732cb9ad478cbe55ecd77423f473816e531f60337  host/pm-write-guard.js
 
 # host/crew.js  ->  skills/team-lane/SKILL.md
 #     Nothing loads at session start. The skill description is the entry point, and the limits this file holds are written into the skill as text.
@@ -158,20 +181,30 @@ b8eb9f11e946e11f7ba8b38f96bce58b8876d161df2d843d28f3b42241521a3b  host/roles-pre
 #     projects. Four unnumbered sections came with 0.9.0: Words we use, Wording every
 #     role prompt copies word for word (the authoritative Rule A and Rule B), Who
 #     writes which document, and What each kind of document holds.
-2cdfa3a5db748baafa6c02021cc48613823a0a97da9febfe40044946792fa3d9  principles.md
+75cd1d5794111cd5fdc36c164cab55e01db8f6e1590a151c5f1bbf8ee9ca06d6  principles.md
 
-# README.md  ->  README.md, README-zh.md
-526189ca58572331fbd6d02e9ee62b33df0f15a8bd5c11d307a07830fe4fd457  README.md
+# README.md  ->  README.md, README-zh.md, and CLAUDE.md
+#     Both READMEs went thin at 0.5.0: a title, the version, Install, the role table
+#     and the licence. Everything else a person editing this plugin needs — the design
+#     rules, how to edit a role, what is not enforced, the hook snippet, where
+#     documents live — is in CLAUDE.md, and that is the only copy. Carry an upstream
+#     README change into CLAUDE.md unless it belongs in one of those five sections.
+0f4e7147e84ff1dc959b5a64b4a30719a3eea8311d1813281667e0ee06927d9f  README.md
 
 # WHAT IS NOT PINNED, AND WHY.
 #
-# Upstream v0.9.0 carries 335 files under its docs/ that this file has never
-# named, and after reading them the answer is still no:
+# Upstream v0.10.0 carries 415 files under its docs/ and its qa/ that this file
+# has never named, and after reading them the answer is still no:
 #
-#   docs/decisions/  — upstream's own ADRs and CRDs (50 files at this tag);
-#   docs/design/     — upstream's own PRDs, designs and task table (5);
-#   docs/qa/         — upstream's QA cases, its run-all.sh and its qa lib (278);
-#   docs/research/   — upstream's own research answers (2).
+#   docs/decisions/  — upstream's own ADRs and CRDs (58 files at this tag);
+#   docs/design/     — upstream's own PRDs and designs (11);
+#   docs/tasks/      — upstream's own task table, one file per task (20);
+#   qa/              — upstream's QA cases, its run-all.sh and its qa lib (326).
+#
+# Two of those paths moved at v0.10.0: QA's folder came out of docs/ to qa/ at the
+# repository root, and the task table became docs/tasks/. docs/research/ is not on
+# the list any more because upstream deleted it: its CRD 0029 took the researcher's
+# answers out of the repository altogether, and the researcher now writes no file.
 #
 # Every one of them is upstream's record of upstream's own jobs. None holds a rule
 # this port carries, skips or restates, which is the test a pinned line has to
@@ -183,9 +216,11 @@ b8eb9f11e946e11f7ba8b38f96bce58b8876d161df2d843d28f3b42241521a3b  host/roles-pre
 # cordis.patch.yml: nothing there is ported, and porting.md's "did not port"
 # table names each of them with its reason.
 #
-# Two of those unpinned folders are still worth reading by hand when a question
-# comes up. docs/research/document-types.md holds the full quotations behind
-# principles.md's "What each kind of document holds", including the sources that
-# could not be reached. And docs/qa/ is where upstream's own checks live: this
-# port has none, by design rule 6, so upstream's cases are the only place to see
-# what a rule was meant to make true. That is a person's job, not a checksum's.
+# Some of that unpinned material is still worth reading by hand when a question
+# comes up. qa/ is where upstream's own checks live: this port has none, by design
+# rule 6, so upstream's cases are the only place to see what a rule was meant to
+# make true. And the full quotations behind principles.md's "What each kind of
+# document holds" were in docs/research/document-types.md, which v0.10.0 deleted
+# along with the rest of that folder — it is one command away in the clone:
+#   git -C "$TMP/dsh-crew" show v0.9.0:docs/research/document-types.md
+# All of that is a person's job, not a checksum's.

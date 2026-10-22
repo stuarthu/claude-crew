@@ -1,12 +1,15 @@
 # claude-crew
 
-> **0.5.0 版本。**
+> **0.6.0 版本。**
 
 claude-crew 是 [Claude Code](https://claude.com/claude-code) 的一个插件。当工作比一处
 小改动更大时，你的会话会变成**产品经理（PM）**，由 PM 带着一个小团队来做这份工作，团队
 成员是这些角色 agent：调研、架构师、工程师、测试工程师、代码工程师、QA、代码评审、安全
-评审、文档评审。你只和 PM 说话。各角色之间不互相说话，他们通过留在你仓库里的文档来协作，
-所以每一个决定以后都还能再读到。这个插件只有 markdown，没有别的——没有 hook，没有脚本，
+评审、文档评审。你只和 PM 说话。各角色之间不互相说话。一个 job 的文档在 your
+project 外一个 folder 里，所以 your project folder 保持干净。它们 job 运行里被
+read 而，而且 job 结束之后 nothing 的 kept 是。留在 your project 里那 do stay
+文件是 the five 那 ship: the two READMEs, `CHANGELOG.md`, `CLAUDE.md` and
+`principles.md`。这个插件只有 markdown，没有别的——没有 hook，没有脚本，
 没有代码——而且在被用到之前，它不会给你的会话增加任何东西。它是
 [dsh-crew](https://github.com/stuarthu/dsh-crew) 的移植版，那是同样的想法，为 DeepSeek
 Harness 写的；`porting.md` 说明了这里有哪些不同。

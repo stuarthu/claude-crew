@@ -412,7 +412,7 @@ list of names, and then a new task needs no edit and there is nothing to race ov
 **QA's test plan is not one of those files.** The plan is single-use: it exists to
 turn the task's DoD items into cases, and once the cases are written the cases carry
 the same information in a runnable form. So the plan is written to
-`<job folder>/<task-id>-plan.md`, outside the repository, and it goes when the job
+`<job folder>/<task-id>-plan.md`, in the job folder, which is never committed, and it goes when the job
 folder goes (principle 19). One part of it is durable and must not go with it:
 **"what I could not test here, and why"**. That moves to `qa/gaps.md`, a
 standing list about this product's testability, grouped by the thing that cannot
@@ -618,7 +618,7 @@ and a warning that always fires teaches the user to say yes without reading it.
 
 **Why the slug inside those commands has a fixed shape (ours).** The job slug is
 not only a label. It is pasted into a file path
-(`~/.claude/crew/jobs/<job-slug>/state.json`) and into almost every git command of
+(`<repo>/.claude-crew/jobs/<job-slug>/state.json`) and into almost every git command of
 step 7 **Branch** and step 17 **Merge and clean up**. A slug holding `..` writes
 outside the jobs folder. A slug holding
 a space or a `;` turns one command into two. And the session that runs those
@@ -832,24 +832,46 @@ not evidence").
 **Rule (ours).** A crew document's home is decided by one question: **does it
 outlive the job?**
 
-- **Durable, in the repository.** An ADR in `docs/decisions/adr/` for a decision
-  about **how**; a CRD in `docs/decisions/crd/` for a decision about **what**, the
-  scope or a contract; the opening document, the task table
-  `docs/tasks/`, the design and the boundary contracts, all in
-  `docs/design/`; QA's runnable cases and `gaps.md`, its standing list of what no
-  case can check, in `qa/`; a
-  researcher's answers in its report (the PM writes what is durable into its own documents); the release and upgrade plans, plus a
-  shipping gap list for a milestone that does not ship, in `docs/release/`; a rule
-  the crew must keep, here in `principles.md`. **Every DoD
-  section rides in one of those two `docs/design/` files** — that is principle 20,
-  and it is the correction this principle needed most.
-- **Single-use, in the job folder** (`~/.claude/crew/jobs/<job-slug>/`, outside the
-  repository): **`state.json`**, which is progress and nothing else; **QA's test
+- **Durable, in the repository.** QA's runnable cases and `qa/gaps.md`, its
+  standing list of what no case can check; a rule the crew must keep, here in
+  `principles.md`; and the four reader-facing files — `README.md`,
+  `CHANGELOG.md`, `CLAUDE.md` and `principles.md`. These are the only documents the
+  repository keeps, and they are the only ones a later job can read: they ship in
+  the published package, and CI reads them.
+- **Job documents, in the docs home** (`<TMP>/claude-crew/<repo>/<job-slug>/`, one
+  per job, **outside** the repository): the opening document, the design and the
+  boundary contracts, the task table `docs/tasks/` and the **DoD section** on every
+  row, every ADR and every CRD, the release and upgrade plans and the shipping gap
+  list. `<TMP>` is the system temp folder, `/tmp` when nothing sets it, and `<repo>`
+  is the repository's absolute path with the leading `/` dropped and every other
+  `/` written as `-`. A user asked for this: the project's own folder
+  stays the project's, and a job's documents are read while the job runs and are
+  not kept after it. Inside that home the tree keeps its old shape — every path is
+  still spelled `docs/design/`, `docs/tasks/`, `docs/decisions/adr/` and the rest —
+  so only the root moved. **Every DoD section rides in one of the two opening
+  documents** — that is principle 20, and it is the correction this principle
+  needed most.
+- **Single-use, in the job folder** (`<repo>/.claude-crew/jobs/<job-slug>/`, one
+  folder per job, at the root of **the repository this session works in**): **`state.json`**,
+  which is progress and nothing else; **QA's test
   plans** (`<task-id>-plan.md`), because the cases carry the same information in a
   runnable form as soon as they are written; the **`Q-` files** in `inbox/`; and the
-  **output of a test run**, which was never on disk and now may not be. A **DoD**
+  **output of a test run**, which was never on disk and still may not be — it goes
+  to stdout and never becomes a file, in the repository or anywhere else. A **DoD**
   used to head this list, and taking it off cost 75 acceptance checks (principle
   20).
+  The folder moved **inside** the repository on a user's request, and what makes it
+  single-use did not move with the location: the PM writes one line into the
+  repository's own `info/exclude`, so the folder never shows in `git status`, is
+  never staged, is never committed, and is dropped whole when the job ends. `info/exclude`
+  and not the project's `.gitignore` because the line says where **this crew** puts
+  progress, not what the project builds — a committed line would be a line added to
+  a file the user owns — and because it is shared by every worktree, so a paired
+  task's two trees see the same rule. The path is **relative** in the code
+  (`DEFAULT_JOBS_DIR = ".claude-crew/jobs"`, resolved against the session's own folder)
+  so one default serves every repository and two repositories can never share a
+  jobs folder; the PM names the resolved **absolute** path to every child, because
+  a fresh worktree does not carry the folder.
 - **Neither the size of the job nor who was in the room decides anything.** An
   ADR is written for a one-file bug fix as readily as for a milestone, and small
   work — which has no architect — has the PM write it.
@@ -861,7 +883,9 @@ outlive the job?**
   `qa/gaps.md`, **a DoD item's own wording** to `docs/tasks/`, and
   **which files a task owns** to `docs/tasks/`. The last two were added
   after each of them nearly leaked a second time; principle 20 has the count and
-  the reason.
+  the reason. **Three of the seven are durable** — `principles.md`, the commit
+  message and `qa/gaps.md`. The other four land in the docs home, so they survive
+  the drop of the job folder and the loss of the `Q-` files, and nothing more.
 
 **Why not by who was in the room (ours).** The old rule sent a decision to an ADR
 when there was an architect, and to a **Decisions** section of the DoD when there
@@ -886,8 +910,10 @@ goes. Had small work's CRD folder been taken over by design decisions, two
 completely different kinds of file would be lying in one folder.
 
 **Why the record outlives the negotiation.** `state.json` is job progress wearing
-a document's clothes: it lives outside the repository so the user's `git status`
-stays clean, and it holds nothing a later reader needs. That reading was extended
+a document's clothes. It now sits **inside** the repository, at `.claude-crew/jobs`,
+and what keeps a user's `git status` clean is not its location but the one ignore
+line the PM writes into `.git/info/exclude`; it is never staged, never committed,
+and it holds nothing a later reader needs. That reading was extended
 to the DoD, and that was the mistake — principle 20 records what it cost, and the
 DoD is now a section of a file that stays. The reasoning itself still holds, and
 it is the more important half: what gets *written inside* a single-use document
@@ -911,14 +937,16 @@ the step, because the folder is gone afterwards either way. The doc reviewer's l
 pass (step 15, **Last doc review**) and the PM's final summary are where that shows
 up. It has already been paid once: see principle 20.
 
-**Lives in** `skills/team-lane/SKILL.md` (step 4 **Write the opening document**, step 10c **QA**,
+**Lives in** `skills/team-lane/SKILL.md` (step 4 **Write the opening document**, step 6 **Job folder**, step 10c **QA**,
 step 11 **Commit**, step 18 **Finish**, and the hard rules),
 `agents/crew-qa.md` (the plan's home, and its step 6 **Feed the standing testability
 list**),
 `agents/crew-engineer.md`,
 `agents/crew-architect.md`, `agents/crew-doc-reviewer.md`, `qa/gaps.md`,
+`host/jobs.js` (the default job folder and the notice that reads it),
 [`0006-split-by-lifetime`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0006-split-by-lifetime.md) (the change request that settled
-it) and [`0010-dod-is-a-section`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0010-dod-is-a-section.md) (the one that took the DoD
+it), [`0030-job-folder-moves-inside-the-repo`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0030-job-folder-moves-inside-the-repo.md) (the one that moved the
+folder inside, and kept it single-use) and [`0010-dod-is-a-section`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0010-dod-is-a-section.md) (the one that took the DoD
 off the single-use list).
 
 ---
@@ -928,7 +956,11 @@ off the single-use list).
 **Rule (ours).** Any change, requirement or decision — big or small — has to leave
 a record that **survives the job**. Surviving has exactly one meaning here: **the
 record is in the repository.** The job folder is not a record. It is progress, and
-it is dropped when the job ends.
+it is dropped when the job ends. A user's request moved the job's own
+documents out of the repository and into the docs home, so a third answer is now
+possible: **the docs home**, read while the job runs and kept after it by nothing.
+In the table below, a row whose "Where" cell starts `the docs home:` carries that
+third answer, and its "Survives the job?" cell is **No**.
 
 So `DoD` is the name of a **section**, never the name of a file. There is no
 `dod.md`, in any folder, including `docs/design/`. Small work and big work open with the same
@@ -953,24 +985,24 @@ repeating a row that all three share.
 | team | Step 1, **Language** | PM asks, user answers | the language every crew document is written in | the documents themselves; `state.json` names it | The documents, yes. `state.json`, no |
 | team | Step 2, **the interview** (principle 22) | PM asks, user answers; a `crew-researcher` when the digging is bigger than a quick look | answers, one question per turn, each carrying the PM's own recommendation, and it stops when every section of the opening document can be written with no guess left; plus the researcher's answer, with a source per claim | the answers become the content of step 4, **Write the opening document**; the researcher's answer is in its report, and the PM writes what is durable into its own documents | The answers, no — step 4 is where they land. The researcher's answer, yes |
 | team | Step 3, **Language and stack** | PM decides, user confirms; a `crew-researcher` when the choice is real | the **Language and stack** section: language and version, package manager, framework, database, test framework with its exact command. Plus the researcher's answer, with a source per claim | the section in the opening document; the researcher's answer is in its report, and the PM writes what is durable into its own documents | Yes, both |
-| team | Step 4, **Write the opening document** | PM | the opening document — `docs/design/prd-<date>-<job-slug>.md`, one per job. Small work: goal, out of scope, Language and stack. Big work: the same file with the problem, the users, success, risks, open questions and the **milestones, each with a DoD section** | `docs/design/` | Yes |
-| small, bug | Step 4, **Write the task table** | PM, because small work has no architect | `docs/tasks/`: one row per task with an id, one sentence of work, the exact files it owns, the test file it must write, and its **DoD section** | `docs/tasks/` | Yes |
-| bug | **A bug becomes a task row** — before any engineer starts | PM, never the engineer that will do the fix | one row: **what was reported** (who reported it, the command, the input, what happened, what was expected) and its **DoD section** (the failing case that must exist and pass, and the behaviour that must change) | `docs/tasks/` | Yes |
+| team | Step 4, **Write the opening document** | PM | the opening document — `docs/design/prd-<date>-<job-slug>.md`, one per job. Small work: goal, out of scope, Language and stack. Big work: the same file with the problem, the users, success, risks, open questions and the **milestones, each with a DoD section** | the docs home: `docs/design/` | No — read while the job runs |
+| small, bug | Step 4, **Write the task table** | PM, because small work has no architect | `docs/tasks/`: one row per task with an id, one sentence of work, the exact files it owns, the test file it must write, and its **DoD section** | the docs home: `docs/tasks/` | No — read while the job runs |
+| bug | **A bug becomes a task row** — before any engineer starts | PM, never the engineer that will do the fix | one row: **what was reported** (who reported it, the command, the input, what happened, what was expected) and its **DoD section** (the failing case that must exist and pass, and the behaviour that must change) | the docs home: `docs/tasks/` | No — read while the job runs |
 | team | Step 5, **Confirm** | PM asks, user answers | the user's yes on the document, on the stack, and — big work — on the milestone list on its own | no file; the confirmed document is the record | No, and the document carries it |
-| team | Step 6, **Job folder** | PM | `state.json`: tasks, milestones, document versions, the CRD list, the merge result | `~/.claude/crew/jobs/<job-slug>/state.json` | **No, on purpose.** It is progress, not a record, and it stays out of the user's `git status` |
+| team | Step 6, **Job folder** | PM | `state.json`: tasks, milestones, document versions, the CRD list, the merge result | `<repo>/.claude-crew/jobs/<job-slug>/state.json` — inside the repository, ignored through `info/exclude` | **No, on purpose.** It is progress, not a record: never staged, never committed, and the folder is dropped when the job ends. Being inside the repository buys the per-job path and the restart notice, not a record |
 | team | Step 7, **Branch** | PM | the work branch `crew/<job-slug>` | git | The branch is deleted in step 17, **Merge and clean up**. Its commits stay on `main`, so the work survives |
-| big | Step 8, **Design** | `crew-architect` | the design, `docs/design/hld-<date>-<job-slug>.md`; `docs/tasks/` with a **DoD section on every row**; one contract per boundary; an ADR per open choice, with every option and why it lost | `docs/design/`, `docs/design/api/<caller>-<callee>.md`, `docs/decisions/adr/` | Yes |
+| big | Step 8, **Design** | `crew-architect` | the design, `docs/design/hld-<date>-<job-slug>.md`; `docs/tasks/` with a **DoD section on every row**; one contract per boundary; an ADR per open choice, with every option and why it lost | the docs home: `docs/design/`, `docs/design/api/<caller>-<callee>.md`, `docs/decisions/adr/` | No — read while the job runs |
 | big | Step 8, **Doc review before any code** — one round, like every other review | `crew-doc-reviewer` | findings, each blocking or optional — including "this row has no DoD section" | its report to the PM; the fix lands in the document | The report, no. The corrected documents, yes |
 | team | Step 9, **Run the tasks** | PM starts one `crew-engineer` per task | the code and its test file, both named in the task row, with the failing run shown before the passing one | the project's own source and test folders | Yes |
 | team | Step 9 or 10, **a question the files cannot answer** | engineer, QA or architect | `inbox/Q-<number>.md`: the cause, every way found, the files each one changes, its cost, and the way it recommends | `<job folder>/inbox/` | **No** — which is why the ADR below **quotes** it word for word and may never point at it |
-| team | Step 10a, **Code review** — once per milestone, at the end, in parallel with 10b and 10d, on the changed part only | `crew-code-reviewer` | findings with file and line, each blocking or optional | report to the PM; the fixes land in the code; the verdict becomes the `code` value of that task's **Verdicts** line, written at step 11, **Commit** | The report, no. The code, yes. The verdict, yes — it survives as one value on the Verdicts line in `docs/tasks/`. That line is the PM's report of what the reviewer said, not the reviewer's own signature: reviewers cannot write files (principle 12) |
-| team | Step 10b, **Security review** — same round, same milestone, when the change earns one | `crew-security-reviewer`, when the change earns one | findings, or the PM's stated reason it was skipped | report to the PM; the verdict becomes the `security` value of that task's **Verdicts** line, and a skip carries its reason there, on its own value; the skip reason also goes into step 12 **Milestone review** or step 18 **Finish** | The report, no. The verdict and its skip reason, yes — on the Verdicts line in `docs/tasks/`, and in the summary. Same limit as 10a: the PM writes the line |
+| team | Step 10a, **Code review** — once per milestone, at the end, in parallel with 10b and 10d, on the changed part only | `crew-code-reviewer` | findings with file and line, each blocking or optional | report to the PM; the fixes land in the code; the verdict becomes the `code` value of that task's **Verdicts** line, written at step 11, **Commit** | The report, no. The code, yes. The verdict, no — it is one value on the Verdicts line in the docs home's `docs/tasks/`, and nothing checks it. That line is the PM's report of what the reviewer said, not the reviewer's own signature: reviewers cannot write files (principle 12) |
+| team | Step 10b, **Security review** — same round, same milestone, when the change earns one | `crew-security-reviewer`, when the change earns one | findings, or the PM's stated reason it was skipped | report to the PM; the verdict becomes the `security` value of that task's **Verdicts** line, and a skip carries its reason there, on its own value; the skip reason also goes into step 12 **Milestone review** or step 18 **Finish** | The report, no. The verdict and its skip reason, no — one value on the Verdicts line in the docs home's `docs/tasks/`, and in the summary. Same limit as 10a: the PM writes the line |
 | team | Step 10c, **QA** — **once per milestone**, after all the coding and before the three reviews, in two steps | `crew-qa`, twice over: one agent writes the case list from the DoD sections without reading the code, then one agent per case | the case list; then one case file each, and the `run.sh` beside them; then the gap lines it reports to the PM | list in `<job folder>/<task-id>-plan.md`; cases in `qa/<task-id>/`, with any helper they share in `qa/lib/`; **`qa/run-all.sh` and `qa/gaps.md` are the PM's — QA reports those lines and never writes either file** | List, no — the cases say the same thing in a form that runs. Cases, yes. Gaps, yes, written by the PM |
-| team | Step 10, **two ways to fix — the PM decides** | PM; the user when they can see the difference | an ADR: the cause, **every** option with its cost and why it lost, the choice, who decided, and the reason | `docs/decisions/adr/NNNN-<short-name>.md` | Yes |
-| team | Any step, **a change to scope, a DoD item, the milestone list or a contract** | PM, whoever asked | a CRD — and the DoD items it adds are written into the task row or the milestone it changes, with a note in the CRD of where they went and how many | `docs/decisions/crd/NNNN-<short-name>.md`, plus `docs/tasks/` or the opening document | Yes |
-| team | Step 11, **Commit** | PM, the only one who uses git | the commit: the task's files, QA's cases, its `gaps.md` entries, any ADR or CRD — and the message, which carries this change's reasons and its real test numbers. **Plus that task's Verdicts line**: one bullet at the top of the task's section carrying all four values (`code`, `security`, `qa`, `doc`), a reason of its own on every `not run` and every `skipped`, and a task id on every `changes needed` | git history for the commit and its message; `docs/tasks/` for the Verdicts line. In this repository `node tools/verify-tasks.mjs` reads that line as the last stage of `npm test`, so every push checks it and a release checks it again before publishing; the check itself writes no file — its counts go to stdout, like every other test run in this table | Yes, both. The commit message is the only timestamped copy of the four values; the Verdicts line is the copy a check can read |
+| team | Step 10, **two ways to fix — the PM decides** | PM; the user when they can see the difference | an ADR: the cause, **every** option with its cost and why it lost, the choice, who decided, and the reason | the docs home: `docs/decisions/adr/NNNN-<short-name>.md` | No — read while the job runs |
+| team | Any step, **a change to scope, a DoD item, the milestone list or a contract** | PM, whoever asked | a CRD — and the DoD items it adds are written into the task row or the milestone it changes, with a note in the CRD of where they went and how many | the docs home: `docs/decisions/crd/NNNN-<short-name>.md`, plus `docs/tasks/` or the opening document | No — read while the job runs |
+| team | Step 11, **Commit** | PM, the only one who uses git | the commit: the task's files, QA's cases, its `gaps.md` entries, any ADR or CRD — and the message, which carries this change's reasons and its real test numbers. **Plus that task's Verdicts line**: one bullet at the top of the task's section carrying all four values (`code`, `security`, `qa`, `doc`), a reason of its own on every `not run` and every `skipped`, and a task id on every `changes needed` | git history for the commit and its message; the docs home's `docs/tasks/` for the Verdicts line. Nothing checks that line any more — a user's request took `node tools/verify-tasks.mjs` out, because the task table moved outside the repository and a CI machine has no open job to read | The commit, yes. The Verdicts line, no — it is read while the job runs, and a missing value reddens nothing
 | big | Step 12, **Milestone review** | PM reports, user answers | what works now, how to try it, what is missing, the real test numbers, every CRD and every ADR of that milestone, one line each | the reply to the user; whatever the user decides becomes a CRD | The report, no. Its decisions, yes |
-| big | Step 13, **Release and upgrade plans**, for a milestone that really ships | PM plus a `crew-researcher`, with a source and a date per claim | `<milestone>-release.md` and `<milestone>-upgrade.md`; or, when nothing ships, a **shipping gap list** naming what is still missing | `docs/release/` — the two plans when the milestone ships; `docs/release/<milestone>-gaps.md` when it does not; the researcher's answer is in its report, and the PM writes what is durable into its own documents | Yes — the two plans or the shipping gap list, and the researcher's answer, all stay. The shipping gap list is a file, not a paragraph in a message: the next milestone shortens that same file instead of copying it forward by hand |
+| big | Step 13, **Release and upgrade plans**, for a milestone that really ships | PM plus a `crew-researcher`, with a source and a date per claim | `<milestone>-release.md` and `<milestone>-upgrade.md`; or, when nothing ships, a **shipping gap list** naming what is still missing | the docs home: `docs/release/` — the two plans when the milestone ships; `docs/release/<milestone>-gaps.md` when it does not; the researcher's answer is in its report, and the PM writes what is durable into its own documents | No — the two plans and the shipping gap list are read while the job runs. The researcher's answer, no The shipping gap list is a file, not a paragraph in a message: the next milestone shortens that same file instead of copying it forward by hand |
 | team | Step 14, **README and the other reader-facing files** | PM | `README.md` in English, plus `README-<lang>.md` when the job's language is not English; a `CHANGELOG.md` entry when a user would notice the change; a `CLAUDE.md` edit when the repository's own rules or layout moved | the repository root | Yes |
 | team | Step 15, **Last doc review** — one round | `crew-doc-reviewer` | findings on every document this job produced or changed, the README included | report to the PM; fixes land in the documents | The report, no. The documents, yes |
 | team | Step 16, **Push and CI** | PM, with the user's yes every single time | the pushed commits, and `merge.publishCheck` — the CI files that were read and whether this push would publish | the remote; `state.json` | The commits, yes. `publishCheck`, no, and it is re-read after a restart |
@@ -978,7 +1010,7 @@ repeating a row that all three share.
 | team | Step 18, **Finish**, and the migration inside it | PM | every DoD section re-read and confirmed item by item, the real numbers from both test commands, the closing summary — and then the durable half moved out of everything about to be dropped, to **seven** destinations | a rule to `principles.md`; a decision about how to `docs/decisions/adr/`; a decision about what, the scope or a contract to `docs/decisions/crd/`; the reasons and the test numbers to the commit message; what no case can check to `qa/gaps.md`; **a DoD item's own wording to `docs/tasks/`**; **which files a task owns to `docs/tasks/`** | Everything it moves, yes. The job folder goes, and a test run's output was never a file at all |
 
 **The matching rule, and it is meant to be checked.** Every step that produces a
-document appears in that table, and every crew document in the repository has a
+document appears in that table, and every crew document named in a briefing has a
 step in that table that produces it. Run it in both directions. A surplus on the
 step side means a step writes something nobody can find; a surplus on the document
 side means a file exists that no rule asked for. Either way the rules and the
@@ -1026,8 +1058,8 @@ holding **5** task folders with **67** cases between them plus `run-all.sh`,
 `gaps.md` and the shared `lib/qa.mjs`, `principles.md`, both READMEs,
 `CHANGELOG.md`, `CLAUDE.md`, and two new files under `tools/`.
 
-- **Document side — every crew document in the repository has a step that
-  produces it.** All of them do. The misalignment was one line *inside* a
+- **Document side — every crew document named in a briefing has a step that
+  produces it.** All of them did, at the time that review ran. The misalignment was one line *inside* a
   document: the **Verdicts line**. The table produced `docs/tasks/` at
   step 4, **Write the task table** (or step 8, **Design**, on big work), but the
   Verdicts line is written by a different role at a different step — the PM, at
@@ -1221,8 +1253,7 @@ and every lost one marked as lost),
 with its own corrections at the end),
 [`0011-verdicts-gate-in-npm-test`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0011-verdicts-gate-in-npm-test.md) (the change request that
 put the gate on the Verdicts line, and killed the `pre-push` hook first),
-`tools/verify-tasks.mjs` (the gate itself, and its own comment on what it cannot
-prove), `CLAUDE.md` (**State and documents**), both READMEs.
+`tools/verify-tasks.mjs` (the gate itself — a user's request took it out, so the file is gone and the hole it was written for is open again), `CLAUDE.md` (**State and documents**), both READMEs.
 
 ---
 
@@ -1607,7 +1638,7 @@ document (where a skipped question goes, and what "not in scope" may hold). No
 other role carries this principle, and that is on purpose — the PM is the only
 role that talks to the user, so it is the only role that can hold an interview.
 What the three rules keep out of the opening document is also written where the
-user reads it, in `README.md` and `README-zh.md`, and `CLAUDE.md` points back
+user reads it, in `README.md`, and `CLAUDE.md` points back
 here for the reasons.
 
 **Source.** Six kinds of question, the funnel and the failure modes are not this
@@ -2059,6 +2090,7 @@ One thing the Scrum Guide gives that holds here unchanged: an item that does not
 | Two independent worktrees, for real isolation | **Rejected, then adopted — [`CRD 0013`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0013-two-worktrees-per-task.md) corrected this row, and it is the one row here that no longer holds.** It was rejected as a *platform feature*: the crew has no notion of a worktree anywhere in `host/`, and a role only has tool-level allow and deny lists, so building one would be platform work. That part still stands. The conclusion was wrong: the PM needs no platform feature, because the PM is the only role that touches git anyway, so plain `git worktree add` gives two real directories today. It is now how the paired shape works (principle 21), and it closed the one hole the shape had been shipped with. |
 | Requiring the code engineer to declare in its report "I did not read the unit test files" | Still unverifiable — it only turns a vague overstep into a definite lie, which is not an improvement in evidence. Overtaken as well: with two worktrees the unit test file is not in that engineer's tree while it writes, so there is nothing left to declare. |
 | Giving the two sides of a paired task different models through `roleModels` | The evidence says the gain is small: crossing an agent boundary does not remove perfectly correlated failure (principle 21's third source). And it backfires. Two sides of unequal strength produce a stream of **false disagreements**, the PM spends its attention judging noise, and the signal the shape exists to produce is buried under it. |
+| Committing `state.json`, so the job's progress survives as a record | It would make the move inside the repository buy something. Rejected: principle 20 says the job folder is **not** a record, and `state.json` is rewritten after every step — committing it puts a file that changes on every step into every diff, in front of every reviewer and every reader, and a progress file a reader cannot tell from an agreed one. What the user asked for was the **location**, not the history, so the folder stays ignored through `info/exclude` and is dropped when the job ends. [`CRD 0030`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0030-job-folder-moves-inside-the-repo.md) and [`ADR 0030`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/adr/0030-job-folder-inside-the-repo-and-ignored.md). |
 
 ---
 

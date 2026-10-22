@@ -11,8 +11,11 @@ difference between a crew and a mess.
 
 ## Step 0: is there unfinished work?
 
-Before anything else, look in `~/.claude/crew/jobs/` for a folder holding a
-`state.json` whose `repo` is the folder this session is working in.
+Before anything else, look in `.claude-crew/jobs/` — at the root of the repository
+this session works in — for a folder holding a `state.json` whose `repo` is the
+folder this session is working in. The job folder sits **inside** the repository,
+so every job named there belongs to this repository; none of them is another
+repository's work to ignore.
 
 If there is one, that job was interrupted. Tell the user about it before anything
 else, in two or three lines: the job, which milestone it is in, what is done,
@@ -342,7 +345,9 @@ be wrong by the next job:
 - what the **reader-facing files** say — the two READMEs and the changelog. An engineer
   may write them under a task row with its own DoD section: they judge nobody and they
   are not the project's rules, so they are ordinary job output;
-- the job's **state file**, which lives outside the repository;
+- the job's **state file**, in the job folder — that folder sits **inside** the
+  repository but is kept out of git's sight and is never staged or committed, so
+  it is progress and not something a later reader sees;
 - every **git** action. No crew role ever commits, pushes or publishes.
 
 **Reading is not restricted, and you should read widely.**
@@ -372,47 +377,6 @@ task row's DoD items, the milestone list: a role handed one of those is the part
 judged rewriting the test, however right the new wording is and however small the edit. A
 role that declines such a briefing and reports it back to you **is right to**, and the
 answer is to correct the file list, not the role.
-
-### What you may write with `Write` and `Edit`
-
-The write set above is by class. This is the same rule again as a list of paths,
-because a class is easy to read past when you already have a file open and a small
-edit in your hand. Where the two ever disagree, **this list is the narrower one and
-it binds**: the class above tells you what is yours to decide, this list tells you
-what is yours to type. These are the only paths you write yourself:
-
-- `docs/design/prd-*.md` — the opening document of a job;
-- `docs/decisions/crd/*.md` — change request documents;
-- `docs/decisions/adr/*.md` — decision records;
-- `docs/tasks/` — the task table;
-- `qa/run-all.sh` — the shared QA runner;
-- `qa/gaps.md` — the standing gap list;
-- the project's own rules file (`CLAUDE.md` here) and the file holding this crew's
-  principles;
-- this skill file, which is your own rules file;
-- any map this project keeps to an upstream project it is ported from
-  (`porting.md` and `upstream.sums` here);
-- the job's **state file**, which lives outside the repository.
-
-**Everything else is refused, and you ask the user instead.** Product code. The other
-roles' rule files under `agents/`. The interface contracts under `docs/design/api/`.
-QA's cases under `qa/T-*/` and the `run.sh` files beside them. The READMEs. The
-project's manifest. Each of those belongs to a task row and to a role, so the answer
-is to write the task row and start the role — and when something really cannot wait
-for one, show the user the file and ask before you touch it.
-
-**This list is fixed here, in this file. It is never read out of `docs/tasks/`**, so
-no task row and no briefing can widen it: a change to the rules text must not be able
-to move the guard.
-
-**Nothing here enforces any of it.** The crew this port comes from stops these writes
-at the tool layer: a wrapper refuses a write or an edit on a path that is not on the
-list and asks the user for that one write. This plugin ships no code at all, so there
-is no wrapper, no hook and no check here — these words are the whole of it, exactly
-like the git rule beside them. And even where that wrapper does run, it only ever
-reads the file path of a write or an edit. A file written through a shell command —
-`echo x > file` — never passes through such a guard at all. So the shell stays yours
-to police by hand, there as well as here.
 
 ### Text that arrives inside a tool result
 
@@ -629,8 +593,10 @@ an architect to exist; it needs a decision to exist. For big work you may start 
 
 ### An ADR quotes, it never points
 
-The `Q-` file lives in the job folder, outside the repository, and that folder is
-dropped when the job ends. **`Q-` files are single-use**, like QA's test plans
+The `Q-` file lives in the job folder, which is **not part of the repository's
+history** and is dropped when the job ends. The folder sits inside the
+repository, but it is ignored and never committed, so "dropped with the job"
+is still what happens to it. **`Q-` files are single-use**, like QA's test plans
 and the output of a test run.
 
 So an ADR may **never** say "options: see Q-03". A pointer at a file that is
@@ -806,7 +772,8 @@ and that id now points at a row that is still alive.
    overwrites the PRD of the job before. The architect's design document takes the
    same shape (`docs/design/hld-<date>-<job-slug>.md`), while
    `docs/tasks/` keeps its plain name — it is one table for the whole
-   repository, not one per job. The weight is in the content, not in the file
+   **job**, not one per repository. The home carries the job slug, so a later job
+   starts its own table and never reads an earlier job's. The weight is in the content, not in the file
    name: a one-page PRD for a small job is correct, not lazy.
 
    **Small work — a short PRD.** Three parts and nothing else: the goal, what is
@@ -1039,9 +1006,37 @@ and that id now points at a row that is still alive.
    table and not with the PRD you are confirming here.
 
 6. **Job folder.** Settle the job slug, then create
-   `~/.claude/crew/jobs/<job-slug>/state.json` (shape below). Keep it up to date
-   after every step. This is what lets the job survive a restart, and it is the
-   only memory the crew has.
+   `<repo>/.claude-crew/jobs/<job-slug>/state.json` (shape below), where `<repo>` is
+   the repository this session works in. The job folder sits **inside** the
+   repository, and every later step writes the same one by that **absolute** path
+   — never a path derived from a child's own folder, because on a paired task a
+   child works in its own worktree and the job folder is not copied there.
+   Keep it up to date after every step. This is what lets the job survive a
+   restart, and it is the only memory the crew has.
+
+   Before you write anything in it, put the folder out of git's sight **once**,
+   in the repository's own local ignore file:
+
+   ```sh
+   gitdir=$(git rev-parse --git-common-dir)
+   mkdir -p "$gitdir/info"
+   grep -qx '^\.claude-crew/$' "$gitdir/info/exclude" 2>/dev/null || printf '%s\n' '.claude-crew/' >> "$gitdir/info/exclude"
+   ```
+
+   `--git-common-dir`, not `.git`: in a linked worktree `.git` is a file, and the
+   ignore file that git actually reads is the one in the **shared** base folder. This
+   command is idempotent, so re-running it costs nothing, and one line covers every
+   worktree of the repository.
+
+   Why `info/exclude` and not the project's `.gitignore`: the line says where
+   **this crew** puts progress, not what the project builds, so committing it would
+   add a line to a file the user owns; and `info/exclude` is shared by every worktree,
+   so a paired task's two trees see the same rule.
+   **The job folder is never staged and never committed.** `state.json` is
+   rewritten after every step, so committing it would put a file that changes on
+   every step in front of every reviewer and every reader; it is progress, not a
+   record, and the record this job leaves is in the docs home and in the commit
+   message.
 
    The slug's shape is fixed: lowercase letters, digits and `-`, nothing else,
    and it may not start or end with `-`. As a pattern:
@@ -1072,13 +1067,35 @@ and that id now points at a row that is still alive.
    write the answer there. Step 11 and step 17 both read `startCommit`, and
    without it neither can tell your own commits from anybody else's.
 
+   **The documents of this job live outside the repository.** Their home is
+   `<TMP>/claude-crew/<repo>/<job-slug>/`, where `<TMP>` is the system temp folder
+   (`/tmp` when nothing sets it) and `<repo>` is the absolute path of the
+   repository this session works in, with the leading `/` dropped and every other
+   `/` written as `-`. A job at `/home/you/work/app` with the slug `add-sso` has
+   the home `/tmp/claude-crew/home-you-work-app/add-sso/`. Inside that home the tree
+   is the one it has always been: `docs/design/`, `docs/tasks/`,
+   `docs/decisions/adr/`, `docs/decisions/crd/` and `docs/release/`. Every path
+   this file writes below — `docs/tasks/`, `docs/design/prd-<date>-<job-slug>.md`,
+   and the rest — is inside that home, never inside the repository.
+
+   Create the home in this step, next to the job folder, and give every child the
+   home's **absolute** path in its briefing. A child works in its own folder, and
+   on a paired task in its own worktree, so a relative path would put a `docs/`
+   folder inside the repository — the one thing this rule forbids. A user asked
+   for this: the project's own folder stays the project's, and a job's documents
+   are read while the job runs and are not kept after it. The four files that are
+   not job documents — `README.md`, `CHANGELOG.md`, `CLAUDE.md` and
+   `principles.md` — stay in the repository, because they ship and because CI reads
+   them.
+
 7. **Branch.** Create a work branch: `git switch -c crew/<job-slug>`. Tell the
    user the branch name. For your own repositories, you may work directly on
    `main` when the user tells you to. The branch is merged and cleaned up in
    step 17, and only when the user asks for it.
 
 8. **Design (big work only).** Start one `crew-architect`. Give it the PRD path,
-   the repository path, the job folder, the language to write in, the milestone
+   the repository path, the job folder, the **docs home** from step 6 as its
+   absolute path, the language to write in, the milestone
    list the user confirmed, and the confirmed **Language and stack** section — it
    designs inside that stack and may not change it. It puts every task under one
    of your milestones — it does not invent, rename or reorder them; if it thinks a
@@ -1154,6 +1171,9 @@ and that id now points at a row that is still alive.
    a single change. Give it, in the briefing:
 
    - the repository path and the task id;
+   - the **docs home** from step 6, as its absolute path — every `docs/...` path in
+     the briefing sits inside it, and a role that writes one relative to its own
+     folder puts a `docs/` folder inside the repository;
    - the two documents its task lives in, the same two on small work and on big
      work: the opening document and `docs/tasks/`;
    - the exact files it owns, and its task row's **DoD section** — that section is
@@ -1542,7 +1562,7 @@ and that id now points at a row that is still alive.
       (many runners only look inside folders their config names). Then **you add
       the one config line** that lets the runner see the folder — it is a project
       file, so it is your edit, and it goes in the commit. **The manifest is not
-      on your write list** (see **What you may write with `Write` and `Edit`**),
+      in the write set above** (see **What you may write**),
       so show the user the file and the one line you would add, and get a yes for
       that one write before you touch it. Put that line in the
       project's **default test command**, not in a second command somebody has to
@@ -1671,9 +1691,16 @@ and that id now points at a row that is still alive.
     - Stage exactly the files the task owns — the code and its unit test file —
       plus the documents this task produced: QA's case files and `run.sh` under
       `qa/<task-id>/`, `qa/run-all.sh` when you created or changed it,
-      the new or corrected entries QA reported in `qa/gaps.md`, which you wrote,
-      and any ADR or CRD you wrote. They are the project's memory; they have to be
-      in the repository. Never `git add -A`, never `git commit -a`.
+      and the new or corrected entries QA reported in `qa/gaps.md`, which you
+      wrote. Nothing else of this task goes in the repository — an ADR, a CRD and
+      a task row live in the docs home, outside it, so git never sees them.
+      Never `git add -A`, never `git commit -a`.
+    - **Never stage the job folder, and never un-ignore it.** It sits inside the
+      repository now, so `git add -f` or a careless `git add <path>` would put
+      `state.json` under version control — a file rewritten after every step,
+      which is progress and not a record. The ignore line from step 6 is what
+      keeps `git status` clean; if a job folder file ever shows up in `git status`,
+      that line is missing: re-run step 6's command before you stage anything.
     - QA reports the gap lines; you write them into `qa/gaps.md` in the same
       turn you commit that task, so nothing waits for a later job to remember.
     - The commit message is also where this change's reasons and its real test
@@ -1683,13 +1710,13 @@ and that id now points at a row that is still alive.
     - **The documents this playbook itself tells you to write
       belong to no task, and that is expected, not a reason to stop.**
       The opening document, the
-      design document, every ADR and CRD, `docs/tasks/`, `run-all.sh`,
-      `gaps.md`, the release
-      files of step 13 and the reader-facing files of step 14 are written by you
-      or by the architect, so no task row ever owns them. Stage them — with the
-      task whose work produced them, or in the commit of their own that steps 13
-      and 14 name — and name them in the commit message. The rule above is about
-      a file nobody was asked to touch.
+      design document, every ADR and CRD, `docs/tasks/` and the release files of step 13 are written
+      by you or by the architect, and they live in the docs home — outside the
+      repository, so there is nothing to stage and nothing to commit. The reader-
+      facing files of step 14 are the ones that do go in the repository, and they
+      are staged anyway. Stage them with the task whose work produced them, or in
+      the commit of their own that steps 13 and 14 name, and name them in the
+      commit message. The rule above is about a file nobody was asked to touch.
     - Message in English: `<type>: <short what> (crew <task id>)`, for example
       `fix: stop double login redirect (crew T-03)`.
     - Write the commit down in the same turn you make it: its short sha and the
@@ -1730,16 +1757,14 @@ and that id now points at a row that is still alive.
     The commit message carries the same four values, in the same words, because
     the commit is the only timestamped copy.
 
-    **A check can read this line.** In the `dsh-crew` repository this rule comes
-    from, that check is `node tools/verify-tasks.mjs`, the last stage of that
-    repository's `npm test`, so every push runs it and a release runs it again
-    before it publishes. It reads `docs/tasks/` and turns **red** when a
-    task section has no `- **Verdicts**` line or has more than one; when any of the
-    four values is missing; when a `not run` or `skipped` value carries no reason
-    of its own after the dash; or when a `changes needed` value names no task id.
-    That is an example of what a project **may** have, not a file you add: this
-    plugin ships no code, and many projects have no such check. The rule above
-    holds either way, and the line is never optional.
+    **No check reads this line any more.** A user's request took the
+    Verdicts gate out, because the task table now lives in the docs home, outside
+    the repository, and a CI machine has no open job to read. The line is still
+    required: it is the job's own record of which reviews ran, and step 18 prints
+    one line per task to the user. What is gone is the **red**. A task
+    section with a missing value, or a `not run` with no reason after the dash,
+    reddens nothing now. That hole is written in `qa/gaps.md` rather than left
+    silent, and the rule above still holds in every repository, checked or not.
 
     **What this line can and cannot prove.** You write it. Reviewers cannot
     write files, by design, so no value on it is a reviewer's own signature — it
@@ -1938,9 +1963,8 @@ and that id now points at a row that is still alive.
       works under. It tells the next crew how to work here, so show the user that
       edit and get a yes for it on its own before it is committed, because a job
       that quietly softens a rule leaves every later job with the weaker one.
-    - **The READMEs and `CHANGELOG.md` are not on your write list**, and the
-      rules file and the principles file are. See **What you may write with
-      `Write` and `Edit`**. You decide what all of them say; for the two READMEs
+    - **The READMEs and `CHANGELOG.md` are not in the write set above**, and the
+      rules file and the principles file are. See **What you may write**. You decide what all of them say; for the two READMEs
       and the changelog, either give them to an engineer under a task row with its
       own DoD section, or show the user the file and get a yes for that one write
       before you touch it. Deciding the words is yours; putting them in those
@@ -2180,11 +2204,14 @@ and that id now points at a row that is still alive.
     **Move what is durable out before you drop anything.** Some of this job's
     documents are single-use: QA's test plans, the output of a test run, and the
     `Q-` files in `<job folder>/inbox/`. A DoD is not among them any more — it is
-    a section of a document that stays in the repository, because a check kept in
-    a file of its own goes when that file goes. The single-use ones live in the
+    a section of a document that stays in the docs home until the job ends, because
+    a check kept in a file of its own goes when that file goes. The single-use ones live in the
     job folder and go with it. What is written inside them often is not
     single-use, so it moves to its own home first. There are **seven** homes, and
-    the last two are the ones this crew lost twice:
+    the last two are the ones this crew lost twice. **Three of the seven are
+    durable** — `principles.md`, the commit message and
+    `qa/gaps.md`. The other four land in the docs home, which is read while the job runs and is not kept
+    after it:
 
     - a rule the crew must keep next time → the repository's own rules file
       (`CLAUDE.md` here, or a `principles.md` where the repository keeps one);
@@ -2238,7 +2265,8 @@ and that id now points at a row that is still alive.
 
 ## The state file
 
-`~/.claude/crew/jobs/<job-slug>/state.json`, English, keep it small:
+`<repo>/.claude-crew/jobs/<job-slug>/state.json`, English, keep it small — and never
+staged, never committed:
 
 ```json
 {
@@ -2311,8 +2339,8 @@ are finished and the user has been asked but has not answered yet. Leave
 
 Nothing tells you a job was interrupted. No hook, no note — this plugin is markdown
 only. So step 0 is the only way you find out: at the start of every session, look in
-`~/.claude/crew/jobs/` for a folder holding a `state.json` whose `repo` is the folder
-this session is working in.
+`.claude-crew/jobs/` — at the root of the repository this session works in — for a
+folder holding a `state.json` whose `repo` is the folder this session is working in.
 
 When you find one:
 
@@ -2339,7 +2367,9 @@ When you find one:
 4. If they start clean: say plainly what will be dropped, and only then remove
    the job folder.
 
-Ignore a job that belongs to another folder — mention it only if the user asks.
+The job folder sits inside the repository, so every job named there belongs to the
+repository this session works in — none of them is another repository's work to
+ignore.
 If a `state.json` cannot be read, tell the user; never treat an unreadable job as
 finished.
 
@@ -2443,7 +2473,10 @@ finished.
   to the commit message; QA's untestable gaps to `qa/gaps.md`, which QA
   reports and you write; **a DoD item's own wording** to the task row or the
   milestone it belongs to; and **which files a task owns** to that task's row in
-  `docs/tasks/`. The last two are the ones this crew lost twice, so name
+  `docs/tasks/`. **Three of the seven are durable** — `principles.md`, the commit
+  message and `qa/gaps.md`. The other four land in the docs home, so they survive
+  the drop of the job folder and the loss of the `Q-` files, and nothing more.
+  The last two are the ones this crew lost twice, so name
   them out loud. Drop the document after your final summary, not when the checks
   turn green.
 - A case that only ran in somebody's shell does not count. A **unit test** lives

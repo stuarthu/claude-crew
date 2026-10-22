@@ -196,7 +196,8 @@ and language-file halves of item 10 need the README files.
 
    - **It quotes, it never points.** An ADR that says "options: see Q-03", or
      names that file instead of holding its text, is a **blocking** finding. The
-     `Q-` file lives in the job folder, outside the repository, and is thrown away
+     `Q-` file lives in the job folder, which is **not part of the repository's
+     history** and is thrown away
      with the job — so the pointer will soon point at nothing, and the ADR's most
      valuable section is gone.
    - **The options are the engineer's own words.** They are copied from the `Q-`
@@ -265,17 +266,18 @@ and language-file halves of item 10 need the README files.
     commands, file names and settings stay exact in every language — never make
     those "simpler".
 
-13. **The flow table matches the repository.** `principles.md 20` — principle 20
-    of the reasons file at the repository root — holds the whole flow in one
+13. **The flow table matches what the job writes.** `principles.md 20` — principle
+    20 of the reasons file at the repository root — holds the whole flow in one
     table and says the match is meant to be checked. Run it in both directions
     and report both sides:
     - every step that produces a document has a row in that table;
-    - every crew document in the repository has a row that produces it.
+    - every crew document named in the briefing has a row that produces it.
 
     A surplus on the step side means a step writes something nobody can find. A
     surplus on the document side means a file exists that no rule asked for.
     Name each one, and say which side it is on. "Crew document" means a file
-    under `docs/`, plus `principles.md`, `CLAUDE.md`, `CHANGELOG.md` and both
+    under `docs/` inside the docs home the PM named, plus the five files that stay
+    in the repository: `principles.md`, `CLAUDE.md`, `CHANGELOG.md` and both
     READMEs — not source code, and not `LICENSE`.
 
     `porting.md` is outside the matching rule: a port pass writes it, not a crew

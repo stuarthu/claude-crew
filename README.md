@@ -1,15 +1,18 @@
 # claude-crew
 
-> **Version 0.5.0.**
+> **Version 0.6.0.**
 
 claude-crew is a plugin for [Claude Code](https://claude.com/claude-code). When
 the work is bigger than one small change, your session becomes the **product
 manager (PM)**, and the PM runs the work as a small crew of role agents:
 researcher, architect, engineer, test engineer, code engineer, QA, code
 reviewer, security reviewer and doc reviewer. You talk to the PM, and only to
-the PM. The roles never talk to each other. They share work through documents
-that stay in your repository, so every decision can be read again later. The
-plugin is markdown and nothing else — no hooks, no scripts, no code — and it
+the PM. The roles never talk to each other. A job's documents go in a folder
+outside your project, so your project folder stays clean. They are read while
+the job runs and are not kept after it. The files that do stay in your project
+are the five that ship: the two READMEs, `CHANGELOG.md`, `CLAUDE.md` and
+`principles.md`. The plugin is markdown and nothing else — no hooks, no
+scripts, no code — and it
 adds nothing to your session until it is used. It is a port of
 [dsh-crew](https://github.com/stuarthu/dsh-crew), the same idea built for
 DeepSeek Harness; `porting.md` says what is different here.

@@ -2,6 +2,81 @@
 
 Newest first. Each entry says what a user would notice.
 
+## 0.6.0
+
+Caught up with [dsh-crew](https://github.com/stuarthu/dsh-crew) **v0.13.0**, the
+tagged release, commit `5dd7b50`. 0.5.0 matched **v0.10.0**, and three upstream
+tags moved since then: v0.11.0, v0.12.0 and v0.13.0.
+
+**Two things change what happens to your repository.** A job's documents no
+longer land in your project folder, and the PM's write limit is gone. Read those
+two before you read anything else.
+
+### Changed
+
+- **A job's documents moved out of your project folder.** The opening document,
+  the design, the task table, every ADR and CRD, the boundary contracts and the
+  release plans now go in a temp docs home:
+  `<TMP>/claude-crew/<repo>/<job-slug>/`. `<TMP>` is your system temp folder —
+  `/tmp` when nothing sets it — and `<repo>` is your project's full path with the
+  slashes written as `-`. Your project folder keeps its code, `qa/`, and the five
+  files that ship: the two READMEs, `CHANGELOG.md`, `CLAUDE.md` and
+  `principles.md`. A job's documents are read while the job runs and are kept
+  after it by nothing.
+- **The task table is one per job, not one per repository.** The docs home
+  carries the job name, so each job starts its own `docs/tasks/` and never reads
+  an earlier job's table. What you notice is that a new job no longer inherits a
+  list of tasks from the job before it.
+- **Nothing checks the Verdicts line any more.** The PM still writes one per task
+  row — four values, each with its own reason on every `not run` and every
+  `skipped` — and still prints one line per task to you at the end of a job. What
+  is gone is the red: a task with a missing value, or a `not run` with no reason
+  after the dash, reddens nothing. The line proves only that it was written. It
+  never proved that a review happened, and it still does not.
+- **The job folder moved inside the repository.** It used to sit at
+  `~/.claude/crew/jobs/<job-slug>/`, far from the project. It is now at
+  `.claude-crew/jobs/<job-slug>/`, at the root of the repository this session
+  works in, so one `ls` shows the job you are in and a job's progress can no
+  longer be mistaken for another repository's. **Nothing about the job changed
+  shape:** the folder is still single-use, the PM keeps it out of git's sight with
+  one line in the repository's own `.git/info/exclude`, so `git status` stays clean,
+  the folder is never staged and never committed, and it is dropped whole when the
+  job ends. That line goes in `info/exclude` and not in the project's `.gitignore`,
+  because it says where **this crew** puts progress rather than what the project
+  builds, and a committed line would add it to a file the user owns. **The job folders
+  that are still under `~/.claude/crew/jobs/` stay where they are** — nothing here
+  moves or deletes them, and a job left in one of them is no longer found by the
+  unfinished-job notice.
+
+### Removed
+
+- **The PM's write limit is gone here, the way it is gone upstream.** There is no
+  path whitelist section in the skill and no "The PM write guard" section in
+  `CLAUDE.md`. Upstream deleted running code — `host/pm-write-guard.js`, its row in
+  `cordis.patch.yml`, and its check `tools/verify-pm-write-guard.mjs`. This port
+  never had that code, so what it carried was the words, and the words are gone
+  too. **This removes the enforcement, not the habit**: the PM still writes the
+  job's own documents, and a role still writes only the files its task owns. What
+  you notice is that a write the PM used to stop and ask you about now goes
+  through with no ask. **The git rule is untouched** and is still the one rule
+  standing between a crew role and a push, a tag push, a force push, a remote
+  delete or a publish — here, as before, that rule is words in the prompts plus
+  the hook snippet you can add to your own settings, not code.
+
+### Documentation
+
+- **Two upstream rules are not carried, and that is a choice.** The Crew preset
+  for dsh 0.2.x: this plugin has no preset and no settings, and design rule 6
+  forbids adding any. The fix to upstream's git guard: this port ships no guard
+  code, so there was no wrong branch to fix, and the hook snippet in `CLAUDE.md`
+  already tells a crew role from the root session by `agent_type`.
+- Both READMEs, `CLAUDE.md` and `porting.md` were brought in step with all of the
+  above, in the same release.
+- The `0.5.0` and older sections below still name the PM's write limit, and the
+  `0.1.0` section still names `~/.claude/crew/jobs/`. They **stay exactly as they
+  are**: those were real when those versions shipped, and a published section is a
+  record of what was true at the time.
+
 ## 0.5.0
 
 Caught up with [dsh-crew](https://github.com/stuarthu/dsh-crew) **v0.10.0**, the

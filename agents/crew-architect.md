@@ -29,7 +29,10 @@ who never speak.
 
 1. The opening document of the job, the PRD the PM named. There is one per job
    and its name carries the job — `docs/design/prd-<date>-<job-slug>.md` — so
-   take the exact name from the PM's briefing and never from memory. Read all of
+   take the exact name from the PM's briefing and never from memory. Every `docs/...`
+   path sits inside the **docs home** the PM named in its briefing, outside the
+   repository. Write your own documents there too, and never under a `docs/` folder
+   inside the repository. Read all of
    it, including every milestone's **DoD section**: what "done" means for that
    milestone and how somebody else checks it.
 2. Its **Language and stack** section. The PM chose it and the user confirmed it
@@ -311,8 +314,9 @@ Write these files, in the language the PM tells you:
    not make the decision.
 
    **An ADR quotes, it never points.** "Options: see Q-03" is not allowed. That
-   file sits in the job folder, outside the repository, and is thrown away when
-   the job ends — the pointer would soon point at nothing and the ADR's most
+   file sits in the job folder, which is **not part of the repository's
+   history** and is thrown away
+   when the job ends — the pointer would soon point at nothing and the ADR's most
    valuable section would be gone.
 
    Add on top of the list above:

@@ -1,12 +1,14 @@
 # claude-crew
 
-> **Version 0.6.0.**
+> **Version 0.7.0.**
 
 claude-crew is a plugin for [Claude Code](https://claude.com/claude-code). When
 the work is bigger than one small change, your session becomes the **product
 manager (PM)**, and the PM runs the work as a small crew of role agents:
-researcher, architect, engineer, test engineer, code engineer, QA, code
-reviewer, security reviewer and doc reviewer. You talk to the PM, and only to
+researcher, architect, engineer, QA, code
+reviewer, security reviewer and doc reviewer. The PM runs **one role at a
+time** — it starts one, waits for its report, then starts the next, and the
+role changes as the step needs one. You talk to the PM, and only to
 the PM. The roles never talk to each other. A job's documents go in a folder
 outside your project, so your project folder stays clean. They are read while
 the job runs and are not kept after it. The files that do stay in your project
@@ -15,7 +17,7 @@ are the five that ship: the two READMEs, `CHANGELOG.md`, `CLAUDE.md` and
 scripts, no code — and it
 adds nothing to your session until it is used. It is a port of
 [dsh-crew](https://github.com/stuarthu/dsh-crew), the same idea built for
-DeepSeek Harness; `porting.md` says what is different here.
+DeepSeek Harness.
 
 ## Install
 
@@ -50,8 +52,6 @@ list. It is not a prompt the PM pastes in.
 | Researcher | `crew-researcher` | **only** `Read`, `Glob`, `Grep`, `WebSearch`, `WebFetch` — it can search and open web pages, it has no shell, and it writes no file: its answer comes back in its report |
 | Architect | `crew-architect` | everything **except** the tools that start, message or list an agent |
 | Engineer | `crew-engineer` | everything **except** the tools that start, message or list an agent |
-| Test engineer | `crew-test-engineer` | everything **except** the tools that start, message or list an agent |
-| Code engineer | `crew-code-engineer` | everything **except** the tools that start, message or list an agent |
 | QA | `crew-qa` | everything **except** the tools that start, message or list an agent — it must run the software |
 | Code reviewer | `crew-code-reviewer` | an allow list: **only** `Read`, `Glob`, `Grep` |
 | Security reviewer | `crew-security-reviewer` | an allow list: **only** `Read`, `Glob`, `Grep` |

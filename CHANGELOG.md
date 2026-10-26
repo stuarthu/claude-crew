@@ -2,6 +2,69 @@
 
 Newest first. Each entry says what a user would notice.
 
+## 0.7.0
+
+The crew costs less and says one thing. Nothing about what the crew does moved:
+same work, same rules, fewer roles and far fewer words. Two things were measured
+in the last job here — a skill file of 26,607 words paid at the start of every
+job, and up to 53 QA agents in one milestone because QA started one agent per
+case.
+
+**Two things change what you pay for a job.** Every task is done by **one**
+engineer, and a reviewer is handed **one task's diff** instead of the whole
+milestone's. Read those two before you read anything else.
+
+### Changed
+
+- **Every task is done by one engineer, who writes the unit tests first and then
+  the code.** A task used to be split across two roles that ran at the same time,
+  each in its own copy of the repository, on its own branch, passing notes between
+  them. One role now holds the whole task. What you notice is that a job starts
+  about half the agents it used to.
+- **QA writes one task's whole case list, not one agent per case.** One `crew-qa`
+  role takes a task and writes every case for it in `qa/<task-id>/`, with the
+  `run.sh` beside them. A case is still a real, runnable file with an exit code,
+  and `qa/run-all.sh` still finds them by pattern. What you notice is that a
+  task's cases arrive in one report instead of one report per case.
+- **A reviewer is handed one task's diff, not the whole milestone's.** A review
+  that used to read every file a milestone touched now reads the files one task
+  owns. Every review is still **one** round, and only a change made because of
+  that review's own finding brings it back.
+- **The PM's rules file is short at the start of a job.** The 18 steps live one
+  file each under `skills/team-lane/steps/`, and this file keeps the rules and a
+  step index. A step is read when the PM reaches that step, one at a time. The
+  steps keep their rules and lose the paragraphs that restate why a rule holds;
+  where a reason was cut, the step keeps one line in the form
+  `Why: principle 6 in principles.md`.
+- **The role prompts are shorter, and the reasons for the rules live in
+  `principles.md`.** Each prompt keeps what the role does and drops the
+  reasoning it used to repeat. Nothing was lost: every reason is still in
+  `principles.md`, and the PM carries the shared wording in the skill file.
+- **The PM runs one role at a time.** It starts one, waits for its report, then
+  starts the next, and the role changes as the step needs one. There is still no
+  cap on the roles one job may use over its whole life.
+
+### Removed
+
+- **Two roles are gone**, and `agents/` holds seven role prompts now, not nine.
+  Every task is one shape: one role, one set of files.
+
+- **`porting.md` and `upstream.sums` are gone.** Nothing measures drift against
+  dsh-crew any more, so a person who wants to compare the two projects reads both
+  repositories. `principles.md` is dsh-crew's file, carried across, and this port
+  edits it where its own rules differ.
+
+### Documentation
+
+- Both READMEs, `CLAUDE.md`, `principles.md`, the skill file, the 18 step files,
+  the seven role prompts and both manifests were brought in step with all of the
+  above, in the same release. The version line in each README and the two version
+  fields in the manifests all read `0.7.0`.
+- The `0.6.0` and older sections below still name the roles and the shapes that
+  shipped with them. They **stay exactly as they are**: those were real when those
+  versions shipped, and a published section is a record of what was true at the
+  time.
+
 ## 0.6.0
 
 Caught up with [dsh-crew](https://github.com/stuarthu/dsh-crew) **v0.13.0**, the

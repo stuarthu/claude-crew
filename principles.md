@@ -33,7 +33,7 @@ the opening document, one per job, whose file name carries the job it belongs to
 a **section** of another document, never a file of its own; see principle 20),
 **HLD** (high level design, one per job under `docs/design/`, named the same way),
 **ADR** (architecture decision record),
-**CRD** (change request document), **QA** (the role that tests the result).
+**change request** (a change to what the user gets or to how two modules talk, moved by the PM into the documents it touches), **QA** (the role that tests the result).
 
 Each principle below has:
 
@@ -194,20 +194,11 @@ And the bar for "done" really is lower than it was. It used to be three gates �
 code review, security review, QA — and it is now one machine-checkable gate. That is
 the trade principle 18 spells out, with what it costs.
 
-**Two shapes, one rule.** The rule above says nothing about how many agents are
-involved, and that is on purpose, because the crew has two ways of doing it:
-
-- **Solo.** One `crew-engineer` writes both halves of a task: the unit test
-  first, then the code. This is the default, and nothing about it has changed.
-- **Paired.** Two engineers each write one half. `crew-test-engineer` writes only
-  the unit tests, `crew-code-engineer` writes only the product code, neither can
-  see the other's half while it is being written, and the PM runs the two halves
-  together after it merges them. Why that shape exists, what it buys, where it is
-  allowed and — most of all — what it cannot prove, is **principle 21**.
-
-Both shapes owe the same evidence: a unit test that was red before the code
-existed, and a report that shows that red run. The paired shape does not get to
-skip it. It moves *who* produces each half, not *what* has to be proved.
+**One shape, one rule.** The rule above says nothing about how many agents are
+involved, and that is on purpose, because the crew has one way of doing it: one
+`crew-engineer` writes both halves of a task, the unit test first and then the
+code. Every task owes the same evidence: a unit test that was red before the code
+existed, and a report that shows that red run.
 
 **Why (ours).** An agent that writes code first will write a unit test that
 passes against whatever it just wrote, including the bugs. The failing run is the
@@ -222,18 +213,16 @@ a unit test aimed at the wrong behaviour fails exactly as convincingly as one
 aimed at the right behaviour. One defence against it is already in the crew — for
 a bug fix, the PM writes the task's DoD section before anyone attempts the fix,
 so the check is authored by someone who is not doing the fixing (principle 20).
-The paired shape of principle 21 extends that same defence to any task, and pays
-for it.
+That is the whole defence this crew has against it.
 
 **A word on the word.** "Tests" in this principle's heading deliberately covers
 every kind: a unit test, and the contract test of principle 3. Everywhere a
 sentence could mean two different kinds, the precise noun is used instead — the
 four names are in **Words we use**, near the end of this file.
 
-**Lives in** `agents/crew-engineer.md`, `agents/crew-test-engineer.md`,
-`agents/crew-code-engineer.md`, `agents/crew-architect.md`, `skills/team-lane/SKILL.md`,
+**Lives in** `agents/crew-engineer.md`, `agents/crew-architect.md`, `skills/team-lane/SKILL.md`,
 `agents/crew-code-reviewer.md`. Where that unit test file lives, and how it is run
-again later, is principle 13. The paired shape, and its limits, is principle 21.
+again later, is principle 13.
 
 **Source.** [The 2020 Scrum Guide](https://scrumguides.org/scrum-guide.html)
 
@@ -275,7 +264,7 @@ After that, the old line holds: the architect says "HTTP/REST, JSON" or
 "in-process call, typed objects", never "FastAPI" or "grpc-go". Which of the
 libraries the project already has an engineer uses is the engineer's call. Adding
 a package the project does not depend on yet is the PM's call, and gets written
-into the stack section. Changing the stack itself needs a CRD, like scope.
+into the stack section. Changing the stack itself is a change request, like scope.
 
 **Why.** Architect job descriptions put boundaries, patterns and standards with
 the architect, and implementation with the engineers. Crossing that line costs
@@ -466,38 +455,42 @@ rules at the top), `package.json` (`scripts.test`),
 
 ---
 
-## 14. Documents are the only channel, and a change gets a CRD
+## 14. Documents are the only channel, and a change moves the documents it touches
 
 **Rule.** Nothing that matters lives only in a message. A child's `report` points
 at the file it wrote; the PM's answer points at the document it changed and that
 document's new version. And any request that would change **what the user gets**
 (scope, a DoD item, the milestone list) or **how two modules talk** (a
-boundary contract) becomes a change request document — `docs/decisions/crd/NNNN-<short-name>.md` —
-written by the PM before anything moves, whoever asked: the user, a role, or the
-PM itself. A CRD is never deleted, and a rejected one stays.
+boundary contract) is a **change request**, and the PM makes it by moving the
+documents it touches — a **Corrections** line and its date, beside the confirmed
+words — whoever asked: the user, a role, or the PM itself. There is no change-request
+file, and nothing stops and waits for a yes.
 
-Who decides: a contract fix that changes nothing the user sees is the PM's call,
-reported at the next milestone review. Anything touching scope, a DoD item or the
-milestone list needs the user's yes first.
+Who decides: the PM, every one of them. The user's turn is at the start of the job
+and at the milestone review, and that is where the PM names the change. What still
+needs the user's own yes is what leaves the machine — a push, a tag, a publish, a
+merge, a branch delete.
 
 **Why (ours).** The crew is flat, so a message reaches exactly one role and dies
 there (principle 1). Two engineers building two sides of a boundary cannot
 compare notes; if one of them was told something in a message, the other is
 building against a different truth and nobody finds out until the halves are
 joined. A document is the only thing every role, and every role started
-tomorrow, reads the same way. The CRD adds the missing half of that: the record
-of *why* a confirmed document changed, and who agreed to it. Without it a design
-can drift a whole milestone and leave no trace of who asked.
+tomorrow, reads the same way. A change request adds the missing half of that: the
+record of *why* a confirmed document changed, and who asked. Without it a design
+can drift a whole milestone and leave no trace of who asked. The record lives in
+the document that moved, beside the confirmed words and with its date, and the PM
+names it again at the milestone review.
 
-**Why the scope is narrow.** A CRD for every question or review finding would
-bury the ones that matter and put the PM in a writing job instead of a deciding
-one. So an internal change that keeps the same behaviour and the same contract —
+**Why the scope is narrow.** A written record for every question or review finding
+would bury the ones that matter and put the PM in a writing job instead of a
+deciding one. So an internal change that keeps the same behaviour and the same contract —
 an ADR, an HLD detail, splitting one task in two — is only a version bump on the
 document that owns it. A question the files can answer stays an inbox `Q-` file.
 The one exception is the user overturning an ADR at a milestone review
 (principle 17): the crew changing its own ADR is a version bump, but the user
-changing a choice the crew already built on costs rebuilt work, so that one gets
-a CRD.
+changing a choice the crew already built on costs rebuilt work, so that one moves
+the documents it touches.
 
 **The channel is not the archive.** Being the only channel does not make a
 document permanent. Some of the documents the crew talks through are single-use
@@ -509,7 +502,7 @@ rule has a second half. Anything that may not live only in a message may not liv
 only in a document that is about to be thrown away either — the reason is the
 same one, that it has to be readable by somebody who is not here yet. A decision about **how** goes in an
 ADR in `docs/decisions/adr/`, a decision about **what**, the scope or a contract
-goes in a CRD in `docs/decisions/crd/`, a rule the crew must keep comes here, and
+is written into the document it moves, a rule the crew must keep comes here, and
 QA's untestable gaps go to `qa/gaps.md`. That is why an ADR **quotes** the
 engineer's `Q-` file word for word and may never say "options: see Q-03": the
 pointer would outlive the file it points at, and the ADR's most valuable section
@@ -517,7 +510,7 @@ would be gone.
 
 **Lives in** `skills/team-lane/SKILL.md` ("Documents are the only channel", "Change requests",
 "An ADR quotes, it never points"),
-`agents/crew-architect.md` ("When the PM sends you a CRD"), `agents/crew-engineer.md`,
+`agents/crew-architect.md` ("When the PM sends a change request"), `agents/crew-engineer.md`,
 `agents/crew-qa.md`.
 
 **Source.** [The 2020 Scrum Guide](https://scrumguides.org/scrum-guide.html) ·
@@ -661,10 +654,11 @@ or compatibility changes. When it stops it uses the channel that already exists
 (which files each one changes, what it costs, where it will hurt later), and
 **the way it would pick, with the reason** — reports the task as blocked, and
 works on another task it was given, if it can finish that one alone. The PM
-decides by the same line a CRD uses: a difference the user can see goes to the
-user; a difference that stays inside the code is the PM's own call, named at the
-next milestone review — or, in small work that has no milestone review, in
-the PM's finish summary; a way that would change a boundary contract gets a CRD.
+decides by the same line a change request uses: a difference the user can see is
+the PM's own call too, and is named at the next milestone review; a difference that
+stays inside the code is named there as well — or, in small work that has no
+milestone review, in the PM's finish summary; a way that would change a boundary
+contract moves the contract file, and only the architect edits one.
 
 Every such decision is written into a document before the engineer starts again,
 and holds the same five things: the cause, **every** option with its cost and
@@ -677,7 +671,7 @@ recommends with a one sentence reason, and
 is written so a reader who has never seen the code can tell the options apart.
 The design does not stop and wait: the architect keeps designing on its own
 recommendation, the PM lays every choice of the milestone in front of the user
-at the milestone review, and the user may overturn one — which is a CRD.
+at the milestone review, and the user may overturn one — which is a change request.
 
 **Why options have to survive the choosing.** A choice that is made and not
 written down disappears at the moment it is made. Whoever reads the code next
@@ -707,8 +701,10 @@ answers a question of fact for a PM that has not judged yet, so a recommendation
 there ends the judging before it starts. An engineer's recommendation arrives
 after the PM already owns the decision.
 
-**Why the PM's line is the CRD line.** A difference the user can see is a scope
-question, and scope belongs to the user (principle 14). Reusing that same line
+**Why the PM's line is the change-request line.** A difference the user can see is
+a scope question, and scope is the class principle 14 moves documents for. Reusing
+that same line means there is one boundary to learn instead of two that can quietly
+drift apart.
 means there is one boundary to learn instead of two that can quietly drift
 apart.
 
@@ -724,8 +720,8 @@ each one would stop the job five times, and would hand the user five questions
 about the inside of the code. So the architect recommends and keeps going. The
 cost is real and known: the user's check happens later, at the milestone review,
 and overturning a recommendation then means redoing the tasks that were already
-built on it, through a CRD. Options the **user can see** are the exception — the
-PM asks about those on the spot and does not wait for the review.
+built on it. Options the **user can see** are named in the review report rather
+than asked about on the spot.
 
 **Lives in** `agents/crew-engineer.md` ("When you fix a bug: find at least two ways
 first"), `agents/crew-architect.md` (**Your outputs**, decision records),
@@ -734,29 +730,37 @@ task** and step 12 **Milestone review**).
 
 ---
 
-## 18. Agents run in parallel by default, and serializing needs a real reason
+## 18. One engineer per code change, and the checks run once at the end of a milestone
 
-**Rule (ours).** Every task that can start now starts now, in one message. Two
-tasks run together when their file lists do not overlap. The crew serializes
-only for a real dependency: the two tasks share a file, or the later one has to
-read what the earlier one wrote. Nothing else counts. One agent that would cover
-several tasks is a signal to **split** the work, not to bundle it. Agent count
-is never a reason to serialize — if a live-agent limit really is in the way, the
-PM stops and asks the user.
+**Rule (ours).** One crew role is awake at a time, up to the number the skill file
+calls the **awake-role limit**, and that number is **1** today. Start one role, wait
+for its report, then start the next. The role changes as the step needs one. The
+order still comes from the file test: a task that shares a file with another, or
+has to read what the other wrote, comes after it.
+
+**Why the number is there (ours).** The user runs a local model, and a model
+server can only hold a few agents at a time. A run that asks for more fails on the
+server, not on the code. The number is the model's capacity, and it is the one
+place to change when the model grows. It is not a cost rule: running one at a time
+does not save tokens, because every role still pays its own prompt once.
 
 **One engineer, one code change.** The unit of an engineer is not a task, it is a
-**code change**: a task holding three independent changes is three engineers, started
-together. That is the same rule as "split, do not bundle", read one level finer. The
-exception is the one the file test already names — when several changes land in the
-same file they cannot run together, so the architect lines them up as a **serial chain**
-and writes on each task row which task it shares the file with.
+**code change**: a task holding three independent changes is three engineers,
+started one after another. That is the same rule as "split, do not bundle", read
+one level finer. The exception is the one the file test already names — when
+several changes land in the same file they cannot follow each other in any order
+that keeps the work honest, so the architect lines them up as a **serial chain**
+and writes on each task row which task it shares the file with. The split is not
+about timing: a bigger agent is not cheaper, it carries more work and a small
+model loses the thread inside it.
 
 **QA and the three reviews run once, at the end of the milestone, not per task.** A
 task is finished when its own unit tests pass; nothing waits for a reviewer to call
 a task done. When all the coding of the milestone is finished, QA runs **one** round
 — one agent writes the case list from the DoD sections without reading the code, then
-one agent per case, all of them together — and then the code review, the security
-review and the doc review each run **once**, in parallel, on the changed part only.
+one agent per case, one after another — and then the code review, the security
+review and the doc review each run **once**, one after another, on the changed part
+only.
 Only one thing brings a reviewer back: a change made because of **its own** finding.
 A code change re-runs the code review, a documentation change the doc review, a
 security change the security review; the three never re-run together.
@@ -768,8 +772,8 @@ the evidence. Four tasks' worth of QA went into a single agent to save agent
 count, and it took about four times as long as four agents would have. The user
 asked why it was so slow. Agent count is easy to count, so it is easy to feel
 good about saving it; the time the user waits is the resource that actually
-costs, and it shows up in no report at all. A rule that only permits parallel
-work loses that trade every time, so the default was moved.
+costs, and it shows up in no report at all. A rule that only permits work either
+way carries a default nobody wrote down, so the default is stated as a rule.
 
 **What batching the checks costs, and it is not zero.** The old reason for running
 the three checks in a fixed order is still true: each check should read code that has
@@ -810,7 +814,7 @@ while another task's QA cases read them, and `qa/run-all.sh` gave
 three different answers in three minutes. The danger is not that a bad change
 gets in; nothing landed that should not have. The danger is a **false red**,
 which can send an engineer to fix something that was never broken, and a **false
-green**, which hides a real failure behind a half-written file. The parallel test
+green**, which hides a real failure behind a half-written file. The file test
 itself still only asks about overlapping **writes**, and that has not changed —
 what changed is that the engineer is now told what to do when the reading side
 bites. `agents/crew-engineer.md` ("A false red is not evidence") says it plainly: a red
@@ -818,8 +822,7 @@ from a check that reads a file another running task owns is not evidence about
 your work, so name the file, say **"the tree was moving"**, and never weaken or
 edit a case to make it green. What closes the hole is that instruction, not a new
 test — no test can tell a half-written file from a broken one. And the run that
-counts is still the PM's own, on a still tree, after every parallel task has
-landed. An engineer's or QA's green is evidence, not the verdict.
+counts is still the PM's own, on a still tree, after every task has landed. An engineer's or QA's green is evidence, not the verdict.
 
 **Lives in** `skills/team-lane/SKILL.md` (step 9 **Run the tasks** and step 10 **Check the
 finished task**), `agents/crew-engineer.md` ("A false red is
@@ -841,7 +844,7 @@ outlive the job?**
 - **Job documents, in the docs home** (`<TMP>/claude-crew/<repo>/<job-slug>/`, one
   per job, **outside** the repository): the opening document, the design and the
   boundary contracts, the task table `docs/tasks/` and the **DoD section** on every
-  row, every ADR and every CRD, the release and upgrade plans and the shipping gap
+  row, every ADR, the release and upgrade plans and the shipping gap
   list. `<TMP>` is the system temp folder, `/tmp` when nothing sets it, and `<repo>`
   is the repository's absolute path with the leading `/` dropped and every other
   `/` written as `-`. A user asked for this: the project's own folder
@@ -866,20 +869,19 @@ outlive the job?**
   never staged, is never committed, and is dropped whole when the job ends. `info/exclude`
   and not the project's `.gitignore` because the line says where **this crew** puts
   progress, not what the project builds — a committed line would be a line added to
-  a file the user owns — and because it is shared by every worktree, so a paired
-  task's two trees see the same rule. The path is **relative** in the code
+  a file the user owns. The path is **relative** in the code
   (`DEFAULT_JOBS_DIR = ".claude-crew/jobs"`, resolved against the session's own folder)
   so one default serves every repository and two repositories can never share a
   jobs folder; the PM names the resolved **absolute** path to every child, because
-  a fresh worktree does not carry the folder.
+  a child works in its own folder.
 - **Neither the size of the job nor who was in the room decides anything.** An
   ADR is written for a one-file bug fix as readily as for a milestone, and small
   work — which has no architect — has the PM write it.
 - **Dropping a single-use document requires moving its durable half out first**,
   and only after the PM has given the user the final summary. There are **seven**
   destinations, not five: a rule goes to `principles.md`, a decision about how to
-  an ADR, a decision about what to a CRD, this change's reasons and its real test
-  numbers to the commit message, QA's "what I could not test here, and why" to
+  an ADR, a decision about what to the document it moves, this change's reasons and
+  its real test numbers to the commit message, QA's "what I could not test here, and why" to
   `qa/gaps.md`, **a DoD item's own wording** to `docs/tasks/`, and
   **which files a task owns** to `docs/tasks/`. The last two were added
   after each of them nearly leaked a second time; principle 20 has the count and
@@ -989,19 +991,19 @@ repeating a row that all three share.
 | small, bug | Step 4, **Write the task table** | PM, because small work has no architect | `docs/tasks/`: one row per task with an id, one sentence of work, the exact files it owns, the test file it must write, and its **DoD section** | the docs home: `docs/tasks/` | No — read while the job runs |
 | bug | **A bug becomes a task row** — before any engineer starts | PM, never the engineer that will do the fix | one row: **what was reported** (who reported it, the command, the input, what happened, what was expected) and its **DoD section** (the failing case that must exist and pass, and the behaviour that must change) | the docs home: `docs/tasks/` | No — read while the job runs |
 | team | Step 5, **Confirm** | PM asks, user answers | the user's yes on the document, on the stack, and — big work — on the milestone list on its own | no file; the confirmed document is the record | No, and the document carries it |
-| team | Step 6, **Job folder** | PM | `state.json`: tasks, milestones, document versions, the CRD list, the merge result | `<repo>/.claude-crew/jobs/<job-slug>/state.json` — inside the repository, ignored through `info/exclude` | **No, on purpose.** It is progress, not a record: never staged, never committed, and the folder is dropped when the job ends. Being inside the repository buys the per-job path and the restart notice, not a record |
+| team | Step 6, **Job folder** | PM | `state.json`: tasks, milestones, document versions, the merge result | `<repo>/.claude-crew/jobs/<job-slug>/state.json` — inside the repository, ignored through `info/exclude` | **No, on purpose.** It is progress, not a record: never staged, never committed, and the folder is dropped when the job ends. Being inside the repository buys the per-job path and the restart notice, not a record |
 | team | Step 7, **Branch** | PM | the work branch `crew/<job-slug>` | git | The branch is deleted in step 17, **Merge and clean up**. Its commits stay on `main`, so the work survives |
 | big | Step 8, **Design** | `crew-architect` | the design, `docs/design/hld-<date>-<job-slug>.md`; `docs/tasks/` with a **DoD section on every row**; one contract per boundary; an ADR per open choice, with every option and why it lost | the docs home: `docs/design/`, `docs/design/api/<caller>-<callee>.md`, `docs/decisions/adr/` | No — read while the job runs |
 | big | Step 8, **Doc review before any code** — one round, like every other review | `crew-doc-reviewer` | findings, each blocking or optional — including "this row has no DoD section" | its report to the PM; the fix lands in the document | The report, no. The corrected documents, yes |
 | team | Step 9, **Run the tasks** | PM starts one `crew-engineer` per task | the code and its test file, both named in the task row, with the failing run shown before the passing one | the project's own source and test folders | Yes |
 | team | Step 9 or 10, **a question the files cannot answer** | engineer, QA or architect | `inbox/Q-<number>.md`: the cause, every way found, the files each one changes, its cost, and the way it recommends | `<job folder>/inbox/` | **No** — which is why the ADR below **quotes** it word for word and may never point at it |
-| team | Step 10a, **Code review** — once per milestone, at the end, in parallel with 10b and 10d, on the changed part only | `crew-code-reviewer` | findings with file and line, each blocking or optional | report to the PM; the fixes land in the code; the verdict becomes the `code` value of that task's **Verdicts** line, written at step 11, **Commit** | The report, no. The code, yes. The verdict, no — it is one value on the Verdicts line in the docs home's `docs/tasks/`, and nothing checks it. That line is the PM's report of what the reviewer said, not the reviewer's own signature: reviewers cannot write files (principle 12) |
+| team | Step 10a, **Code review** — once per milestone, at the end, after 10c and one after another with 10b and 10d, on the changed part only | `crew-code-reviewer` | findings with file and line, each blocking or optional | report to the PM; the fixes land in the code; the verdict becomes the `code` value of that task's **Verdicts** line, written at step 11, **Commit** | The report, no. The code, yes. The verdict, no — it is one value on the Verdicts line in the docs home's `docs/tasks/`, and nothing checks it. That line is the PM's report of what the reviewer said, not the reviewer's own signature: reviewers cannot write files (principle 12) |
 | team | Step 10b, **Security review** — same round, same milestone, when the change earns one | `crew-security-reviewer`, when the change earns one | findings, or the PM's stated reason it was skipped | report to the PM; the verdict becomes the `security` value of that task's **Verdicts** line, and a skip carries its reason there, on its own value; the skip reason also goes into step 12 **Milestone review** or step 18 **Finish** | The report, no. The verdict and its skip reason, no — one value on the Verdicts line in the docs home's `docs/tasks/`, and in the summary. Same limit as 10a: the PM writes the line |
 | team | Step 10c, **QA** — **once per milestone**, after all the coding and before the three reviews, in two steps | `crew-qa`, twice over: one agent writes the case list from the DoD sections without reading the code, then one agent per case | the case list; then one case file each, and the `run.sh` beside them; then the gap lines it reports to the PM | list in `<job folder>/<task-id>-plan.md`; cases in `qa/<task-id>/`, with any helper they share in `qa/lib/`; **`qa/run-all.sh` and `qa/gaps.md` are the PM's — QA reports those lines and never writes either file** | List, no — the cases say the same thing in a form that runs. Cases, yes. Gaps, yes, written by the PM |
 | team | Step 10, **two ways to fix — the PM decides** | PM; the user when they can see the difference | an ADR: the cause, **every** option with its cost and why it lost, the choice, who decided, and the reason | the docs home: `docs/decisions/adr/NNNN-<short-name>.md` | No — read while the job runs |
-| team | Any step, **a change to scope, a DoD item, the milestone list or a contract** | PM, whoever asked | a CRD — and the DoD items it adds are written into the task row or the milestone it changes, with a note in the CRD of where they went and how many | the docs home: `docs/decisions/crd/NNNN-<short-name>.md`, plus `docs/tasks/` or the opening document | No — read while the job runs |
-| team | Step 11, **Commit** | PM, the only one who uses git | the commit: the task's files, QA's cases, its `gaps.md` entries, any ADR or CRD — and the message, which carries this change's reasons and its real test numbers. **Plus that task's Verdicts line**: one bullet at the top of the task's section carrying all four values (`code`, `security`, `qa`, `doc`), a reason of its own on every `not run` and every `skipped`, and a task id on every `changes needed` | git history for the commit and its message; the docs home's `docs/tasks/` for the Verdicts line. Nothing checks that line any more — a user's request took `node tools/verify-tasks.mjs` out, because the task table moved outside the repository and a CI machine has no open job to read | The commit, yes. The Verdicts line, no — it is read while the job runs, and a missing value reddens nothing
-| big | Step 12, **Milestone review** | PM reports, user answers | what works now, how to try it, what is missing, the real test numbers, every CRD and every ADR of that milestone, one line each | the reply to the user; whatever the user decides becomes a CRD | The report, no. Its decisions, yes |
+| team | Any step, **a change to scope, a DoD item, the milestone list or a contract** | PM, whoever asked | the change itself — the DoD items it adds are written into the task row or the milestone it changes, and a **Corrections** line with its date sits beside the confirmed words in every document it moved | the documents it moves, in the docs home: `docs/tasks/`, the opening document, or a file under `docs/design/api/`. There is no change-request file | No — read while the job runs |
+| team | Step 11, **Commit** | PM, the only one who uses git | the commit: the task's files, QA's cases, its `gaps.md` entries, any ADR — and the message, which carries this change's reasons and its real test numbers. **Plus that task's Verdicts line**: one bullet at the top of the task's section carrying all four values (`code`, `security`, `qa`, `doc`), a reason of its own on every `not run` and every `skipped`, and a task id on every `changes needed` | git history for the commit and its message; the docs home's `docs/tasks/` for the Verdicts line. Nothing checks that line any more — a user's request took `node tools/verify-tasks.mjs` out, because the task table moved outside the repository and a CI machine has no open job to read | The commit, yes. The Verdicts line, no — it is read while the job runs, and a missing value reddens nothing
+| big | Step 12, **Milestone review** | PM reports, user answers | what works now, how to try it, what is missing, the real test numbers, every change request and every ADR of that milestone, one line each | the reply to the user; a change the user asks for there is a change request the PM makes | The report, no. Its decisions, yes |
 | big | Step 13, **Release and upgrade plans**, for a milestone that really ships | PM plus a `crew-researcher`, with a source and a date per claim | `<milestone>-release.md` and `<milestone>-upgrade.md`; or, when nothing ships, a **shipping gap list** naming what is still missing | the docs home: `docs/release/` — the two plans when the milestone ships; `docs/release/<milestone>-gaps.md` when it does not; the researcher's answer is in its report, and the PM writes what is durable into its own documents | No — the two plans and the shipping gap list are read while the job runs. The researcher's answer, no The shipping gap list is a file, not a paragraph in a message: the next milestone shortens that same file instead of copying it forward by hand |
 | team | Step 14, **README and the other reader-facing files** | PM | `README.md` in English, plus `README-<lang>.md` when the job's language is not English; a `CHANGELOG.md` entry when a user would notice the change; a `CLAUDE.md` edit when the repository's own rules or layout moved | the repository root | Yes |
 | team | Step 15, **Last doc review** — one round | `crew-doc-reviewer` | findings on every document this job produced or changed, the README included | report to the PM; fixes land in the documents | The report, no. The documents, yes |
@@ -1066,8 +1068,8 @@ holding **5** task folders with **67** cases between them plus `run-all.sh`,
   step 11, **Commit** — and no row said so. That is the shape the rule exists to
   catch, and it is a harder one to see than a missing file: the document was
   claimed, so nothing looked wrong. The larger counts changed nothing on their
-  own; more task sections, more CRDs and more QA cases are only more of what step 4,
-  the CRD row and step 10c already produce.
+  own; more task sections, more change requests and more QA cases are only more of
+  what step 4, the change-request row and step 10c already produce.
 - **Step side — every step that produces a document has a named home for it.**
   Clean. The two new files under `tools/` — `verify-tasks.mjs` and the shared
   `lib/boot-log.mjs` — are step 9's output, and step 9's home reads "the
@@ -1103,7 +1105,8 @@ researcher answers as report-only are steps no job here has run, and that is not
 
 **Why (ours): 75 acceptance checks were lost in an hour.** The closing migration
 step named five destinations — a rule to `principles.md`, a decision about how to
-an ADR, a decision about what to a CRD, this change's reasons and test numbers to
+an ADR, a decision about what to the document it moves, this change's reasons and
+test numbers to
 the commit message, a testability gap to `qa/gaps.md`. **A DoD item's own
 wording is none of those five.** It is not a rule, not a how-decision, not a
 scope decision, not a test number, not a gap. So when this crew's own job folder
@@ -1167,8 +1170,8 @@ one round of QA, and one round of each of the three reviews.
 
 The old lane existed because the full loop used to cost hours: three rounds of code
 review, two of security review, and a round of QA per task. Principles 6 and 18 now
-put QA and the three reviews **once** at the end of the milestone, in parallel, on
-the changed part only — so a typo's full loop is minutes. The lane was a workaround
+put QA and the three reviews **once** at the end of the milestone, one after
+another, on the changed part only — so a typo's full loop is minutes. The lane was a workaround
 for a cost that no longer exists, and it was buying that speed with the one thing
 this repository keeps losing: a change nobody else looked at.
 
@@ -1212,7 +1215,7 @@ together and no check notices. It came back in the other currency, in the option
 that was chosen to avoid it.
 
 **Where a line number is still allowed, and why only there.** Inside a record
-that is never rewritten: a CRD or an ADR. Those files are a snapshot of one
+that is never rewritten: an ADR. Those files are a snapshot of one
 decision at one moment on purpose, so a number that rots inside one rots
 honestly — a reader already knows to read it as of its date, and editing it
 afterwards would be the larger mistake. Everywhere a document is alive and gets
@@ -1254,175 +1257,6 @@ with its own corrections at the end),
 [`0011-verdicts-gate-in-npm-test`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0011-verdicts-gate-in-npm-test.md) (the change request that
 put the gate on the Verdicts line, and killed the `pre-push` hook first),
 `tools/verify-tasks.mjs` (the gate itself — a user's request took it out, so the file is gone and the hole it was written for is open again), `CLAUDE.md` (**State and documents**), both READMEs.
-
----
-
-## 21. On a paired task, the unit tests and the code come from two engineers who never meet
-
-**Rule.** A task may be run in the **paired shape**. `crew-test-engineer` writes
-only the unit test files; `crew-code-engineer` writes only the product code. Each
-works in its own git worktree, and each reads the same two documents and nothing
-else: the task's DoD section, and the ADR in which the architect pinned the
-interface between the two halves. They never talk to each other — the crew is
-flat (principle 1), and a sibling is not a child, so `SendMessage` cannot reach
-across even if a role holds the tool. The code engineer runs lint, type checks,
-the compiler and the project's test command while it works, but no unit test for
-the behaviour it is building, because it does not have one. **The PM merges the
-two halves and runs the project's test command itself, exactly once, and reports
-what came out.** Where the halves disagree, the disagreement is the product: each
-side re-checks its own half once, and what is left goes to the PM, and if the PM
-cannot settle it, to the user. The engineer that wrote the unit tests may never
-weaken an assertion to make a disagreement go away; only the PM may approve a
-change to it, and that change has to be traceable to the words of the DoD
-section.
-
-The solo shape of principle 6 is unchanged and stays the default. Which tasks are
-paired is written in the task row in `docs/tasks/`, proposed by the
-architect when it writes that table. Who confirms it depends on which road the
-job is on, and a paired task only ever exists on one of them. On small work the
-PM writes that table itself and the user stamps it with the rest of the opening
-document — but small work has no paired shape at all. On big work, the only
-road where a paired task can exist, the architect writes the table after the
-user has
-already confirmed the opening document, so the PM confirms the shapes and the
-user meets them at the milestone review
-([`0021-who-stamps-the-shape-on-big-work`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0021-who-stamps-the-shape-on-big-work.md)).
-
-**Why (ours).** Principle 6 buys a unit test that was red first, but in the solo
-shape that unit test is written by the agent that is about to write the code, so
-it can be bent towards the code that agent already meant to write. The paired
-shape takes that possibility away by construction: the one who writes the check
-is deliberately not the one who writes the code. The second thing it buys is
-cheaper and larger — **two independent readings of the same document**. Where the
-document allowed two readings, the two halves do not fit, and the crew finds out
-at the merge instead of finding out in production. The disagreement is not a
-mishap to be smoothed over; it is the only cheap signal the crew has that a
-document it already agreed on is not clear.
-
-**It is not pair programming.** Ping-pong pair programming works by talking
-continuously and checking continuously, and its goal is for two people to
-**converge** on one shared understanding. This shape removes the talking
-completely, and wants the opposite: the two readings must not converge, because
-the place where they differ is the whole point. So it is not pair programming
-with the chat switched off — it is a different thing, **independent
-verification**, which comes from safety-critical engineering and not from XP. Do
-not call it pair programming in any document here. Call it the paired shape.
-
-**The three roles that write something which checks the product.** They are easy
-to confuse now that there are three of them, and one of the names invites the
-confusion: `crew-test-engineer` is a programmer, not a tester.
-
-| | `crew-test-engineer` | `crew-code-engineer` | `crew-qa` |
-| --- | --- | --- | --- |
-| Who it is | a **programmer** | a programmer | **QA** |
-| What it writes | **unit tests** | product code | **QA cases**, acceptance and black box |
-| Granularity | **one behaviour per unit test** | — | **one DoD item per case**, checked the way the user would see it |
-| When | **before** the code exists | — | **after** the code is finished |
-| Home | **the project's own test suite**; a file this task owns, committed with the code | product code files | **`qa/<task-id>/`, nowhere else** |
-| Can it see the code | No — its own worktree, where the code does not exist yet | — | Writes its plan first, then reads the code |
-| Scope | **this task only** | this task only | this task, **plus every earlier task's cases run again** |
-
-**Four differences, and not one of them is optional**: granularity (one unit
-behaviour against one acceptance item), timing (before the code against after
-it), home (the project's own test suite against `qa/`), and scope (this task
-against every task's cases run again as a regression). This same table also has
-to stand in both READMEs, because a reader meets these three names there before
-they ever meet this file.
-
-**Two boundaries this shape does not cross.**
-
-- **It exists only in a job that has an architect.** Small work — where the PM
-  writes the task rows itself and starts no architect — has no paired shape at
-  all. The reason is not taste. Before either engineer can write a line, both
-  have to decide the same five things: the import path, the exported name, the
-  signature, the shape of the return value, and what happens on an error. They
-  cannot see each other, so any one of those five landing differently makes the
-  merged run red — a name clash, not a disagreement — and the rate of that is
-  near enough to certain that the signal of principle 21 would drown in it
-  forever. The architect settles those five in an ADR and each side reads its own
-  half; only the architect may change that ADR, and an engineer that thinks it is
-  wrong reports to the PM instead of editing it. So this shape rides on a design
-  step that already exists, and where there is no architect there is no paired
-  shape.
-- **While the two halves are written, the independence is real isolation, not
-  good faith.** Two git worktrees, made by the PM with plain `git worktree add`:
-  the unit test file does not exist in the code engineer's tree, so it is not
-  "should not read it", it is "cannot read it". That distinction is worth the
-  cost, because reading a file leaves no trace — a rule alone would have been a
-  seatbelt, the same shape as `host/git-guard.js`, which reads command text and
-  can be walked around. Say the limit as precisely as the lock: **the lock holds
-  until the merge, and it ends there.** When the merged run is red, the code
-  engineer is called back into the merged tree and can see the unit tests. That
-  is deliberate and written down rather than hidden: its independent reading is
-  already on disk and already recorded as evidence, so blindfolding it during the
-  fix would only make the fix harder and would buy no new signal.
-
-**What a green first meeting proves, and what it does not.** When the merged run
-comes out all green, it says exactly one thing: **the two readings matched**. It
-does **not** say the document was clear, and a report may never claim that. There
-are two kinds of ambiguity in a document. One kind makes two readers disagree —
-this shape catches that kind, and that is what it is for. The other kind makes
-two readers make the *same* wrong assumption, and against that kind this shape is
-completely blind: the halves fit, everything is green, and nothing is reported.
-The evidence below says the second kind is common, and that it clusters exactly
-where a specification is weakest — which is to say, it arrives wearing the
-costume of the best possible result. Two consequences follow, and both are rules,
-not opinions. First, this is not the last net: `crew-qa` (afterwards, writing its
-own cases from the document before it reads the code) and the code reviewer stay
-exactly as they were. QA's reading is the only one in the crew that is
-**structurally independent** — it is taken from the document before QA has read a
-line of the code. The code reviewer can catch a shared misreading too, and item 6
-of its own list asks it to check the change against every item of the DoD
-section; but it reads the code first, so its reading is no longer independent. Second, giving the
-two sides different models does not fix it — see the rejected ideas below.
-
-**And the ceiling.** Everything this shape can buy is capped by the quality of
-that one DoD section, and **that DoD section has no second pair of eyes.** That is
-the deepest limit of the design, written here rather than left to be discovered.
-
-**Lives in** `agents/crew-test-engineer.md`, `agents/crew-code-engineer.md`,
-`agents/crew-engineer.md` (which says at the top that it is the solo road),
-`skills/team-lane/SKILL.md` (the shape decision, the two worktrees, the merge, the one run, the
-clean-up), `agents/crew-architect.md` (marking the shape in the task table, and the
-interface ADR), `agents/crew-code-reviewer.md` (the evidence it must be handed, and the
-reversal above), `host/roles.js` and `preset/crew/agent.cordis.yml` (the two role
-tools have to exist), `docs/tasks/` (the shape column, and the two file
-lists that may not overlap),
-[`0012-paired-engineers`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0012-paired-engineers.md) (the shape, and its own record of
-what it does not prove),
-[`0013-two-worktrees-per-task`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0013-two-worktrees-per-task.md) (the isolation),
-[`0014-pair-mode-needs-an-architect`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0014-pair-mode-needs-an-architect.md) (the boundary and the
-interface ADR), `CLAUDE.md`, both READMEs. The rule that a unit test comes first
-at all is principle 6; where that file lives afterwards is principle 13; and the
-four names this principle keeps apart — a unit test, a QA case, the project's
-test command, a contract test — are defined in **Words we use**, the unnumbered
-section just below.
-
-**Source.**
-
-- Cockburn & Williams, *The Costs and Benefits of Pair Programming* (the Utah
-  experiment, **1999**; published **2001**) — pairing cost about 15% more effort
-  and produced about 15% fewer defects, and the paired code passed 90% of the
-  acceptance suite against 75% for solo work. Read the cost figure carefully:
-  those 15% are two people sharing one piece of work, while this shape is two
-  people each doing a whole piece.
-- Knight & Leveson, *An Experimental Evaluation of the Assumption of Independence
-  in Multiversion Programming* (**1986**) — one specification, two universities,
-  27 independently written versions, a million cases. Independently written
-  programs do not fail independently: about half the faults were shared by
-  several versions.
-- *N-Version Programming with Coding Agents* (arXiv, **2026-06**) — 5 harnesses
-  including Claude Code, 23 models, 48 implementations, a million cases.
-  Simultaneous failures: **429** observed against **115** predicted by an
-  independence model, 3.7 times as many, p about 1.8×10⁻¹⁸⁷. Changing the model
-  or the harness does not remove perfectly correlated failure: 87 of 907
-  cross-agent pairs failed identically (φ=1), and 52 pairs did so inside one
-  agent. The failures cluster where the specification is weak. This is the one
-  source that explains why a green merge is not evidence of a clear document.
-- Pair programming as one of the original twelve practices of Extreme Programming
-  (Kent Beck, *Extreme Programming Explained*, **1999**) — cited for the contrast
-  above, not as the origin of this shape.
-  [Pair programming](https://en.wikipedia.org/wiki/Pair_programming)
 
 ---
 
@@ -1666,17 +1500,17 @@ the sixth kind of question, given permission.
 
 ## Words we use
 
-Three roles now write something that checks the product, so the word "test" on
+Two roles now write something that checks the product, so the word "test" on
 its own can mean three different things. These four names are what the crew uses
 instead. They were counted out of the repository's own wording, not invented
 here.
 
 | Word | What it means | Who writes it | Where it lives |
 | --- | --- | --- | --- |
-| **unit test** | One behaviour per test, written before the code that satisfies it exists | `crew-engineer` in the solo shape, `crew-test-engineer` in the paired shape | The project's own test suite; a file the task owns, committed with the code |
+| **unit test** | One behaviour per test, written before the code that satisfies it exists | `crew-engineer` | The project's own test suite; a file the task owns, committed with the code |
 | **case** (a QA case) | Acceptance, black box: one DoD item checked the way the user would see it, after the code is finished | `crew-qa` | **Only** `qa/<task-id>/`, with a `run.sh` per task |
 | **the project's test command** | In dsh-crew `npm test`: it runs both of the above and every other check together | — | `package.json`, `scripts.test` |
-| **contract test** | One on each side of a module boundary, proving that side matches the boundary contract (principle 3) | `crew-engineer`, or the engineers of a paired task | The project's own test suite (this repository has no module boundary today, so it has none) |
+| **contract test** | One on each side of a module boundary, proving that side matches the boundary contract (principle 3) | `crew-engineer` | The project's own test suite (this repository has no module boundary today, so it has none) |
 
 **The rule.** If a sentence could mean two of these, the precise noun has to be
 used. Bare "test" is allowed only where it deliberately means *any* of them —
@@ -1690,13 +1524,13 @@ against **case** — two different nouns that cannot be confused. Use them.
 **This section is not a principle, and it has no number on purpose.** A number in
 this file is a promise: a rule, a reason, the files that carry it, and an outside
 source where one was borrowed. This is a set of definitions with no outside
-source, and it serves several principles at once — 6 (the unit test comes first),
-13 (every test lands on disk), 21 (the paired shape) — as well as `agents/crew-qa.md`.
+source, and it serves several principles at once — 6 (the unit test comes first) and
+13 (every test lands on disk) — as well as `agents/crew-qa.md`.
 Locking it inside any one of them would put the wrong scope on it. Principle 6
-and principle 21 each point here instead.
+points here instead.
 
 **How far the clean-up went.** The precise nouns were applied to principle 6,
-principle 21 and this section, and to the files this job was already changing.
+this section, and to the files this job was already changing.
 The rest of this file, and most of the repository, still says "test" where it is
 not ambiguous — with one engineer, "test first" was never unclear. The ambiguity
 arrived with the new roles, so the clean-up follows the new roles rather than
@@ -1708,10 +1542,8 @@ pretending the repository is uniform.
 
 ## Wording every role prompt copies word for word
 
-Three blocks live below. They are the **authoritative wording**, and every one of the ten role
-prompts carries them **word for word**: `skills/team-lane/SKILL.md`, `agents/crew-architect.md`, `agents/crew-engineer.md`,
-`agents/crew-test-engineer.md`, `agents/crew-code-engineer.md`, `agents/crew-qa.md`, `agents/crew-code-reviewer.md`,
-`agents/crew-security-reviewer.md`, `agents/crew-doc-reviewer.md` and `agents/crew-researcher.md`.
+Three blocks live below. They are the **authoritative wording**, and the PM carries them in
+`skills/team-lane/SKILL.md`; the role prompts no longer carry them.
 
 **Copy, do not paraphrase.** A rule that ten files each state in their own words is ten rules, and
 nobody can tell which one is the real one. Nine of those files are written by nine engineers who
@@ -1790,9 +1622,9 @@ because the PM is the one who writes those documents: once the user has confirme
 document, no word of its scope, its checks, its milestone list or its stack section changes without
 the user — **and a correction is not an exception.** A check that is impossible, or contradicts
 another check, or asks for something the job has since decided against, is a finding, not a licence.
-The shape this repository uses is **append, never overwrite**: the confirmed words stay, a CRD
-records the correction, the correction is written beside them with its date, the work does not stop,
-and a fixed heading in that document lists every one of them so the user can read them at a glance.
+The shape this repository uses is **append, never overwrite**: the confirmed words stay, the
+correction is written beside them with its date, the work does not stop, and a fixed heading in
+that document lists every one of them so the user can read them at a glance.
 A standard you may quietly correct is not a standard; a standard whose corrections are all visible
 still is.
 
@@ -1839,8 +1671,8 @@ the copy.
 | The task table's rows, and the DoD section on each row | the architect; the PM on small work, and the PM for a bug's row |
 | The **Verdicts** line on a task row | the PM, always, whoever wrote the rest of the row |
 | A decision about how (an ADR) | the architect; the PM on small work and for a bug's ADR |
-| A change request (a CRD) | the PM, whoever asked for the change |
-| An interface contract, and the interface ADR of a paired task | the architect **only** — no engineer edits one, on either side |
+| A change to scope, a DoD item, the stack or the milestone list | the PM, whoever asked for the change |
+| An interface contract | the architect **only** — no engineer edits one |
 | QA's cases and the `run.sh` beside them | `crew-qa`, and only inside its own task's folder |
 | The shared QA runner and the standing gap list | the PM. QA reports the lines to add and never writes either file: two QA roles running side by side would both write them, the second write would win, and a runner that lost one task's cases still prints a green total |
 | Product code and its unit tests | the engineer that owns that task |
@@ -1897,8 +1729,8 @@ sides can both live with: **the milestone's DoD says what done means, the task r
 checked.** Neither is a second copy of the other.
 
 **Also ours, and not from any source**: version history does not live in the PRD. It is already in
-each CRD's **Applied** line and in the git history, so a copy inside the PRD is duplicated data that
-a reader must walk past to reach the problem statement. What the PRD keeps is one line: its current
+the versions in `state.json` and in the git history, so a copy inside the PRD is duplicated data
+that a reader must walk past to reach the problem statement. What the PRD keeps is one line: its current
 version and date. What it must also carry is the fixed **corrections** heading Rule B's PM half
 describes.
 
@@ -1944,7 +1776,7 @@ for the decision, which is why the options section **quotes** the engineer's que
 word instead of summarising it. And one option marked as the recommendation, because the work does
 not stop and wait for the user to confirm an ADR.
 
-### CRD, a change request
+### Change request, and where it lands
 
 Two sources, one from each side of the practice, and they agree on four fields. The PMBOK Guide's
 change-control process is the project-management side; ITIL 4's change enablement practice
@@ -1955,11 +1787,12 @@ PMBOK classifies a change as corrective, preventive or defect repair. The quotat
 configuration-management standard that would have been a third source, refused the fetch and is
 recorded there as unreachable rather than paraphrased.
 
-Ours adds who asked, what it touches by document and task id, the cost in work that would be built
-again, the decision with who made it, **how many DoD items it added and to which task or
-milestone**, and the **Applied** line naming the documents changed and their new versions. A CRD is
-never deleted, and a rejected one stays, so that what was asked for and refused is still readable
-later.
+Ours keeps those fields, and writes them into the document the change moves rather than into a
+file of its own: who asked, what it touches by document and task id, the cost in work that would be
+built again, and the decision with who made it. The DoD items a change adds go into the task row or
+the milestone they belong to. A **Corrections** line with its date sits beside the confirmed words in
+every document that moved, and the PM names the change at the next milestone review. There is no
+change-request file, so nothing can hold a new DoD item by mistake — the one defect that shape had.
 
 ### An interface contract
 
@@ -1977,7 +1810,7 @@ pins paths, operations, schemas and security; a consumer-driven contract pins co
 request/response examples for the parts the caller actually uses. All of them include the behaviour
 on an error, which is the part most often left out.
 
-The five things principle 21 makes an architect pin for a paired task — import path, exported name,
+The five things an architect pins for a call inside one package — import path, exported name,
 signature, shape of the return value, behaviour on an error — are that list minus three: acceptable
 values and the meaning of each, input ranges, and the protocol. For an in-process call inside one
 package the protocol is not in question; the other two are a real gap and are named here rather
@@ -2064,7 +1897,7 @@ One thing the Scrum Guide gives that holds here unchanged: an item that does not
 | QA writing its cases straight into the project's test folder | One test command for everything, and CI would run the QA cases too. Rejected: QA would then own files inside the product, which breaks the rule that one task owns its files, and makes an engineer's and a reviewer's job harder to tell apart. `qa/` plus `run-all.sh` buys the same protection without moving that line. |
 | QA cases as plain shell scripts, one exit code each | Portable and needs no framework. Rejected: a shell can only test what a shell can reach, so a library's return value or a browser app has to be squeezed through a command, and the assertions end up weaker than the ones the project already has. The project's own framework is used instead, with the runner-cannot-see-the-folder problem handled by asking the PM. |
 | A CRD for every request, question and review finding | A complete audit trail, and nothing lost. Rejected: most of those are answered from the files in one turn, and the PM would spend the job writing records instead of deciding. Scope and contract changes are the ones that cost real work, so those are the ones that get a file. |
-| The PM deciding scope changes on its own, and telling the user later | Faster, and the CRD folder would still hold the history. Rejected: it defeats the milestone stop (principle 5). The whole reason milestones exist is that the user judges direction while changing it is cheap. |
+| The PM deciding scope changes on its own, and telling the user later | Faster, and the CRD folder would still hold the history. Rejected: it defeats the milestone stop (principle 5). The whole reason milestones exist is that the user judges direction while changing it is cheap. **This port adopted it on 2026-10-25, at the user's own words: the user's turn is at the start of the job and at the milestone review, and the PM decides the rest.** The milestone stop still reports every change; what it no longer waits for is a yes. What still needs a yes is what leaves the machine — a push, a tag, a publish, a merge, a branch delete. |
 | The architect chooses the stack | It is the most technical decision in the job, so this looked right. Rejected: small work has no architect, the design already depends on the stack, and the user has to approve it — and only the PM talks to the user. The architect designs inside the stack instead, and must say so if the stack cannot carry the design. |
 | Each engineer picks its own libraries in a new repository | This is what the old principle 8 implied. Rejected once the crew met an empty repository: roles cannot talk, so two engineers pick two languages and two test frameworks and nobody notices until the halves are joined. QA's cases would split the same way. |
 | The researcher recommends a stack | It has the sources in front of it. Rejected: a researcher that recommends is deciding, and its findings are then read as a verdict nobody approved. It lists candidates and costs; the PM decides and the user confirms. |
@@ -2084,12 +1917,12 @@ One thing the Scrum Guide gives that holds here unchanged: an item that does not
 | A global, numbered list of acceptance checks | It reads well in a review and gives every check a short name. Rejected on this crew's own evidence: three of its 75 checks failed *as checks* because they sat far from the work they governed (11 contradicted 48-52, 67 was too literal, 70 pointed at a renamed folder), and four CRDs still point at numbers no document defines. A check now lives in the DoD section of its task or milestone and is named that way. |
 | A git `pre-push` hook that refuses a push when a review gate was skipped | The user's first idea for an unskippable gate, and it went to review before it was built. Rejected on two grounds the PM re-checked, both of which hold. One: **`pre-push` cannot see the commits a tag push carries**, and a `v*` tag is this repository's one irreversible action — it triggers `.github/workflows/publish.yml` and publishes to npm — so the hook missed the only push that matters. Two: **a hook does not travel with the repository**; `git clone` does not bring `.git/hooks/`, and `--no-verify` walks past it. (The same review corrected the PM on a detail: `git push -n` is `--dry-run`, not `--no-verify`.) What replaced it is a check inside `npm test`, `node tools/verify-tasks.mjs`: push CI runs it and the publish workflow runs it again before it publishes, which covers exactly the push the hook could not see, and it travels with the repository. The hook never landed, so nothing was undone. [`CRD 0011`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0011-verdicts-gate-in-npm-test.md). |
 | Every ADR stops and waits for the user to pick | Rejected: one design often holds several ADRs, so the job would stop once per ADR and the user would be interrupted with choices about the inside of the code. The architect marks a recommendation and the design keeps moving; the user sees every option at the milestone review and may overturn one. Options the user can see are still asked on the spot. |
-| Letting the two engineers of a paired task talk to each other | The user asked for this first and then rejected it himself. Pair programming works by **converging** on one understanding; the paired shape works by not converging, and a design cannot have both. Two agents that may talk will negotiate, the more assertive side wins, one understanding comes out — and the PM never learns that the document allowed two readings, because the signal was settled in private. Worse, the case that matters most ("both are right, the document really does permit both") can only be handled by the PM: no engineer may touch a task row. One side benefit is worth naming. Once the channel was gone, the rule "write the disagreement down before you discuss it" became unnecessary — **a rule that stops being needed because a feature was cut is usually a sign the cut was right.** |
+| Letting the two engineers of a paired task talk to each other | The user asked for this first and then rejected it himself. Pair programming works by **converging** on one understanding; what upstream built works by not converging, and a design cannot have both. Two agents that may talk will negotiate, the more assertive side wins, one understanding comes out — and the PM never learns that the document allowed two readings, because the signal was settled in private. Worse, the case that matters most ("both are right, the document really does permit both") can only be handled by the PM: no engineer may touch a task row. One side benefit is worth naming. Once the channel was gone, the rule "write the disagreement down before you discuss it" became unnecessary — **a rule that stops being needed because a feature was cut is usually a sign the cut was right.** |
 | Two engineers writing the unit tests and a third writing the code | The PM's idea; the user chose unit tests against code instead. It is kept here because it names a real weakness of what was built. **Unit test against unit test is a pure signal** — the same kind of output on both sides, directly comparable, so a difference can only come from a different reading. A red merge in the shape we built mixes three causes that look identical: an ambiguous document (the signal), a typo in an assertion, and an ordinary bug in the code. That is why each side re-checks its own half once before anything is reported; that step exists only to strip the two kinds of noise, and it is the busiest step in the loop. |
 | Having each engineer write a prose summary of its understanding, and comparing the two | Much cheaper, and it measures nothing. **Prose can be vague**, so both sides can walk around the very same ambiguity using the very same vague words and come out looking as if they agree. An assertion cannot be vague: nobody writes one without first deciding the value, the error and the edge. |
-| Two independent worktrees, for real isolation | **Rejected, then adopted — [`CRD 0013`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0013-two-worktrees-per-task.md) corrected this row, and it is the one row here that no longer holds.** It was rejected as a *platform feature*: the crew has no notion of a worktree anywhere in `host/`, and a role only has tool-level allow and deny lists, so building one would be platform work. That part still stands. The conclusion was wrong: the PM needs no platform feature, because the PM is the only role that touches git anyway, so plain `git worktree add` gives two real directories today. It is now how the paired shape works (principle 21), and it closed the one hole the shape had been shipped with. |
+| Two independent worktrees, for real isolation | **Rejected, then adopted — [`CRD 0013`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0013-two-worktrees-per-task.md) corrected this row, and it is the one row here that no longer holds.** It was rejected as a *platform feature*: the crew has no notion of a worktree anywhere in `host/`, and a role only has tool-level allow and deny lists, so building one would be platform work. That part still stands. The conclusion was wrong: the PM needs no platform feature, because the PM is the only role that touches git anyway, so plain `git worktree add` gives two real directories today. That is how upstream ran it, and it closed the one hole upstream's design had been shipped with. **This port deleted that shape on 2026-10-26, and the principle that held it went with it, so the present tense above is upstream's, not this repository's.** |
 | Requiring the code engineer to declare in its report "I did not read the unit test files" | Still unverifiable — it only turns a vague overstep into a definite lie, which is not an improvement in evidence. Overtaken as well: with two worktrees the unit test file is not in that engineer's tree while it writes, so there is nothing left to declare. |
-| Giving the two sides of a paired task different models through `roleModels` | The evidence says the gain is small: crossing an agent boundary does not remove perfectly correlated failure (principle 21's third source). And it backfires. Two sides of unequal strength produce a stream of **false disagreements**, the PM spends its attention judging noise, and the signal the shape exists to produce is buried under it. |
+| Giving the two sides of a paired task different models through `roleModels` | The evidence says the gain is small: crossing an agent boundary does not remove perfectly correlated failure. And it backfires. Two sides of unequal strength produce a stream of **false disagreements**, the PM spends its attention judging noise, and the signal that design was built to produce is buried under it. |
 | Committing `state.json`, so the job's progress survives as a record | It would make the move inside the repository buy something. Rejected: principle 20 says the job folder is **not** a record, and `state.json` is rewritten after every step — committing it puts a file that changes on every step into every diff, in front of every reviewer and every reader, and a progress file a reader cannot tell from an agreed one. What the user asked for was the **location**, not the history, so the folder stays ignored through `info/exclude` and is dropped when the job ends. [`CRD 0030`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0030-job-folder-moves-inside-the-repo.md) and [`ADR 0030`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/adr/0030-job-folder-inside-the-repo-and-ignored.md). |
 
 ---

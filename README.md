@@ -1,6 +1,6 @@
 # claude-crew
 
-> **Version 0.7.0.**
+> **Version 0.6.0.**
 
 claude-crew is a plugin for [Claude Code](https://claude.com/claude-code). When
 the work is bigger than one small change, your session becomes the **product

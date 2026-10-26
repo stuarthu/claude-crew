@@ -1,6 +1,6 @@
 # claude-crew
 
-> **0.7.0 版本。**
+> **0.6.0 版本。**
 
 claude-crew 是 [Claude Code](https://claude.com/claude-code) 的一个插件。当工作比一处
 小改动更大时，你的会话会变成**产品经理（PM）**，由 PM 带着一个小团队来做这份工作，团队

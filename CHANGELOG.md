@@ -2,6 +2,29 @@
 
 Newest first. Each entry says what a user would notice.
 
+## 0.7.0
+
+Three changes, and no new behaviour.
+
+- **One README, in English.** The Chinese README is gone. Install and use stay
+  exactly the same. A second language README is still allowed in the projects the
+  crew runs, and the check that compares it with the English one is still there —
+  only this plugin's own second README was dropped.
+- **The standing documents stop describing this plugin as a copy of another
+  project.** The README, `CLAUDE.md`, `principles.md` and the role prompts now
+  describe a plugin in its own right, and `CLAUDE.md` no longer names another
+  project's folder as a place to stay out of. The published release pages keep
+  their old words, because a published page is a record of what was true when
+  it shipped.
+- **One stale rule in the doc reviewer is gone.** It used to read a folder of
+  change-request files that this plugin no longer writes. That entry is out of
+  its prompt. The rule now sits in one place: a change to scope, a DoD item, the
+  milestone list, the stack or a boundary contract is the PM's own call. The PM
+  writes it into the document it moves, with a **Corrections** line and its date,
+  and names it at the milestone review. Nothing stops and waits for a yes. What
+  still needs a yes is only what leaves your machine: a push, a tag, a publish,
+  a merge, a branch delete.
+
 ## 0.6.0
 
 This release has two halves, and both ship in one page. `0.6.0` was never tagged

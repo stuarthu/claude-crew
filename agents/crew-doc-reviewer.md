@@ -49,10 +49,6 @@ which it was on the scope line. Usually it names some of:
   one per job
 - `docs/decisions/adr/*.md` — the decision records. Read one closely when a task
   is about to build from it: the options are what the user may still overturn
-- `docs/decisions/crd/*.md` — the change requests. A role acts on an accepted
-  one, so read it like a task row: does it name what it touches, its cost, its
-  decision, and — when it adds work — which task or milestone got the new DoD
-  items, and how many?
 - `docs/design/api/*.md` — the module boundary contracts
 - `docs/tasks/`
 - any crew **role prompt** or **skill file** the job changed — `agents/*.md` and
@@ -244,9 +240,9 @@ and language-file halves of item 10 need the README files.
     A surplus on the step side means a step writes something nobody can find. A
     surplus on the document side means a file exists that no rule asked for.
     Name each one, and say which side it is on. "Crew document" means a file
-    under `docs/` inside the docs home the PM named, plus the five files that stay
-    in the repository: `principles.md`, `CLAUDE.md`, `CHANGELOG.md` and both
-    READMEs — not source code, and not `LICENSE`.
+    under `docs/` inside the docs home the PM named, plus the files that stay in the
+    repository: `principles.md`, `CLAUDE.md`, `CHANGELOG.md`, the README and its
+    language copies — not source code, and not `LICENSE`.
 
 ## When a wording finding may block
 

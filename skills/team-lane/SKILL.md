@@ -341,12 +341,11 @@ be wrong by the next job:
   the lines and you write them: two QA roles running side by side would both write those
   two files, the second write would win, and a runner that lost one task's cases still
   prints a green total;
-- the **project's own rules file**, the file holding this crew's principles, and any map
-  they keep to an upstream project. A role editing those is changing the rules it is
+- the **project's own rules file** and the file holding this crew's principles. A role editing those is changing the rules it is
   working under, which no task row can authorise;
 - on small work, which has no architect: the **task rows** and their DoD sections, the
   **design**, and the **ADRs**;
-- what the **reader-facing files** say — the two READMEs and the changelog. An engineer
+- what the **reader-facing files** say — the README, its language copies, and the changelog. An engineer
   may write them under a task row with its own DoD section: they judge nobody and they
   are not the project's rules, so they are ordinary job output;
 - the job's **state file**, in the job folder — that folder sits **inside** the
@@ -373,8 +372,8 @@ thing to fix. The same table, short:
 | QA's cases and the `run.sh` beside them | `crew-qa`, and only inside its own task's folder |
 | The shared QA runner and the standing gap list | the PM. QA reports the lines to add and never writes either file |
 | Product code and its unit tests | the engineer that owns that task |
-| The reader-facing files: the two READMEs and `CHANGELOG.md` | the PM decides what they say; an engineer may write them under a task row with its own DoD section |
-| The project's own rules file, the crew's principles file, and any map they keep to an upstream project | the PM, and nobody else |
+| The reader-facing files: the README, its language copies, and `CHANGELOG.md` | the PM decides what they say; an engineer may write them under a task row with its own DoD section |
+| The project's own rules file and the crew's principles file | the PM, and nobody else |
 
 **Never put one of the judging documents in a role's file list.** The opening document, a
 task row's DoD items, the milestone list: a role handed one of those is the party being

@@ -5,14 +5,13 @@
 > 1. **A generic `docs/...` path in this file means your own repository.** `docs/tasks/`,
 >    `qa/gaps.md`, `docs/decisions/adr/` and the rest: this crew really does write into those,
 >    in **any** repository. They are **destinations**, not pointers.
-> 2. **A numbered file is in this package's own repository, and it is written as a link**
->    (for example `crd/0012-paired-engineers`). Those are **provenance**: why a rule exists and
->    how many times it went red. You do not need to read them to follow the rules; open one when
->    you want the evidence.
-> 3. **Renaming breaks those links, and no check will notice.** So the CRDs and ADRs under
->    `docs/decisions/` are named by number and are not renamed. The links point at `main` rather
->    than at a commit because those files are historical snapshots and never change (a rejected
->    CRD stays too), so pinning a commit would only ever show you a stale copy.
+> 2. **A numbered file written as a full link is a decision record kept outside this repository,**
+>    and it is **provenance**: why a rule exists and how many times it went red. You do not need to
+>    read it to follow the rule; open it when you want the evidence.
+> 3. **Renaming breaks those links, and no check will notice.** So the decision records those links
+>    point at are named by number and are never renamed. The links point at `main` rather than at a
+>    commit because those files are historical snapshots and never change (a rejected record stays
+>    too), so pinning a commit would only ever show you a stale copy.
 >
 > These three were added on 2026-08-22, the day this file stopped being contributors-only and
 > became something the package ships.
@@ -53,7 +52,7 @@ ones a newcomer is most likely to delete.
 **Rule.** Only the PM starts agents. A role talks to the PM and to nobody else.
 Two roles can never talk to each other.
 
-**Why.** dsh delivers a message to direct children only, so a grandchild would be
+**Why.** A role reports back to the PM that started it and to nobody else, so a grandchild would be
 out of the PM's reach forever. But the deeper reason is worth keeping in mind:
 a system ends up shaped like the communication of the people who build it. Our
 builders cannot communicate at all. So anything two of them must agree on has to
@@ -429,7 +428,7 @@ edits project config, and never moves its files to dodge the problem.
 
 **And that line goes in the project's default test command.** A suite that runs
 only when somebody remembers a second command rots, and that is a matter of time,
-not of will. In dsh-crew the line is `bash qa/run-all.sh` at the end
+not of will. In a node project the line is `bash qa/run-all.sh` at the end
 of `npm test`, and `npm test` runs in CI on every push
 (`.github/workflows/test.yml`); publishing stays on a `v*` tag and runs the same
 checks again before it publishes, so a release never trusts an earlier push's
@@ -899,17 +898,17 @@ decision to exist.
 **Why not by the size of the job.** That was the first alternative, and it repeats
 the same mistake one step along: a year later, finding a decision would mean first
 knowing whether that job was big or small. It also collides with the shapes of the
-two file types. A CRD is built around changing something already agreed — who
+two kinds of record. A change request was built around changing something already agreed — who
 asked, the scope, the cost, whether the user must say yes — and "there are two ways
 to write this fix" has none of that: nobody asked, and nothing the user sees
 changes. The proof is this crew's own job. It was **sized as small work** at the
-start, and it has since written more CRDs than that label allows for — most of
+start, and it has since written more change requests than that label allows for — most of
 them a real change to something already agreed. The label stopped being true long
-before the job ended, and the CRDs, the QA cases and the task sections have all
+before the job ended, and the change requests, the QA cases and the task sections have all
 kept growing since. No current count is written down here on purpose: one was,
 and it went stale inside the same job that wrote it. That is the point: nothing about the size of a job decides where a record
-goes. Had small work's CRD folder been taken over by design decisions, two
-completely different kinds of file would be lying in one folder.
+goes. Had that job's change-request folder been taken over by design decisions, two
+completely different kinds of file would have been lying in one folder.
 
 **Why the record outlives the negotiation.** `state.json` is job progress wearing
 a document's clothes. It now sits **inside** the repository, at `.claude-crew/jobs`,
@@ -1009,7 +1008,7 @@ repeating a row that all three share.
 | team | Step 15, **Last doc review** — one round | `crew-doc-reviewer` | findings on every document this job produced or changed, the README included | report to the PM; fixes land in the documents | The report, no. The documents, yes |
 | team | Step 16, **Push and CI** | PM, with the user's yes every single time | the pushed commits, and `merge.publishCheck` — the CI files that were read and whether this push would publish | the remote; `state.json` | The commits, yes. `publishCheck`, no, and it is re-read after a restart |
 | team | Step 17, **Merge and clean up** | PM, three separate yeses | the merge commit on `main`, never squashed, so every task's commit and its test-first proof stay readable; then the deleted branch | git history | Yes |
-| team | Step 18, **Finish**, and the migration inside it | PM | every DoD section re-read and confirmed item by item, the real numbers from both test commands, the closing summary — and then the durable half moved out of everything about to be dropped, to **seven** destinations | a rule to `principles.md`; a decision about how to `docs/decisions/adr/`; a decision about what, the scope or a contract to `docs/decisions/crd/`; the reasons and the test numbers to the commit message; what no case can check to `qa/gaps.md`; **a DoD item's own wording to `docs/tasks/`**; **which files a task owns to `docs/tasks/`** | Everything it moves, yes. The job folder goes, and a test run's output was never a file at all |
+| team | Step 18, **Finish**, and the migration inside it | PM | every DoD section re-read and confirmed item by item, the real numbers from both test commands, the closing summary — and then the durable half moved out of everything about to be dropped, to **seven** destinations | a rule to `principles.md`; a decision about how to `docs/decisions/adr/`; a decision about what, the scope or a contract to the document it moves; the reasons and the test numbers to the commit message; what no case can check to `qa/gaps.md`; **a DoD item's own wording to `docs/tasks/`**; **which files a task owns to `docs/tasks/`** | Everything it moves, yes. The job folder goes, and a test run's output was never a file at all |
 
 **The matching rule, and it is meant to be checked.** Every step that produces a
 document appears in that table, and every crew document named in a briefing has a
@@ -1341,7 +1340,7 @@ The third guards the section that leaks the most:
 > did not do, where crossing it only means a little more work, **does not go in the list**.
 > Put it there and it becomes a boundary the user has to overturn to get what they want.
 
-**Why (ours).** Four pieces of evidence, all of them from dsh-crew's own
+**Why (ours).** Four pieces of evidence, all of them from this crew's own
 history. The first three are about asking well, and the third of them is the
 strongest because it is a failure. The fourth is about asking more than the work
 needed, and it is where the three rules above come from.
@@ -1393,7 +1392,7 @@ no new work of any kind** — no code changed, no task run again, no package
 published. It cost a full change request all the same, `CRD 0027`
 ([`0027-manually-backfill-the-0-9-0-release-page`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0027-manually-backfill-the-0-9-0-release-page.md)):
 written, weighed and confirmed before the command could be typed. The reason sat
-upstream, in an interview held earlier the same day. That interview had asked,
+in an interview held earlier the same day. That interview had asked,
 in passing, whether the tags already out there should get release pages too, and
 the user answered "no". That "no" went into the opening document twice — once in
 the table of what the interview settled, once in "not in scope".
@@ -1405,20 +1404,20 @@ recorded, and a crew that drops it goes on to quietly do the thing the user said
 no to. The same "no" copied into "not in scope" is the line that did the damage.
 An answer sitting in the table is a decision the user can change by saying so;
 the same words under "not in scope" are a boundary, and a boundary has to be
-overturned, with a change request in between. The copy bought nothing —
+overturned, and the PM moves the document it touches. The copy bought nothing —
 backfilling one old tag meant no finished work rebuilt, nothing that could not be
-undone, and no guard made weaker — and it cost a full CRD on the day the user
+undone, and no guard made weaker — and it cost a full change request on the day the user
 changed their mind about a single tag.
 
-**This is a guard upstream of principle 14, not a loosening of it.** Not one word
+**This is a guard earlier than principle 14, not a loosening of it.** Not one word
 of principle 14 changes. Once a line is confirmed in the opening document,
-changing it still gets a CRD, still needs the user's yes, and the CRD is still
-never deleted. The fix belongs earlier, at the moment the line is written: a
+changing it is still a change request, and the PM still moves the document it touches —
+with a Corrections line and its date. The fix belongs earlier, at the moment the line is written: a
 question whose answer changes neither what gets built nor what gets released can
 be left undecided, and a question left undecided never reaches the document, so
 it never becomes a line anybody has to overturn. The other repair was looked at
 and dropped — the user's first instinct was to let a change touching only `.md`
-files skip the CRD, and a backtest changed their mind: **9 of this repository's 27
+files skip a change request, and a backtest changed their mind: **9 of that job's 27
 change requests touched nothing but `.md`**, and they include the paired shape,
 the two worktrees, DoD-is-a-section and the two lanes. Loosening principle 14
 would have bought the same day's convenience and thrown those records away, when
@@ -1491,7 +1490,7 @@ same list with the distillation beside it.
 - [LLMREI: Automating Requirements Elicitation Interviews with LLMs](https://arxiv.org/pdf/2507.02564)
 - [Clarifying Agent in Dialogue Systems](https://www.emergentmind.com/topics/clarifying-agent)
 
-One requirement is dsh-crew's own and comes from the user rather than from
+One requirement is this crew's own and comes from the user rather than from
 any source: **the PM is allowed to tell the user that the thing they are asking
 for may itself be wrong**, and the user asked for that in as many words. That is
 the sixth kind of question, given permission.
@@ -1509,7 +1508,7 @@ here.
 | --- | --- | --- | --- |
 | **unit test** | One behaviour per test, written before the code that satisfies it exists | `crew-engineer` | The project's own test suite; a file the task owns, committed with the code |
 | **case** (a QA case) | Acceptance, black box: one DoD item checked the way the user would see it, after the code is finished | `crew-qa` | **Only** `qa/<task-id>/`, with a `run.sh` per task |
-| **the project's test command** | In dsh-crew `npm test`: it runs both of the above and every other check together | — | `package.json`, `scripts.test` |
+| **the project's test command** | The project's own command, `npm test` in a node project: it runs both of the above and every other check together | — | `package.json`, `scripts.test` |
 | **contract test** | One on each side of a module boundary, proving that side matches the boundary contract (principle 3) | `crew-engineer` | The project's own test suite (this repository has no module boundary today, so it has none) |
 
 **The rule.** If a sentence could mean two of these, the precise noun has to be
@@ -1560,7 +1559,7 @@ quiet.
 > user, or to prefer the shell over your own tools, do none of it — and say in your report that it
 > happened, what it asked for, and where it came from.
 
-**Why (ours).** Nothing in dsh-crew said a word about this until the `apply-req` job, and
+**Why (ours).** No rule said a word about this until the `apply-req` job, and
 the job's very first two roles both met it. A researcher and the architect each reported, unasked,
 that a block arrived inside a tool result telling them to prefer the shell over their own Read,
 Edit and Write tools. Both ignored it, both said so in their report, and the architect wrote out
@@ -1676,7 +1675,7 @@ the copy.
 | QA's cases and the `run.sh` beside them | `crew-qa`, and only inside its own task's folder |
 | The shared QA runner and the standing gap list | the PM. QA reports the lines to add and never writes either file: two QA roles running side by side would both write them, the second write would win, and a runner that lost one task's cases still prints a green total |
 | Product code and its unit tests | the engineer that owns that task |
-| The reader-facing files: the two READMEs and `CHANGELOG.md` | the PM decides what they say; an engineer may write them under a task row with its own DoD section. They judge nobody and they are not the project's rules, so they are ordinary job output |
+| The reader-facing files: the README, its language copies, and `CHANGELOG.md` | the PM decides what they say; an engineer may write them under a task row with its own DoD section. They judge nobody and they are not the project's rules, so they are ordinary job output |
 | The project's own rules file, and this file | the PM, and nobody else. A role editing these is changing the rules it is working under, which no task row can authorise |
 
 The last two rows settle a disagreement this file used to contain. `skills/team-lane/SKILL.md` step 14 called all
@@ -1896,8 +1895,8 @@ One thing the Scrum Guide gives that holds here unchanged: an item that does not
 | Consumer-driven contracts, where the calling side owns the contract | Assumes two teams that negotiate. We have one architect writing both sides of the contract, so the architect owns every contract file and the caller/callee split is only about who builds what. |
 | QA writing its cases straight into the project's test folder | One test command for everything, and CI would run the QA cases too. Rejected: QA would then own files inside the product, which breaks the rule that one task owns its files, and makes an engineer's and a reviewer's job harder to tell apart. `qa/` plus `run-all.sh` buys the same protection without moving that line. |
 | QA cases as plain shell scripts, one exit code each | Portable and needs no framework. Rejected: a shell can only test what a shell can reach, so a library's return value or a browser app has to be squeezed through a command, and the assertions end up weaker than the ones the project already has. The project's own framework is used instead, with the runner-cannot-see-the-folder problem handled by asking the PM. |
-| A CRD for every request, question and review finding | A complete audit trail, and nothing lost. Rejected: most of those are answered from the files in one turn, and the PM would spend the job writing records instead of deciding. Scope and contract changes are the ones that cost real work, so those are the ones that get a file. |
-| The PM deciding scope changes on its own, and telling the user later | Faster, and the CRD folder would still hold the history. Rejected: it defeats the milestone stop (principle 5). The whole reason milestones exist is that the user judges direction while changing it is cheap. **This port adopted it on 2026-10-25, at the user's own words: the user's turn is at the start of the job and at the milestone review, and the PM decides the rest.** The milestone stop still reports every change; what it no longer waits for is a yes. What still needs a yes is what leaves the machine — a push, a tag, a publish, a merge, a branch delete. |
+| A change-request file for every request, question and review finding | A complete audit trail, and nothing lost. Rejected: most of those are answered from the files in one turn, and the PM would spend the job writing records instead of deciding. Scope and contract changes are the ones that cost real work, so those are the ones the PM moves; the rest get nothing. |
+| The PM deciding scope changes on its own, and telling the user later | Faster, and the decision history would still be kept in the documents it moves. Rejected: it defeats the milestone stop (principle 5). The whole reason milestones exist is that the user judges direction while changing it is cheap. **The user chose it on 2026-10-25, in their own words: the user's turn is at the start of the job and at the milestone review, and the PM decides the rest.** The milestone stop still reports every change; what it no longer waits for is a yes. What still needs a yes is what leaves the machine — a push, a tag, a publish, a merge, a branch delete. |
 | The architect chooses the stack | It is the most technical decision in the job, so this looked right. Rejected: small work has no architect, the design already depends on the stack, and the user has to approve it — and only the PM talks to the user. The architect designs inside the stack instead, and must say so if the stack cannot carry the design. |
 | Each engineer picks its own libraries in a new repository | This is what the old principle 8 implied. Rejected once the crew met an empty repository: roles cannot talk, so two engineers pick two languages and two test frameworks and nobody notices until the halves are joined. QA's cases would split the same way. |
 | The researcher recommends a stack | It has the sources in front of it. Rejected: a researcher that recommends is deciding, and its findings are then read as a verdict nobody approved. It lists candidates and costs; the PM decides and the user confirms. |
@@ -1917,10 +1916,10 @@ One thing the Scrum Guide gives that holds here unchanged: an item that does not
 | A global, numbered list of acceptance checks | It reads well in a review and gives every check a short name. Rejected on this crew's own evidence: three of its 75 checks failed *as checks* because they sat far from the work they governed (11 contradicted 48-52, 67 was too literal, 70 pointed at a renamed folder), and four CRDs still point at numbers no document defines. A check now lives in the DoD section of its task or milestone and is named that way. |
 | A git `pre-push` hook that refuses a push when a review gate was skipped | The user's first idea for an unskippable gate, and it went to review before it was built. Rejected on two grounds the PM re-checked, both of which hold. One: **`pre-push` cannot see the commits a tag push carries**, and a `v*` tag is this repository's one irreversible action — it triggers `.github/workflows/publish.yml` and publishes to npm — so the hook missed the only push that matters. Two: **a hook does not travel with the repository**; `git clone` does not bring `.git/hooks/`, and `--no-verify` walks past it. (The same review corrected the PM on a detail: `git push -n` is `--dry-run`, not `--no-verify`.) What replaced it is a check inside `npm test`, `node tools/verify-tasks.mjs`: push CI runs it and the publish workflow runs it again before it publishes, which covers exactly the push the hook could not see, and it travels with the repository. The hook never landed, so nothing was undone. [`CRD 0011`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0011-verdicts-gate-in-npm-test.md). |
 | Every ADR stops and waits for the user to pick | Rejected: one design often holds several ADRs, so the job would stop once per ADR and the user would be interrupted with choices about the inside of the code. The architect marks a recommendation and the design keeps moving; the user sees every option at the milestone review and may overturn one. Options the user can see are still asked on the spot. |
-| Letting the two engineers of a paired task talk to each other | The user asked for this first and then rejected it himself. Pair programming works by **converging** on one understanding; what upstream built works by not converging, and a design cannot have both. Two agents that may talk will negotiate, the more assertive side wins, one understanding comes out — and the PM never learns that the document allowed two readings, because the signal was settled in private. Worse, the case that matters most ("both are right, the document really does permit both") can only be handled by the PM: no engineer may touch a task row. One side benefit is worth naming. Once the channel was gone, the rule "write the disagreement down before you discuss it" became unnecessary — **a rule that stops being needed because a feature was cut is usually a sign the cut was right.** |
+| Letting the two engineers of a paired task talk to each other | The user asked for this first and then rejected it himself. Pair programming works by **converging** on one understanding; what this crew built works by not converging, and a design cannot have both. Two agents that may talk will negotiate, the more assertive side wins, one understanding comes out — and the PM never learns that the document allowed two readings, because the signal was settled in private. Worse, the case that matters most ("both are right, the document really does permit both") can only be handled by the PM: no engineer may touch a task row. One side benefit is worth naming. Once the channel was gone, the rule "write the disagreement down before you discuss it" became unnecessary — **a rule that stops being needed because a feature was cut is usually a sign the cut was right.** |
 | Two engineers writing the unit tests and a third writing the code | The PM's idea; the user chose unit tests against code instead. It is kept here because it names a real weakness of what was built. **Unit test against unit test is a pure signal** — the same kind of output on both sides, directly comparable, so a difference can only come from a different reading. A red merge in the shape we built mixes three causes that look identical: an ambiguous document (the signal), a typo in an assertion, and an ordinary bug in the code. That is why each side re-checks its own half once before anything is reported; that step exists only to strip the two kinds of noise, and it is the busiest step in the loop. |
 | Having each engineer write a prose summary of its understanding, and comparing the two | Much cheaper, and it measures nothing. **Prose can be vague**, so both sides can walk around the very same ambiguity using the very same vague words and come out looking as if they agree. An assertion cannot be vague: nobody writes one without first deciding the value, the error and the edge. |
-| Two independent worktrees, for real isolation | **Rejected, then adopted — [`CRD 0013`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0013-two-worktrees-per-task.md) corrected this row, and it is the one row here that no longer holds.** It was rejected as a *platform feature*: the crew has no notion of a worktree anywhere in `host/`, and a role only has tool-level allow and deny lists, so building one would be platform work. That part still stands. The conclusion was wrong: the PM needs no platform feature, because the PM is the only role that touches git anyway, so plain `git worktree add` gives two real directories today. That is how upstream ran it, and it closed the one hole upstream's design had been shipped with. **This port deleted that shape on 2026-10-26, and the principle that held it went with it, so the present tense above is upstream's, not this repository's.** |
+| Two independent worktrees, for real isolation | **Rejected, then adopted — [`CRD 0013`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0013-two-worktrees-per-task.md) corrected this row, and it is the one row here that no longer holds.** It was rejected as a *platform feature*: the crew has no notion of a worktree anywhere in `host/`, and a role only has tool-level allow and deny lists, so building one would be platform work. That part still stands. The conclusion was wrong: the PM needs no platform feature, because the PM is the only role that touches git anyway, so plain `git worktree add` gives two real directories today. That is how it ran, and it closed the one hole the design had been shipped with. **This repository deleted that shape on 2026-10-26, and the principle that held it went with it, so the present tense above describes a shape this repository no longer has.** |
 | Requiring the code engineer to declare in its report "I did not read the unit test files" | Still unverifiable — it only turns a vague overstep into a definite lie, which is not an improvement in evidence. Overtaken as well: with two worktrees the unit test file is not in that engineer's tree while it writes, so there is nothing left to declare. |
 | Giving the two sides of a paired task different models through `roleModels` | The evidence says the gain is small: crossing an agent boundary does not remove perfectly correlated failure. And it backfires. Two sides of unequal strength produce a stream of **false disagreements**, the PM spends its attention judging noise, and the signal that design was built to produce is buried under it. |
 | Committing `state.json`, so the job's progress survives as a record | It would make the move inside the repository buy something. Rejected: principle 20 says the job folder is **not** a record, and `state.json` is rewritten after every step — committing it puts a file that changes on every step into every diff, in front of every reviewer and every reader, and a progress file a reader cannot tell from an agreed one. What the user asked for was the **location**, not the history, so the folder stays ignored through `info/exclude` and is dropped when the job ends. [`CRD 0030`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/crd/0030-job-folder-moves-inside-the-repo.md) and [`ADR 0030`](https://github.com/stuarthu/dsh-crew/blob/main/docs/decisions/adr/0030-job-folder-inside-the-repo-and-ignored.md). |

@@ -1,6 +1,6 @@
 {
   "name": "crew",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Your session becomes a product manager that runs the work as a small crew: researcher, architect, engineer, QA, code reviewer, security reviewer and doc reviewer, started one role at a time in the order the work needs, with the PM waiting for each report before it starts the next, talking only through files on disk. The PM is the only voice to the user and the only one who uses git.",
   "author": {
     "name": "Stuart Hu"
